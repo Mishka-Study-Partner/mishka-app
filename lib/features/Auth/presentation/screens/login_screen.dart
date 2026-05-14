@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:mishka_app/core/utils/app_colors.dart';
 import 'package:mishka_app/core/utils/app_sizes.dart';
@@ -7,11 +8,11 @@ import 'package:mishka_app/features/Auth/presentation/screens/reset_password.dar
 import 'package:mishka_app/features/Auth/presentation/screens/signin_views/email_view.dart';
 import 'package:mishka_app/features/Auth/presentation/screens/signin_views/phone_view.dart';
 import 'package:mishka_app/features/Auth/presentation/screens/sign_up_screen.dart';
+import 'package:mishka_app/features/Auth/view/bloc/auth_bloc.dart';
 
 import '../../../../core/widgets/custom_app_bar.dart';
 import '../widgets/custom_elevated_button.dart';
 import '../widgets/custom_segmanted_button.dart';
-import '../widgets/form_text.dart';
 import '../widgets/social_media_total_buttons.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -22,17 +23,72 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
-    TextEditingController emailController =TextEditingController();
-    TextEditingController phoneController =TextEditingController();
-    TextEditingController passwordController =TextEditingController();
+    final TextEditingController emailController =TextEditingController();
+    final TextEditingController phoneController =TextEditingController();
+    final TextEditingController passwordController =TextEditingController();
     bool isChecked1 = false;
     bool isChecked2 = false;
     int selectedIndex = 0;
     @override
+    void dispose() {
+      emailController.dispose();
+      phoneController.dispose();
+      passwordController.dispose();
+      super.dispose();
+    }
+
+    void _submitLogin() {
+      final l10n = AppLocalizations.of(context)!;
+      final password = passwordController.text.trim();
+      final email = emailController.text.trim();
+      final phone = phoneController.text.trim();
+
+      if (password.isEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(l10n.password)),
+        );
+        return;
+      }
+
+      if (selectedIndex == 0 && email.isEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(l10n.emailAddress)),
+        );
+        return;
+      }
+
+      if (selectedIndex == 1 && phone.isEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(l10n.phoneNumber)),
+        );
+        return;
+      }
+
+      context.read<AuthBloc>().add(
+        AuthLoginRequested(
+          email: selectedIndex == 0 ? email : null,
+          phoneNumber: selectedIndex == 1 ? phone : null,
+          password: password,
+          rememberMe: isChecked1,
+        ),
+      );
+    }
+
+    @override
     Widget build(BuildContext context) {
       final l10n = AppLocalizations.of(context)!;
-      
-      return Scaffold(
+
+      return BlocConsumer<AuthBloc, AuthState>(
+        listener: (context, state) {
+          if (state is AuthError) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text(state.message)),
+            );
+          }
+        },
+        builder: (context, state) {
+          final isLoading = state is AuthLoading;
+          return Scaffold(
         backgroundColor: AppColors.screenBackground,
         appBar: const MishkaAppBar(title: '', showBottomBar: false),
         body: Padding(
@@ -70,9 +126,15 @@ class _LoginScreenState extends State<LoginScreen> {
                   segments: [l10n.email, l10n.phoneNumber],
                 ),
                 if (selectedIndex == 0)
-                  EmailView()
+                  EmailView(
+                    emailController: emailController,
+                    passwordController: passwordController,
+                  )
                 else
-                  PasswordView(),
+                  PasswordView(
+                    phoneController: phoneController,
+                    passwordController: passwordController,
+                  ),
 
                 SizedBox(height: 16.h),
                 Row(
@@ -154,7 +216,8 @@ class _LoginScreenState extends State<LoginScreen> {
                 SizedBox(height: 24.h),
                 AuthButton(
                   text: l10n.signIn,
-                  onPressed: () {},
+                  isLoading: isLoading,
+                  onPressed: _submitLogin,
                 ),
                 SizedBox(height: 16.h),
                 Row(
@@ -226,6 +289,8 @@ class _LoginScreenState extends State<LoginScreen> {
         ),
 
     );
+        },
+      );
   }
 
 }

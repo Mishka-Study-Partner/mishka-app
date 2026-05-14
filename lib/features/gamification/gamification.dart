@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../core/utils/app_colors.dart';
 import '../../core/widgets/custom_app_bar.dart';
+import '../../l10n/app_localizations.dart';
 import '../Auth/presentation/widgets/custom_segmanted_button.dart';
 class Gamification extends StatefulWidget {
   final VoidCallback? onBack;
@@ -20,10 +21,11 @@ class _GamificationState extends State<Gamification> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       backgroundColor: AppColors.screenBackground,
       appBar: MishkaAppBar(
-        title: "Gamification",
+        title: l10n.gamification,
         showBack: true,
         showBottomBar: false,
         onBackTap: widget.onBack,

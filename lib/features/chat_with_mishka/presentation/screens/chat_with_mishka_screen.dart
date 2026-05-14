@@ -4,16 +4,14 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../../../core/utils/app_colors.dart';
 import '../../../../core/widgets/custom_app_bar.dart';
+import '../../../../l10n/app_localizations.dart';
 
 import '../../data/controller/chat_flow_controller.dart';
 import '../../data/model/uploaded_item.dart';
-import '../../data/service/mishka_dummy_ai_service.dart' as ai_service;
+import '../../data/service/mishka_ai_service.dart' as ai_service;
 
 import '../widgets/chat_input_bar.dart';
 import '../widgets/chat_message_render.dart';
-import 'quiz_screen.dart';
-import 'flashcards_screen.dart';
-import 'mindmap_screen.dart';
 
 class ChatWithMishkaScreen extends StatefulWidget {
   final VoidCallback? onBack;
@@ -41,9 +39,7 @@ class _ChatWithMishkaScreenState extends State<ChatWithMishkaScreen> {
   void initState() {
     super.initState();
     controller = ChatFlowController();
-    ai = ai_service.MishkaAiService(
-      baseUrl: 'http://127.0.0.1:8000', // 🔁 change to server IP
-    );
+    ai = ai_service.MishkaAiService();
   }
 
   @override
@@ -80,8 +76,9 @@ class _ChatWithMishkaScreenState extends State<ChatWithMishkaScreen> {
     final path = file.path;
 
     if (path == null || path.isEmpty) {
+      final l10n = AppLocalizations.of(context)!;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Could not read file path')),
+        SnackBar(content: Text(l10n.couldNotReadFilePath)),
       );
       return;
     }
@@ -320,19 +317,6 @@ class _ChatWithMishkaScreenState extends State<ChatWithMishkaScreen> {
       case 'intermediate':
       default:
         return DifficultyLevel.intermediate;
-    }
-  }
-
-  StudyAction _mapTool(String value) {
-    switch (value.toLowerCase()) {
-      case 'quiz':
-        return StudyAction.quiz;
-      case 'mind map':
-        return StudyAction.mindmap;
-      case 'flashcards':
-        return StudyAction.flashcards;
-      default:
-        return StudyAction.quiz;
     }
   }
 

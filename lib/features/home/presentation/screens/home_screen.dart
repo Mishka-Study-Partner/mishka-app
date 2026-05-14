@@ -1,11 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:iconify_flutter/icons/mdi.dart';
 import 'package:iconify_flutter/iconify_flutter.dart';
+import 'package:intl/intl.dart';
 
 import 'package:mishka_app/core/utils/app_colors.dart';
 import 'package:mishka_app/core/utils/app_sizes.dart';
 import 'package:mishka_app/core/widgets/custom_app_bar.dart';
+import 'package:mishka_app/features/Auth/view/bloc/auth_bloc.dart';
+import 'package:mishka_app/features/home/data/repositories/home_repository.dart';
+import 'package:mishka_app/features/todo_lists/data/models/task_api_model.dart';
 import 'package:mishka_app/generated/assets.dart';
 import 'package:mishka_app/main.dart';
 
@@ -15,7 +20,7 @@ import '../widgets/ai_tool_card.dart';
 import '../widgets/community_card.dart';
 import '../widgets/support_badge_card.dart';
 
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends StatefulWidget {
   final void Function(MainTab)? onTabSwitch;
   final void Function(CategoryScreenType)? onCategoryNavigate;
 
@@ -26,13 +31,66 @@ class HomeScreen extends StatelessWidget {
   });
 
   @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  final HomeRepository _homeRepository = HomeRepository();
+  int _streakDays = 0;
+  List<bool> _weekCompleted = const [];
+  String? _tipText;
+  List<TaskApiModel> _upcomingTasks = const [];
+  bool _isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadHomeData();
+  }
+
+  Future<void> _loadHomeData() async {
+    setState(() => _isLoading = true);
+    try {
+      final results = await Future.wait([
+        _homeRepository.getDailyStreak(),
+        _homeRepository.getTips(),
+        _homeRepository.getUpcomingTasks(),
+      ]);
+      if (!mounted) return;
+      final tasks = (results[2] as List<TaskApiModel>).toList()
+        ..sort((a, b) {
+          final ad = a.deadline ?? DateTime(9999);
+          final bd = b.deadline ?? DateTime(9999);
+          return ad.compareTo(bd);
+        });
+      final streakModel = results[0] as dynamic;
+      setState(() {
+        _streakDays = streakModel.days as int;
+        _weekCompleted = (streakModel.weekCompleted as List<bool>?) ?? const [];
+        _tipText = (results[1] as dynamic).isNotEmpty
+            ? (results[1] as dynamic).first.text as String
+            : null;
+        _upcomingTasks = tasks.take(2).toList();
+      });
+    } catch (_) {
+      // Keep UI usable with defaults when backend data fails.
+    } finally {
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    final authState = context.watch<AuthBloc>().state;
+    final firstName = authState is AuthSuccess ? authState.user.firstName : null;
     
     return Scaffold(
       backgroundColor: AppColors.screenBackground,
-      appBar: const MishkaAppBar(
-        title: "Mishka",
+      appBar: MishkaAppBar(
+        title: l10n.appTitle,
         showBack: false,
         showBottomBar: false,
       ),
@@ -44,19 +102,19 @@ class HomeScreen extends StatelessWidget {
             SizedBox(height: 16.h),
             
             // Welcome Section
-            _buildWelcomeSection(context, l10n),
+            _buildWelcomeSection(context, l10n, firstName),
             SizedBox(height: 32.h),
             
             // Daily Streaks Section
-            _buildStreaksSection(context, l10n),
+            _buildStreaksSection(context, l10n, _streakDays),
             SizedBox(height: 24.h),
             
             // Tip of the Day
-            TipOfTheDayCard(l10n: l10n),
+            TipOfTheDayCard(l10n: l10n, tipText: _tipText),
             SizedBox(height: 24.h),
             
             // Upcoming Deadlines
-            _buildUpcomingDeadlines(context, l10n),
+            _buildUpcomingDeadlines(context, l10n, _upcomingTasks),
             SizedBox(height: 24.h),
             
             // Mishka's AI Tools
@@ -73,6 +131,11 @@ class HomeScreen extends StatelessWidget {
             
             // Mishka's Support
             _buildSupportSection(context, l10n),
+            if (_isLoading)
+              Padding(
+                padding: EdgeInsets.only(bottom: 24.h),
+                child: const Center(child: CircularProgressIndicator()),
+              ),
             SizedBox(height: 80.h), // Space before end of screen
           ],
         ),
@@ -80,9 +143,17 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildWelcomeSection(BuildContext context, AppLocalizations l10n) {
+  Widget _buildWelcomeSection(
+    BuildContext context,
+    AppLocalizations l10n,
+    String? firstName,
+  ) {
+    final localeName = Localizations.localeOf(context).toString();
+    final today = DateTime.now();
+    final formattedDate = DateFormat.yMMMMEEEEd(localeName).format(today);
+
     return Padding(
-      padding:  EdgeInsets.only(left:AppSizes.paddingMedium,right: AppSizes.paddingMedium),
+      padding: EdgeInsets.only(left: AppSizes.paddingMedium, right: AppSizes.paddingMedium),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -91,7 +162,9 @@ class HomeScreen extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  l10n.welcomeBackSara,
+                  firstName == null || firstName.isEmpty
+                      ? l10n.welcomeBackSara
+                      : 'Welcome back, $firstName',
                   style: TextStyle(
                     fontFamily: "Pridi",
                     fontSize: AppSizes.fontSizeLarge,
@@ -101,7 +174,7 @@ class HomeScreen extends StatelessWidget {
                 ),
                 SizedBox(height: 4.h),
                 Text(
-                  l10n.sundayJan26,
+                  formattedDate,
                   style: TextStyle(
                     fontFamily: "Pridi",
                     fontSize: 12.sp,
@@ -124,7 +197,31 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildStreaksSection(BuildContext context, AppLocalizations l10n) {
+  /// Returns a 7-element list (Mon=0 … Sun=6) indicating completed days.
+  /// Uses API data when available, otherwise infers from streak count + today.
+  List<bool> _resolveWeekDays() {
+    if (_weekCompleted.length == 7) return _weekCompleted;
+
+    // Infer: assume streak is consecutive ending yesterday (or today).
+    final todayIndex = DateTime.now().weekday - 1; // 0=Mon … 6=Sun
+    final completedCount = _streakDays.clamp(0, todayIndex);
+    return List.generate(7, (i) {
+      if (i < todayIndex) return i >= (todayIndex - completedCount);
+      return false;
+    });
+  }
+
+  Widget _buildStreaksSection(
+    BuildContext context,
+    AppLocalizations l10n,
+    int streakDays,
+  ) {
+    final dayLabels = [
+      l10n.mon, l10n.tue, l10n.wed, l10n.thu, l10n.fri, l10n.sat, l10n.sun,
+    ];
+    final weekDays = _resolveWeekDays();
+    final todayIndex = DateTime.now().weekday - 1;
+
     return Padding(
       padding: EdgeInsets.all(AppSizes.paddingMedium),
       child: Container(
@@ -149,7 +246,6 @@ class HomeScreen extends StatelessWidget {
                     color: AppColors.mainDark,
                   ),
                 ),
-
                 Row(
                   children: [
                     Iconify(
@@ -159,7 +255,7 @@ class HomeScreen extends StatelessWidget {
                     ),
                     SizedBox(width: 4.w),
                     Text(
-                      l10n.days(3),
+                      l10n.days(streakDays),
                       style: TextStyle(
                         fontFamily: "Pridi",
                         fontSize: AppSizes.fontSizeLarge,
@@ -169,27 +265,20 @@ class HomeScreen extends StatelessWidget {
                     ),
                   ],
                 ),
-
               ],
             ),
             SizedBox(height: 16.h),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: [
-                _buildDayItem(context, l10n.mon, true, false), // Completed
-                _buildDayItem(context, l10n.tue, true, false), // Completed
-                _buildDayItem(context, l10n.wed, true, false), // Completed
-                _buildDayItem(context, l10n.thu, false, true), // Today
-                _buildDayItem(context, l10n.fri, false, false), // Upcoming
-                _buildDayItem(context, l10n.sat, false, false), // Upcoming
-                _buildDayItem(context, l10n.sun, false, false), // Upcoming
-              ],
+              children: List.generate(7, (i) {
+                final isToday = i == todayIndex;
+                final completed = weekDays[i];
+                return _buildDayItem(context, dayLabels[i], completed, isToday);
+              }),
             ),
             SizedBox(height: 16.h),
-
             Divider(color: AppColors.stroke, height: 1.h),
             SizedBox(height: 16.h),
-            // Legend
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
@@ -282,7 +371,11 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildUpcomingDeadlines(BuildContext context, AppLocalizations l10n) {
+  Widget _buildUpcomingDeadlines(
+    BuildContext context,
+    AppLocalizations l10n,
+    List<TaskApiModel> tasks,
+  ) {
     return Padding(
       padding:  EdgeInsets.all(AppSizes.paddingMedium),
       child: Column(
@@ -302,7 +395,7 @@ class HomeScreen extends StatelessWidget {
               ),
               TextButton(
                 onPressed: () {
-                  onTabSwitch?.call(MainTab.todo);
+                  widget.onTabSwitch?.call(MainTab.todo);
                 },
                 child: Text(
                   "${l10n.viewYourToDoList} >",
@@ -317,33 +410,55 @@ class HomeScreen extends StatelessWidget {
             ],
           ),
           SizedBox(height: 12.h),
-          Row(
-            children: [
-              Expanded(
-                child: _buildTaskCard(
-                  context,
-                  l10n,
-                  l10n.plcSheet2Offline,
-                  l10n.collegeTasksList,
-                  l10n.sunJan262025,
-                  "07:00 pm",
-                  true, // completed
+          if (tasks.isEmpty)
+            Container(
+              width: double.infinity,
+              padding: EdgeInsets.all(AppSizes.paddingMedium),
+              decoration: BoxDecoration(
+                color: AppColors.white,
+                borderRadius: BorderRadius.circular(AppSizes.radiusMedium),
+                border: Border.all(color: AppColors.stroke),
+              ),
+              child: Text(
+                l10n.noUpcomingDeadlinesYet,
+                style: TextStyle(
+                  fontFamily: 'Pridi',
+                  fontSize: AppSizes.fontSizeMedium,
+                  color: AppColors.lightText,
                 ),
               ),
-              SizedBox(width: 8.w),
-              Expanded(
-                child: _buildTaskCard(
-                  context,
-                  l10n,
-                  l10n.meetingForGraduationProject,
-                  l10n.workTasksList,
-                  l10n.sunJan262025,
-                  "09:00 pm",
-                  false, // not completed
-                ),
+            )
+          else
+            SizedBox(
+              height: 220.h,
+              child: ListView.separated(
+                scrollDirection: Axis.horizontal,
+                itemCount: tasks.length,
+                separatorBuilder: (_, __) => SizedBox(width: 8.w),
+                itemBuilder: (context, index) {
+                  final task = tasks[index];
+                  final deadline = task.deadline;
+                  final dateText = deadline == null
+                      ? '-'
+                      : DateFormat('EEE, MMM d, yyyy').format(deadline);
+                  final timeText = deadline == null
+                      ? '--:--'
+                      : DateFormat('hh:mm a').format(deadline);
+                  return SizedBox(
+                    width: MediaQuery.of(context).size.width * 0.55,
+                    child: _buildTaskCard(
+                      context,
+                      l10n,
+                      task.title,
+                      task.todoListTitle ?? l10n.yourList,
+                      dateText,
+                      timeText,
+                      task.completed ?? false,
+                    ),
+                  );
+                },
               ),
-            ],
-          ),
+            ),
         ],
       ),
     );
@@ -358,75 +473,133 @@ class HomeScreen extends StatelessWidget {
     String time,
     bool isCompleted,
   ) {
-    final deadlineColor = isCompleted ? AppColors.green : AppColors.red;
-    final bgColor = isCompleted ? AppColors.screenBackground : AppColors.white;
-    
+    final deadlineColor = isCompleted ? const Color(0xFF4A7C59) : AppColors.blue;
+    final bgColor = isCompleted ? const Color(0xFFFFFDF5) : AppColors.white;
+    final checkboxBorder = isCompleted ? AppColors.mainGold : AppColors.greyText;
+    final checkboxFill = isCompleted
+        ? AppColors.mainGold.withValues(alpha: 0.15)
+        : Colors.transparent;
+
+    final sideBarColor = isCompleted ? AppColors.mainGold : AppColors.greyText;
+
     return Container(
-      padding: EdgeInsets.all(AppSizes.paddingMedium),
+      padding: EdgeInsets.all(10.w),
       decoration: BoxDecoration(
         color: bgColor,
         borderRadius: BorderRadius.circular(AppSizes.radiusMedium),
         border: Border.all(color: AppColors.stroke),
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
+          // Left color stripe (inside the card with padding)
           Container(
-            width: 24.w,
-            height: 24.w,
+            width: 3.w,
             decoration: BoxDecoration(
-              color: isCompleted ? AppColors.mainGold : Colors.transparent,
-              borderRadius: BorderRadius.circular(4.r),
-              border: Border.all(
-                color: isCompleted ? AppColors.mainGold : AppColors.stroke,
+              color: sideBarColor,
+              borderRadius: BorderRadius.circular(10.r),
+            ),
+          ),
+          // Card content
+          Expanded(
+            child: Padding(
+              padding: EdgeInsets.only(left: 10.w),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Checkbox
+                  Container(
+                    width: 26.w,
+                    height: 26.w,
+                    decoration: BoxDecoration(
+                      color: checkboxFill,
+                      borderRadius: BorderRadius.circular(6.r),
+                      border: Border.all(color: checkboxBorder),
+                    ),
+                    child: isCompleted
+                        ? Icon(
+                            Icons.check,
+                            size: 16.w,
+                            color: AppColors.mainGold,
+                          )
+                        : null,
+                  ),
+                  SizedBox(height: 10.h),
+                  // Task label
+                  Text(
+                    l10n.task,
+                    style: TextStyle(
+                      fontFamily: "Pridi",
+                      fontSize: AppSizes.fontSizeMedium,
+                      fontWeight: FontWeight.w700,
+                      color: AppColors.mainDark,
+                    ),
+                  ),
+                  Text(
+                    task,
+                    style: TextStyle(
+                      fontFamily: "Pridi",
+                      fontSize: 12.sp,
+                      fontWeight: FontWeight.w500,
+                      color: AppColors.lightText,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  SizedBox(height: 6.h),
+                  // List label
+                  Text(
+                    l10n.list,
+                    style: TextStyle(
+                      fontFamily: "Pridi",
+                      fontSize: AppSizes.fontSizeMedium,
+                      fontWeight: FontWeight.w700,
+                      color: AppColors.mainDark,
+                    ),
+                  ),
+                  Text(
+                    list,
+                    style: TextStyle(
+                      fontFamily: "Pridi",
+                      fontSize: 12.sp,
+                      fontWeight: FontWeight.w500,
+                      color: AppColors.lightText,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  SizedBox(height: 6.h),
+                  // Deadline label
+                  Text(
+                    l10n.deadline,
+                    style: TextStyle(
+                      fontFamily: "Pridi",
+                      fontSize: AppSizes.fontSizeMedium,
+                      fontWeight: FontWeight.w700,
+                      color: AppColors.mainDark,
+                    ),
+                  ),
+                  Text(
+                    deadline,
+                    style: TextStyle(
+                      fontFamily: "Pridi",
+                      fontSize: 12.sp,
+                      fontWeight: FontWeight.w500,
+                      color: deadlineColor,
+                    ),
+                  ),
+                  SizedBox(height: 2.h),
+                  Text(
+                    time,
+                    style: TextStyle(
+                      fontFamily: "Pridi",
+                      fontSize: 12.sp,
+                      fontWeight: FontWeight.w500,
+                      color: deadlineColor,
+                    ),
+                  ),
+                ],
               ),
-            ),
-            child: isCompleted
-                ? Iconify(
-                    Mdi.check,
-                    size: 16.w,
-                    color: AppColors.white,
-                  )
-                : null,
-          ),
-          SizedBox(height: 8.h),
-          Text(
-            "${l10n.task} $task",
-            style: TextStyle(
-              fontFamily: "Pridi",
-              fontSize: AppSizes.fontSizeMedium,
-              fontWeight: FontWeight.w600,
-              color: AppColors.mainDark,
-            ),
-          ),
-          SizedBox(height: 4.h),
-          Text(
-            "${l10n.list} $list",
-            style: TextStyle(
-              fontFamily: "Pridi",
-              fontSize: 12.sp,
-              fontWeight: FontWeight.w500,
-              color: AppColors.lightText,
-            ),
-          ),
-          SizedBox(height: 8.h),
-          Text(
-            "${l10n.deadline} $deadline",
-            style: TextStyle(
-              fontFamily: "Pridi",
-              fontSize: 12.sp,
-              fontWeight: FontWeight.w500,
-              color: deadlineColor,
-            ),
-          ),
-          SizedBox(height: 4.h),
-          Text(
-            time,
-            style: TextStyle(
-              fontFamily: "Pridi",
-              fontSize: 12.sp,
-              fontWeight: FontWeight.w500,
-              color: deadlineColor,
             ),
           ),
         ],
@@ -454,7 +627,7 @@ class HomeScreen extends StatelessWidget {
               ),
               TextButton(
                 onPressed: () {
-                  onCategoryNavigate?.call(CategoryScreenType.aiTools);
+                  widget.onCategoryNavigate?.call(CategoryScreenType.aiTools);
                 },
                 child: Text(
                   "${l10n.viewMore} >",
@@ -479,38 +652,34 @@ class HomeScreen extends StatelessWidget {
           physics: const NeverScrollableScrollPhysics(),
           children: [
           AiToolCard(
-          title: 'Chat with Mishka',
-          imagePath:Assets.imagesHomeChatCard,
+          title: l10n.chatWithMishka,
+          imagePath: Assets.imagesHomeChatCard,
           onTap: () {
-            // Navigate to Chat with Mishka screen
-            onCategoryNavigate?.call(CategoryScreenType.chatWithMishka);
+            widget.onCategoryNavigate?.call(CategoryScreenType.chatWithMishka);
           },
           cornerPosition: CardCornerPosition.topLeft,
           ),
           AiToolCard(
-          title: 'Summarize with Mishka',
+          title: l10n.summarizeWithMishka,
           imagePath: Assets.imagesHomeSumaryQuizzesCard,
       onTap: () {
-        // Navigate to Chat with Mishka where summaries can be created
-        onCategoryNavigate?.call(CategoryScreenType.chatWithMishka);
+        widget.onCategoryNavigate?.call(CategoryScreenType.chatWithMishka);
       },
       cornerPosition: CardCornerPosition.topRight,
       ),
       AiToolCard(
-      title: 'Flash Cards',
+      title: l10n.flashCards,
       imagePath: Assets.imagesHomeFlashcardsCard,
       onTap: () {
-        // Navigate to Chat with Mishka where flashcards can be created
-        onCategoryNavigate?.call(CategoryScreenType.chatWithMishka);
+        widget.onCategoryNavigate?.call(CategoryScreenType.chatWithMishka);
       },
       cornerPosition: CardCornerPosition.bottomLeft,
       ),
       AiToolCard(
-      title: 'Quizzes',
-      imagePath:Assets.imagesHomeSumaryQuizzesCard,
+      title: l10n.quizzes,
+      imagePath: Assets.imagesHomeSumaryQuizzesCard,
       onTap: () {
-        // Navigate to Chat with Mishka where quizzes can be created
-        onCategoryNavigate?.call(CategoryScreenType.chatWithMishka);
+        widget.onCategoryNavigate?.call(CategoryScreenType.chatWithMishka);
       },
       cornerPosition: CardCornerPosition.bottomRight,
       ),
@@ -542,7 +711,7 @@ class HomeScreen extends StatelessWidget {
               ),
               TextButton(
                 onPressed: () {
-                  onCategoryNavigate?.call(CategoryScreenType.studyWithMe);
+                  widget.onCategoryNavigate?.call(CategoryScreenType.studyWithMe);
                 },
                 child: Text(
                   "${l10n.start} >",
@@ -599,7 +768,7 @@ class HomeScreen extends StatelessWidget {
               ),
               TextButton(
                 onPressed: () {
-                  onCategoryNavigate?.call(CategoryScreenType.ourCommunity);
+                  widget.onCategoryNavigate?.call(CategoryScreenType.ourCommunity);
                 },
                 child: Text(
                   "${l10n.join} >",
@@ -625,7 +794,7 @@ class HomeScreen extends StatelessWidget {
                   isRowLayout: false,
                   onStart: () {
                     // Navigate to Our Community screen
-                    onCategoryNavigate?.call(CategoryScreenType.ourCommunity);
+                    widget.onCategoryNavigate?.call(CategoryScreenType.ourCommunity);
                   },
                 ),
               ),
@@ -638,7 +807,7 @@ class HomeScreen extends StatelessWidget {
                   isRowLayout: false,
                   onStart: () {
                     // Navigate to Our Community screen
-                    onCategoryNavigate?.call(CategoryScreenType.ourCommunity);
+                    widget.onCategoryNavigate?.call(CategoryScreenType.ourCommunity);
                   },
                 ),
               ),
@@ -653,7 +822,7 @@ class HomeScreen extends StatelessWidget {
             isRowLayout: true,
             onStart: () {
               // Navigate to Our Community screen
-              onCategoryNavigate?.call(CategoryScreenType.ourCommunity);
+              widget.onCategoryNavigate?.call(CategoryScreenType.ourCommunity);
             },
           ),
         ],
@@ -681,7 +850,7 @@ class HomeScreen extends StatelessWidget {
               ),
               TextButton(
                 onPressed: () {
-                  onCategoryNavigate?.call(CategoryScreenType.gamefaction);
+                  widget.onCategoryNavigate?.call(CategoryScreenType.gamefaction);
                 },
                 child: Text(
                   "${l10n.exploreMore} >",

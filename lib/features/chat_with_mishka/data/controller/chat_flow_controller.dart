@@ -16,6 +16,7 @@ enum StudyAction {
   quiz,
   flashcards,
   mindmap,
+  summarize,
 }
 
 enum MessageType {
@@ -276,6 +277,8 @@ class ChatFlowController {
         return "Flashcards";
       case StudyAction.mindmap:
         return "Mind Map";
+      case StudyAction.summarize:
+        return "Summarize";
     }
   }
 

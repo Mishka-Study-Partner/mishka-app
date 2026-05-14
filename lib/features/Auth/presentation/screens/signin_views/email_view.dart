@@ -5,10 +5,14 @@ import 'package:mishka_app/l10n/app_localizations.dart';
 import '../../widgets/form_text.dart';
 
 class EmailView extends StatelessWidget {
-  final TextEditingController emailController = TextEditingController();
-  final TextEditingController passwordController = TextEditingController();
-  
-  EmailView({super.key});
+  const EmailView({
+    super.key,
+    required this.emailController,
+    required this.passwordController,
+  });
+
+  final TextEditingController emailController;
+  final TextEditingController passwordController;
 
   @override
   Widget build(BuildContext context) {

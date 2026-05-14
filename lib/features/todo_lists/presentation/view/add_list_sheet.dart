@@ -3,10 +3,22 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:mishka_app/core/utils/app_colors.dart';
 import 'package:mishka_app/core/utils/app_sizes.dart';
 import 'package:mishka_app/l10n/app_localizations.dart';
-import 'package:mishka_app/features/profile/presentation/widgets/profile_text_field.dart';
 
-class AddListSheet extends StatelessWidget {
+class AddListSheet extends StatefulWidget {
   const AddListSheet({super.key});
+
+  @override
+  State<AddListSheet> createState() => _AddListSheetState();
+}
+
+class _AddListSheetState extends State<AddListSheet> {
+  final TextEditingController _titleController = TextEditingController();
+
+  @override
+  void dispose() {
+    _titleController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -69,27 +81,51 @@ class AddListSheet extends StatelessWidget {
               ),
             ),
             SizedBox(height: 6.h),
-            const ProfileTextField(
-              value: "",
-              label: '',
+            TextField(
+              controller: _titleController,
+              decoration: InputDecoration(
+                hintText: l10n.listName,
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(AppSizes.radiusSmall),
+                ),
+              ),
             ),
             SizedBox(height: 20.h),
             Row(
               children: [
                 Expanded(
                   child: SizedBox(
-                    height: AppSizes.buttonHeightSmall,
+                    height: 40.h,
                     child: ElevatedButton(
-                      onPressed: () {},
+                      onPressed: () {
+                        Navigator.pop(
+                          context,
+                          {
+                            'title': _titleController.text.trim(),
+                            'icon': availableIcons.first,
+                          },
+                        );
+                      },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppColors.mainGold,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8.r),
+                        ),
                       ),
                       child: Text(
                         l10n.save,
-                        style: const TextStyle(
+                        style: TextStyle(
                           color: AppColors.white,
-                          height: 1.2,
-                          fontFamily: "Pridi",
+                          fontFamily: 'Pridi',
+                          fontSize: 13.sp,
+                          height: 1.0,
+                        ),
+                        strutStyle: StrutStyle(
+                          fontFamily: 'Pridi',
+                          fontSize: 13.sp,
+                          height: 1.4,
+                          leading: 0,
+                          forceStrutHeight: true,
                         ),
                       ),
                     ),
@@ -98,17 +134,29 @@ class AddListSheet extends StatelessWidget {
                 SizedBox(width: 8.w),
                 Expanded(
                   child: SizedBox(
-                    height: AppSizes.buttonHeightSmall,
+                    height: 40.h,
                     child: OutlinedButton(
                       onPressed: () => Navigator.pop(context),
                       style: OutlinedButton.styleFrom(
                         side: const BorderSide(color: AppColors.red),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8.r),
+                        ),
                       ),
                       child: Text(
                         l10n.cancel,
-                        style: const TextStyle(
+                        style: TextStyle(
                           color: AppColors.red,
-                          fontFamily: "Pridi",
+                          fontFamily: 'Pridi',
+                          fontSize: 13.sp,
+                          height: 1.0,
+                        ),
+                        strutStyle: StrutStyle(
+                          fontFamily: 'Pridi',
+                          fontSize: 13.sp,
+                          height: 1.4,
+                          leading: 0,
+                          forceStrutHeight: true,
                         ),
                       ),
                     ),

@@ -287,8 +287,8 @@ class _ToolPreviewRendererState extends State<ToolPreviewRenderer> {
                     }
                   } else if (answered && isCorrect && !isSelected) {
                     // Show correct answer even if user selected wrong
-                    bgColor = const Color(0xFFE8F5E9).withOpacity(0.3);
-                    borderColor = const Color(0xFF4CAF50).withOpacity(0.5);
+                    bgColor = const Color(0xFFE8F5E9).withValues(alpha: 0.3);
+                    borderColor = const Color(0xFF4CAF50).withValues(alpha: 0.5);
                   }
 
                   return GestureDetector(
@@ -307,7 +307,7 @@ class _ToolPreviewRendererState extends State<ToolPreviewRenderer> {
                         borderRadius: BorderRadius.circular(8.r),
                         border: Border.all(
                           color: isSelected && !answered
-                              ? AppColors.mainDark.withOpacity(0.5)
+                              ? AppColors.mainDark.withValues(alpha: 0.5)
                               : borderColor,
                           width: isSelected && !answered ? 2.0 : 1.5,
                         ),
@@ -491,7 +491,7 @@ class _ToolPreviewRendererState extends State<ToolPreviewRenderer> {
     final height = (150 + (maxChildren * 60)).h;
     final centerX = width / 2;
 
-    return Container(
+    return SizedBox(
       width: width,
       height: height,
       child: CustomPaint(
@@ -567,9 +567,9 @@ class _ToolPreviewRendererState extends State<ToolPreviewRenderer> {
         boxShadow: isRoot
             ? [
                 BoxShadow(
-                  color: AppColors.mainDark.withOpacity(0.2),
+                  color: AppColors.mainDark.withValues(alpha: 0.2),
                   blurRadius: 4,
-                  offset: Offset(0, 2),
+                  offset: const Offset(0, 2),
                 ),
               ]
             : null,
@@ -691,7 +691,7 @@ class _MindMapPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint()
-      ..color = AppColors.mainDark.withOpacity(0.5)
+      ..color = AppColors.mainDark.withValues(alpha: 0.5)
       ..strokeWidth = 2.0
       ..style = PaintingStyle.stroke;
 

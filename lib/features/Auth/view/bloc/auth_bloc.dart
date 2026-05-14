@@ -16,6 +16,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     on<AuthRegisterRequested>(_onRegister);
     on<AuthLoadUserRequested>(_onLoadUser);
     on<AuthLogoutRequested>(_onLogout);
+    on<AuthReplaceUser>(_onReplaceUser);
   }
 
   final AuthRemoteDataSource _remote;
@@ -23,7 +24,13 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   Future<void> _onLogin(AuthLoginRequested event, Emitter<AuthState> emit) async {
     emit(const AuthLoading());
     try {
-      final auth = await _remote.login(email: event.email, password: event.password);
+      final auth = await _remote.login(
+        email: event.email,
+        phoneNumber: event.phoneNumber,
+        countryCode: event.countryCode,
+        password: event.password,
+        rememberMe: event.rememberMe,
+      );
       emit(AuthSuccess(auth.user));
     } on ApiException catch (e) {
       emit(AuthError(e.message, e.error));
@@ -43,6 +50,8 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         agreeTerms: event.agreeTerms,
         phoneNumber: event.phoneNumber,
         countryCode: event.countryCode,
+        educationStatus: event.educationStatus,
+        signupOtp: event.signupOtp,
       );
       emit(AuthSuccess(auth.user));
     } on ApiException catch (e) {
@@ -58,15 +67,31 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       emit(const AuthInitial());
       return;
     }
-    emit(const AuthLoading());
+    final previousUser = switch (state) {
+      AuthSuccess(:final user) => user,
+      _ => null,
+    };
+    if (previousUser == null) {
+      emit(const AuthLoading());
+    }
     try {
       final user = await _remote.getCurrentUser();
       emit(AuthSuccess(user));
     } on ApiException catch (e) {
+      if (previousUser != null) {
+        return;
+      }
       emit(AuthError(e.message, e.error));
     } on FormatException catch (e) {
+      if (previousUser != null) {
+        return;
+      }
       emit(AuthError(e.message, 'INVALID_RESPONSE'));
     }
+  }
+
+  void _onReplaceUser(AuthReplaceUser event, Emitter<AuthState> emit) {
+    emit(AuthSuccess(event.user));
   }
 
   Future<void> _onLogout(AuthLogoutRequested event, Emitter<AuthState> emit) async {

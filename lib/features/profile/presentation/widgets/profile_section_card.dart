@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../../core/utils/app_colors.dart';
+
 class ProfileSectionCard extends StatelessWidget {
   final IconData? icon;
   final String? title;
@@ -17,12 +18,15 @@ class ProfileSectionCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    final borderColor = Theme.of(context).dividerColor;
+
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: AppColors.white,
+        color: scheme.surface,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppColors.stroke),
+        border: Border.all(color: borderColor),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -41,10 +45,11 @@ class ProfileSectionCard extends StatelessWidget {
                 if (title != null)
                   Text(
                     title!,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontFamily: "Pridi",
                       fontSize: 16,
                       fontWeight: FontWeight.w500,
+                      color: scheme.onSurface,
                     ),
                   ),
               ],

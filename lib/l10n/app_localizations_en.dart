@@ -89,6 +89,11 @@ class AppLocalizationsEn extends AppLocalizations {
       'Enter the 5 digits code you received at your Gmail : example123@gamil.com';
 
   @override
+  String enter6DigitsCodeEmail(String email) {
+    return 'Enter the 6 digits code you received at your email: $email';
+  }
+
+  @override
   String get verify => 'Verify';
 
   @override
@@ -306,6 +311,33 @@ class AppLocalizationsEn extends AppLocalizations {
   String get profile => 'Profile';
 
   @override
+  String get profileFieldNotSet => '—';
+
+  @override
+  String get profileLoadFailed => 'Could not refresh profile.';
+
+  @override
+  String get removeProfilePhotoConfirm => 'Remove your profile photo?';
+
+  @override
+  String get remove => 'Remove';
+
+  @override
+  String get editProfile => 'Edit profile';
+
+  @override
+  String get profileUpdateFailed => 'Could not save profile.';
+
+  @override
+  String get fieldRequired => 'This field is required.';
+
+  @override
+  String get invalidEmailHint => 'Enter a valid email address.';
+
+  @override
+  String get retry => 'Retry';
+
+  @override
   String get aiTools => 'Ai tools';
 
   @override
@@ -377,16 +409,34 @@ class AppLocalizationsEn extends AppLocalizations {
   String get english => 'English';
 
   @override
+  String get arabic => 'Arabic';
+
+  @override
   String get theme => 'Theme:';
 
   @override
   String get lightMode => 'Light mode';
 
   @override
+  String get darkMode => 'Dark mode';
+
+  @override
+  String get themeSystem => 'System default';
+
+  @override
   String get notification => 'Notification:';
 
   @override
   String get enabled => 'Enabled';
+
+  @override
+  String get disabled => 'Disabled';
+
+  @override
+  String get chooseLanguage => 'Choose language';
+
+  @override
+  String get chooseAppearance => 'Choose appearance';
 
   @override
   String get privacyPolicy => 'Privacy Policy';
@@ -656,6 +706,44 @@ class AppLocalizationsEn extends AppLocalizations {
   String get savedSummary => 'Saved Summary';
 
   @override
+  String get savedSearchHint => 'Search saved items...';
+
+  @override
+  String get savedDetailPlaceholder =>
+      'Your saved content will load here when the library is connected.';
+
+  @override
+  String get savedNoSearchResults => 'No saved items match your search.';
+
+  @override
+  String get savedLibraryEmpty =>
+      'Nothing saved yet. Create content from AI tools and tap Save.';
+
+  @override
+  String get savedDetailItemUnavailable => 'This item is no longer available.';
+
+  @override
+  String get savedDetailNotInLibraryAnymore =>
+      'This is not in your saved library anymore. Pull to refresh the list.';
+
+  @override
+  String get savedDetailNotFound => 'We could not find this item.';
+
+  @override
+  String get savedDetailMissingListId =>
+      'This item has no id. Try refreshing the list.';
+
+  @override
+  String get savedLibraryRemoveQuestion =>
+      'Remove this from your saved library?';
+
+  @override
+  String get savedLibraryRemoved => 'Removed from saved library.';
+
+  @override
+  String get savedLibraryShared => 'Shared to your channels.';
+
+  @override
   String get result => 'Result';
 
   @override
@@ -678,4 +766,309 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get keepGoing => 'Keep going';
+
+  @override
+  String get delete => 'Delete';
+
+  @override
+  String get undo => 'Undo';
+
+  @override
+  String get deleteThisListQuestion => 'Delete this list?';
+
+  @override
+  String get listDeleted => 'List deleted';
+
+  @override
+  String get renameList => 'Rename List';
+
+  @override
+  String get listRenamed => 'List renamed';
+
+  @override
+  String get errorPrefix => 'Error';
+
+  @override
+  String get pleaseFillAllRequiredFields => 'Please fill all required fields';
+
+  @override
+  String get pleaseEnterVerificationCode => 'Please enter verification code';
+
+  @override
+  String get pleaseEnterBothPasswordFields =>
+      'Please enter both password fields';
+
+  @override
+  String get passwordsDoNotMatch => 'Passwords do not match';
+
+  @override
+  String get myTasks => 'My Tasks';
+
+  @override
+  String get day => 'Day';
+
+  @override
+  String get month => 'Month';
+
+  @override
+  String get year => 'Year';
+
+  @override
+  String get noUpcomingDeadlinesYet => 'No upcoming deadlines yet.';
+
+  @override
+  String get ok => 'OK';
+
+  @override
+  String get privacyPolicyComingSoon => 'Privacy Policy screen coming soon.';
+
+  @override
+  String get helpSupportComingSoon => 'Help & Support screen coming soon.';
+
+  @override
+  String get taskActionsComingSoon =>
+      'Task edit, delete, and complete will be available in a future update.';
+
+  @override
+  String get deleteTaskConfirm => 'Delete this task?';
+
+  @override
+  String get taskDeleted => 'Task deleted.';
+
+  @override
+  String get taskMarkedComplete => 'Task marked as completed.';
+
+  @override
+  String get taskMarkedPending => 'Task marked as pending.';
+
+  @override
+  String get createListBeforeAddingTasks =>
+      'Create a list first, then add tasks inside it.';
+
+  @override
+  String get chooseListForNewTask => 'Which list should this task go in?';
+
+  @override
+  String get logoutConfirmationMessage => 'Are you sure you want to log out?';
+
+  @override
+  String get couldNotReadFilePath => 'Could not read file path';
+
+  @override
+  String get mindMap => 'Mind Map';
+
+  @override
+  String get share => 'Share';
+
+  @override
+  String get shareToCommunityChannels => 'Share to community channels';
+
+  @override
+  String get noCommunityChannelsFound => 'No community channels found';
+
+  @override
+  String failedToLoadChannels(String error) {
+    return 'Failed to load channels: $error';
+  }
+
+  @override
+  String shareFailed(String error) {
+    return 'Share failed: $error';
+  }
+
+  @override
+  String sharedToChannelsCount(int count) {
+    return 'Shared to $count channel(s)';
+  }
+
+  @override
+  String get uploadMaterialToGenerateSummary =>
+      'Upload your material to generate summary';
+
+  @override
+  String get uploadMaterialToGenerateQuiz =>
+      'Upload your material to generate quiz';
+
+  @override
+  String get uploadMaterialToGenerateFlashcards =>
+      'Upload your material to generate flashcards';
+
+  @override
+  String get uploadMaterialToGenerateMindMap =>
+      'Upload your material to generate mind map';
+
+  @override
+  String generationFailed(String error) {
+    return 'Generation failed: $error';
+  }
+
+  @override
+  String get savedToYourLibrary => 'Saved to your library';
+
+  @override
+  String saveFailed(String error) {
+    return 'Save failed: $error';
+  }
+
+  @override
+  String fileLabel(String name) {
+    return 'File: $name';
+  }
+
+  @override
+  String get generating => 'Generating...';
+
+  @override
+  String get uploadMaterial => 'Upload material';
+
+  @override
+  String get calendar => 'Calendar';
+
+  @override
+  String get chooseYourStudyMode => 'Choose your Study Mode';
+
+  @override
+  String get cameraMode => 'Camera Mode';
+
+  @override
+  String get concentrationMode => 'Concentration Mode';
+
+  @override
+  String get pomodoroTimers => 'Pomodoro Timers';
+
+  @override
+  String get customTimer => 'Custom Timer';
+
+  @override
+  String get createLinkWithFriends => 'Create link with friends';
+
+  @override
+  String get studyWithYourFriends => 'Study with your Friends';
+
+  @override
+  String get createNewLink => 'Create new Link';
+
+  @override
+  String get createLinkAndPassword => 'Create your Link and password';
+
+  @override
+  String get comingSoonFeature => 'This feature is coming soon!';
+
+  @override
+  String get mentorLibrary => 'Mentor Library';
+
+  @override
+  String get communityEvents => 'Community Events';
+
+  @override
+  String get mentorshipHistory => 'Mentorship History';
+
+  @override
+  String get joinNewCommunity => 'Join a New Community';
+
+  @override
+  String get rejoinSavedCommunity => 'Rejoin your Saved Community';
+
+  @override
+  String get theTask => 'The Task:';
+
+  @override
+  String get typeYourTaskHere => 'Type your task here';
+
+  @override
+  String get date => 'Date:';
+
+  @override
+  String get time => 'Time:';
+
+  @override
+  String get startTimer => 'Start Timer';
+
+  @override
+  String get studyTime => 'Study Time';
+
+  @override
+  String get shortBreak => 'Short Break';
+
+  @override
+  String get longBreak => 'Long Break';
+
+  @override
+  String get mins => 'mins';
+
+  @override
+  String get completedCycles => 'Completed cycles';
+
+  @override
+  String get areYouStillThere => 'Are you still there?';
+
+  @override
+  String get howIsYourMoodWhileStudying => 'How is your mood while studying?';
+
+  @override
+  String get yesContinue => 'Yes, Continue';
+
+  @override
+  String get noStop => 'No, Stop';
+
+  @override
+  String get customYourOwnTimer => 'Custom Your Own Timer:';
+
+  @override
+  String get recentlyCustomizedTimers => 'Recently customized Timers:';
+
+  @override
+  String get cameraOn => 'Camera On';
+
+  @override
+  String get videoCallWithMishka => 'Video call with Mishka';
+
+  @override
+  String get cameraIsOn => 'Camera is On';
+
+  @override
+  String get cameraIsOff => 'Camera is Off';
+
+  @override
+  String get timer => 'Timer';
+
+  @override
+  String get yourStudyLink => 'Your study link:';
+
+  @override
+  String get linkCopied => 'Link copied!';
+
+  @override
+  String get linkCopiedAndReady => 'Link copied and ready to share!';
+
+  @override
+  String get copyAndShare => 'Copy & Share';
+
+  @override
+  String get enterPassword => 'Enter password';
+
+  @override
+  String get noPreviousCustomTimers => 'No previous custom timers.';
+
+  @override
+  String get howIsYourModeWhileStudying => 'How is your mode while studying?';
+
+  @override
+  String get makingGoodProgressToday => 'Making good progress today?';
+
+  @override
+  String get takeBreak => 'Take Break';
+
+  @override
+  String get endCall => 'End Call';
+
+  @override
+  String get backToCall => 'Back to Call';
+
+  @override
+  String get breakTime => 'Break Time';
+
+  @override
+  String get cameraPermissionRequired =>
+      'Camera permission is required for video call mode.';
 }

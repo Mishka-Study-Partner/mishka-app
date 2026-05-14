@@ -1,14 +1,20 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:mishka_app/core/network/api_exception.dart';
+import 'package:mishka_app/core/network/api_service.dart';
 import 'package:mishka_app/core/utils/app_colors.dart';
 import 'package:mishka_app/core/utils/app_sizes.dart';
+import 'package:mishka_app/features/Auth/data/data_sources/auth_remote_data_source.dart';
 import 'package:mishka_app/l10n/app_localizations.dart';
+import 'package:mishka_app/features/Auth/view/bloc/auth_bloc.dart';
 
 import '../../../../core/widgets/custom_app_bar.dart';
 import '../widgets/custom_elevated_button.dart';
 import '../widgets/form_text.dart';
 import '../widgets/social_media_total_buttons.dart';
 import 'login_screen.dart';
+import 'verification_views/otp_verification_screen.dart';
 
 class SignUpScreen extends StatefulWidget {
   const SignUpScreen({super.key,});
@@ -18,18 +24,137 @@ class SignUpScreen extends StatefulWidget {
 }
 
 class _SignUpScreenState extends State<SignUpScreen> {
-  TextEditingController emailController =TextEditingController();
-  TextEditingController firstNameController =TextEditingController();
-  TextEditingController lastNameController =TextEditingController();
-  TextEditingController phoneController =TextEditingController();
-  TextEditingController passwordController =TextEditingController();
+  static const bool _signupOtpOptional = false;
+  final TextEditingController emailController =TextEditingController();
+  final TextEditingController firstNameController =TextEditingController();
+  final TextEditingController lastNameController =TextEditingController();
+  final TextEditingController phoneController =TextEditingController();
+  final TextEditingController passwordController =TextEditingController();
   bool isChecked1 = false;
   bool isChecked2 = false;
+  bool _isOtpLoading = false;
+  @override
+  void dispose() {
+    emailController.dispose();
+    firstNameController.dispose();
+    lastNameController.dispose();
+    phoneController.dispose();
+    passwordController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _submitSignUp() async {
+    final l10n = AppLocalizations.of(context)!;
+    if (firstNameController.text.trim().isEmpty ||
+        lastNameController.text.trim().isEmpty ||
+        emailController.text.trim().isEmpty ||
+        phoneController.text.trim().isEmpty ||
+        passwordController.text.trim().isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(l10n.pleaseFillAllRequiredFields)),
+      );
+      return;
+    }
+    if (!isChecked2) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(l10n.agreeToTerms)),
+      );
+      return;
+    }
+
+    setState(() => _isOtpLoading = true);
+    final email = emailController.text.trim();
+    try {
+      await AuthRemoteDataSource(ApiService()).sendSignupOtp(
+        email: email,
+      );
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(_errorMessage(e))),
+        );
+      }
+      return;
+    } finally {
+      if (mounted) {
+        setState(() => _isOtpLoading = false);
+      }
+    }
+
+    if (!mounted) return;
+    await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => OtpVerificationScreen(
+          title: l10n.verifyByEmail,
+          subtitle: l10n.enter6DigitsCodeEmail(email),
+          // Keep optional until final signup OTP UX is locked.
+          allowEmptyCode: _signupOtpOptional,
+          onVerify: (otpCode) async {
+            final dataSource = AuthRemoteDataSource(ApiService());
+            final trimmedOtp = otpCode.trim();
+            if (trimmedOtp.isNotEmpty) {
+              await dataSource.verifySignupOtp(
+                email: email,
+                otpCode: trimmedOtp,
+              );
+            }
+            context.read<AuthBloc>().add(
+              AuthRegisterRequested(
+                firstName: firstNameController.text.trim(),
+                lastName: lastNameController.text.trim(),
+                email: email,
+                password: passwordController.text,
+                agreeTerms: isChecked2,
+                phoneNumber: phoneController.text.trim(),
+                // Temporary fallback until education status selector is implemented.
+                educationStatus: 'other',
+                signupOtp: trimmedOtp.isEmpty ? null : trimmedOtp,
+              ),
+            );
+            Navigator.pop(context);
+          },
+        ),
+      ),
+    );
+  }
+
+  String _errorMessage(Object error) {
+    if (error is ApiException) {
+      final buffer = StringBuffer();
+      if (error.statusCode != null) {
+        buffer.write('[${error.statusCode}] ');
+      }
+      if (error.error != null && error.error!.isNotEmpty) {
+        buffer.write('[${error.error}] ');
+      }
+      buffer.write(error.message);
+      if (error.details != null) {
+        buffer.write('\n${error.details}');
+      }
+      return buffer.toString();
+    }
+    return error.toString();
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    
-    return Scaffold(
+
+    return BlocConsumer<AuthBloc, AuthState>(
+      listener: (context, state) {
+        if (state is AuthSuccess) {
+          Navigator.of(context).popUntil((route) => route.isFirst);
+          return;
+        }
+        if (state is AuthError) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(state.message)),
+          );
+        }
+      },
+      builder: (context, state) {
+        return Scaffold(
       backgroundColor: AppColors.screenBackground,
       appBar: const MishkaAppBar(title: '', showBottomBar: false),
       body: Padding(
@@ -149,7 +274,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
               SizedBox(height: 24.h),
               AuthButton(
                 text: l10n.createAccount,
-                onPressed: () {},
+                isLoading: state is AuthLoading || _isOtpLoading,
+                onPressed: _submitSignUp,
               ),
               SizedBox(height: 16.h),
               Row(
@@ -218,6 +344,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
         ),
       ),
 
+    );
+      },
     );
   }
 

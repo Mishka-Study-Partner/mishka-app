@@ -21,16 +21,20 @@ class MishkaBottomNav extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    
+    final scheme = Theme.of(context).colorScheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Container(
       height: 72.h,
-      decoration: const BoxDecoration(
-        color: AppColors.white,
+      decoration: BoxDecoration(
+        color: scheme.surface,
         boxShadow: [
           BoxShadow(
-            color: Colors.black12,
+            color: isDark
+                ? Colors.black.withValues(alpha: 0.45)
+                : Colors.black12,
             blurRadius: 4,
-            offset: Offset(0, -1),
+            offset: const Offset(0, -1),
           ),
         ],
       ),
@@ -79,6 +83,8 @@ class MishkaBottomNav extends StatelessWidget {
     required String icon,
   }) {
     bool selected = index == currentIndex;
+    final scheme = Theme.of(context).colorScheme;
+    final inactive = scheme.onSurface.withValues(alpha: 0.75);
 
     return GestureDetector(
       onTap: () => onTap(index),
@@ -87,7 +93,7 @@ class MishkaBottomNav extends StatelessWidget {
         children: [
           Iconify(
             icon,
-            color: selected ? AppColors.mainGold : AppColors.mainDark,
+            color: selected ? AppColors.mainGold : inactive,
             size: 26.w,
           ),
           SizedBox(height: 4.h),
@@ -99,7 +105,7 @@ class MishkaBottomNav extends StatelessWidget {
                   fontFamily: "Pridi",
                   fontSize: AppSizes.fontSizeSmall,
                   fontWeight: FontWeight.w600,
-                  color: selected ? AppColors.mainGold : AppColors.mainDark,
+                  color: selected ? AppColors.mainGold : inactive,
                 ),
               ),
               if (selected)

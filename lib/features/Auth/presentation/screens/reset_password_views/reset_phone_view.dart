@@ -1,17 +1,78 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:mishka_app/core/network/api_service.dart';
 import 'package:mishka_app/core/utils/app_colors.dart';
 import 'package:mishka_app/core/utils/app_sizes.dart';
+import 'package:mishka_app/features/Auth/data/data_sources/auth_remote_data_source.dart';
 import 'package:mishka_app/l10n/app_localizations.dart';
-import 'package:mishka_app/features/Auth/presentation/screens/verification_views/phone_verification.dart';
+import 'package:mishka_app/features/Auth/presentation/screens/reset_password_views/new_password_view.dart';
+import 'package:mishka_app/features/Auth/presentation/screens/verification_views/otp_verification_screen.dart';
 
 import '../../widgets/custom_elevated_button.dart';
 import '../../widgets/form_text.dart';
 
-class ResetPhoneView extends StatelessWidget {
+class ResetPhoneView extends StatefulWidget {
+  const ResetPhoneView({super.key});
+
+  @override
+  State<ResetPhoneView> createState() => _ResetPhoneViewState();
+}
+
+class _ResetPhoneViewState extends State<ResetPhoneView> {
   final TextEditingController phoneController = TextEditingController();
-  
-   ResetPhoneView({super.key});
+  bool _isLoading = false;
+
+  @override
+  void dispose() {
+    phoneController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _sendCode() async {
+    final l10n = AppLocalizations.of(context)!;
+    final phone = phoneController.text.trim();
+    if (phone.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(l10n.phoneNumber)),
+      );
+      return;
+    }
+    setState(() => _isLoading = true);
+    try {
+      await AuthRemoteDataSource(ApiService()).forgotPassword(phoneNumber: phone);
+      if (!mounted) return;
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => OtpVerificationScreen(
+            title: l10n.verifyByPhoneNumber,
+            subtitle: l10n.enter5DigitsCodePhone,
+            allowEmptyCode: false,
+            onVerify: (otpCode) async {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => NewPasswordView(
+                    resetCode: otpCode,
+                    phoneNumber: phone,
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+      );
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(e.toString())),
+      );
+    } finally {
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -50,14 +111,8 @@ class ResetPhoneView extends StatelessWidget {
           SizedBox(height: 24.h),
           AuthButton(
             text: l10n.getCode,
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => const PhoneVerification(),
-                ),
-              );
-            },
+            isLoading: _isLoading,
+            onPressed: _sendCode,
           ),
         ],
       ),

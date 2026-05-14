@@ -43,7 +43,8 @@ class _OtpInputState extends State<OtpInput> {
     }
 
     final code = controllers.map((c) => c.text).join();
-    if (!code.contains('') && widget.onCompleted != null) {
+    final isComplete = controllers.every((c) => c.text.isNotEmpty);
+    if (isComplete && widget.onCompleted != null) {
       widget.onCompleted!(code);
     }
   }

@@ -26,6 +26,14 @@
   "verificationCode": "رمز التحقق",
   "verifyByEmail": "التحقق عبر عنوان البريد الإلكتروني",
   "enter5DigitsCodeEmail": "أدخل رمز الخمسة أرقام الذي تلقيته على بريدك الإلكتروني: example123@gamil.com",
+  "enter6DigitsCodeEmail": "أدخل رمز التحقق المكون من 6 أرقام الذي استلمته على بريدك الإلكتروني: {email}",
+  "@enter6DigitsCodeEmail": {
+    "placeholders": {
+      "email": {
+        "type": "String"
+      }
+    }
+  },
   "verify": "تحقق",
   "successfullyVerified": "تم التحقق بنجاح",
   "letsStartSettingAccount": "دعنا نبدأ بإعداد حسابك حتى تتمكن من بدء استخدام التطبيق",
@@ -102,6 +110,15 @@
   "category": "الفئة",
   "saved": "المحفوظات",
   "profile": "الملف الشخصي",
+  "profileFieldNotSet": "—",
+  "profileLoadFailed": "تعذّر تحديث الملف الشخصي.",
+  "removeProfilePhotoConfirm": "إزالة صورة الملف الشخصي؟",
+  "remove": "إزالة",
+  "editProfile": "تعديل الملف الشخصي",
+  "profileUpdateFailed": "تعذّر حفظ الملف الشخصي.",
+  "fieldRequired": "هذا الحقل مطلوب.",
+  "invalidEmailHint": "يرجى إدخال بريد إلكتروني صالح.",
+  "retry": "إعادة المحاولة",
   "aiTools": "الأدوات الذكية",
   "aiToolsSubtitle": "الدردشة مع ميشكا، الاختبارات، البطاقات التعليمية، الملخص.",
   "toDoList": "قائمة المهام",
@@ -125,10 +142,16 @@
   "exampleEmailContact": "example123@gmail.com",
   "language": "اللغة:",
   "english": "الإنجليزية",
+  "arabic": "العربية",
   "theme": "المظهر:",
   "lightMode": "الوضع الفاتح",
+  "darkMode": "الوضع الداكن",
+  "themeSystem": "تلقائي (النظام)",
   "notification": "الإشعارات:",
   "enabled": "مفعل",
+  "disabled": "متوقف",
+  "chooseLanguage": "اختر اللغة",
+  "chooseAppearance": "اختر المظهر",
   "privacyPolicy": "سياسة الخصوصية",
   "helpSupport": "المساعدة والدعم",
   "logOut": "تسجيل الخروج",
@@ -224,6 +247,17 @@
   "view": "عرض",
   "savedQuizes": "الاختبارات المحفوظة",
   "savedSummary": "الملخص المحفوظ",
+  "savedSearchHint": "ابحث في المحفوظات...",
+  "savedDetailPlaceholder": "سيظهر المحتوى المحفوظ هنا عند ربط المكتبة.",
+  "savedNoSearchResults": "لا توجد عناصر مطابقة لبحثك.",
+  "savedLibraryEmpty": "لا يوجد شيء محفوظ بعد. أنشئ محتوى من أدوات الذكاء الاصطناعي ثم احفظه.",
+  "savedDetailItemUnavailable": "هذا العنصر لم يعد متاحاً.",
+  "savedDetailNotInLibraryAnymore": "هذا العنصر لم يعد في مكتبتك المحفوظة. اسحب للتحديث.",
+  "savedDetailNotFound": "تعذر العثور على هذا العنصر.",
+  "savedDetailMissingListId": "لا يوجد معرّف لهذا العنصر. حدّث القائمة.",
+  "savedLibraryRemoveQuestion": "إزالة هذا من مكتبتك المحفوظة؟",
+  "savedLibraryRemoved": "تمت الإزالة من المحفوظات.",
+  "savedLibraryShared": "تمت المشاركة إلى قنواتك.",
   "result": "النتيجة",
   "congratulation": "تهانينا!",
   "keepItUp": "استمر",
@@ -232,4 +266,144 @@
   "answered80Percent": "لقد أجبت على 80% من الإجابات الصحيحة",
   "answered40Percent": "لقد أجبت على 40% من الإجابات الصحيحة",
   "keepGoing": "استمر"
+  ,"delete": "حذف"
+  ,"undo": "تراجع"
+  ,"deleteThisListQuestion": "حذف هذه القائمة؟"
+  ,"listDeleted": "تم حذف القائمة"
+  ,"renameList": "إعادة تسمية القائمة"
+  ,"listRenamed": "تم إعادة تسمية القائمة"
+  ,"errorPrefix": "خطأ"
+  ,"pleaseFillAllRequiredFields": "يرجى ملء جميع الحقول المطلوبة"
+  ,"pleaseEnterVerificationCode": "يرجى إدخال رمز التحقق"
+  ,"pleaseEnterBothPasswordFields": "يرجى إدخال حقلي كلمة المرور"
+  ,"passwordsDoNotMatch": "كلمتا المرور غير متطابقتين"
+  ,"myTasks": "مهامي"
+  ,"day": "اليوم"
+  ,"month": "الشهر"
+  ,"year": "السنة"
+  ,"noUpcomingDeadlinesYet": "لا توجد مواعيد نهائية قادمة بعد."
+  ,"ok": "حسنًا"
+  ,"privacyPolicyComingSoon": "شاشة سياسة الخصوصية قريبًا."
+  ,"helpSupportComingSoon": "شاشة المساعدة والدعم قريبًا."
+  ,"taskActionsComingSoon": "تعديل المهمة والحذف والإكمال ستتوفر في تحديث قادم."
+  ,"deleteTaskConfirm": "هل تريد حذف هذه المهمة؟"
+  ,"taskDeleted": "تم حذف المهمة."
+  ,"taskMarkedComplete": "تم وضع علامة مكتمل على المهمة."
+  ,"taskMarkedPending": "تم إعادة المهمة إلى قيد الانتظار."
+  ,"createListBeforeAddingTasks": "أنشئ قائمة أولاً ثم أضف المهام داخلها."
+  ,"chooseListForNewTask": "إلى أي قائمة تريد إضافة هذه المهمة؟"
+  ,"logoutConfirmationMessage": "هل أنت متأكد أنك تريد تسجيل الخروج؟"
+  ,"couldNotReadFilePath": "تعذر قراءة مسار الملف"
+  ,"mindMap": "الخريطة الذهنية"
+  ,"share": "مشاركة"
+  ,"shareToCommunityChannels": "المشاركة إلى قنوات المجتمع"
+  ,"noCommunityChannelsFound": "لا توجد قنوات مجتمع متاحة"
+  ,"failedToLoadChannels": "تعذر تحميل القنوات: {error}"
+  ,"shareFailed": "فشلت المشاركة: {error}"
+  ,"sharedToChannelsCount": "تمت المشاركة إلى {count} قناة"
+  ,"uploadMaterialToGenerateSummary": "ارفع المادة لإنشاء ملخص"
+  ,"uploadMaterialToGenerateQuiz": "ارفع المادة لإنشاء اختبار"
+  ,"uploadMaterialToGenerateFlashcards": "ارفع المادة لإنشاء بطاقات تعليمية"
+  ,"uploadMaterialToGenerateMindMap": "ارفع المادة لإنشاء خريطة ذهنية"
+  ,"generationFailed": "فشل التوليد: {error}"
+  ,"savedToYourLibrary": "تم الحفظ في مكتبتك"
+  ,"saveFailed": "فشل الحفظ: {error}"
+  ,"fileLabel": "الملف: {name}"
+  ,"generating": "جارٍ التوليد..."
+  ,"uploadMaterial": "رفع المادة"
+  ,"@sharedToChannelsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  }
+  ,"@failedToLoadChannels": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  }
+  ,"@shareFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  }
+  ,"@generationFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  }
+  ,"@saveFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  }
+  ,"@fileLabel": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  }
+  ,"calendar": "التقويم"
+  ,"chooseYourStudyMode": "اختر وضع الدراسة"
+  ,"cameraMode": "وضع الكاميرا"
+  ,"concentrationMode": "وضع التركيز"
+  ,"pomodoroTimers": "مؤقت بومودورو"
+  ,"customTimer": "مؤقت مخصص"
+  ,"createLinkWithFriends": "أنشئ رابطاً مع الأصدقاء"
+  ,"studyWithYourFriends": "ادرس مع أصدقائك"
+  ,"createNewLink": "أنشئ رابطاً جديداً"
+  ,"createLinkAndPassword": "أنشئ رابطاً وكلمة مرور"
+  ,"comingSoonFeature": "هذه الميزة قادمة قريباً!"
+  ,"mentorLibrary": "مكتبة المرشدين"
+  ,"communityEvents": "فعاليات المجتمع"
+  ,"mentorshipHistory": "سجل الإرشاد"
+  ,"joinNewCommunity": "انضم لمجتمع جديد"
+  ,"rejoinSavedCommunity": "أعد الانضمام لمجتمعك المحفوظ"
+  ,"theTask": "المهمة:"
+  ,"typeYourTaskHere": "اكتب مهمتك هنا"
+  ,"date": "التاريخ:"
+  ,"time": "الوقت:"
+  ,"startTimer": "ابدأ المؤقت"
+  ,"studyTime": "وقت الدراسة"
+  ,"shortBreak": "استراحة قصيرة"
+  ,"longBreak": "استراحة طويلة"
+  ,"mins": "دقائق"
+  ,"completedCycles": "الدورات المكتملة"
+  ,"areYouStillThere": "هل ما زلت هنا؟"
+  ,"howIsYourMoodWhileStudying": "كيف حالك أثناء الدراسة؟"
+  ,"yesContinue": "نعم، أكمل"
+  ,"noStop": "لا، توقف"
+  ,"customYourOwnTimer": "خصص مؤقتك الخاص:"
+  ,"recentlyCustomizedTimers": "المؤقتات المخصصة مؤخراً:"
+  ,"cameraOn": "الكاميرا مفعلة"
+  ,"videoCallWithMishka": "مكالمة فيديو مع مشكا"
+  ,"cameraIsOn": "الكاميرا مفعلة"
+  ,"cameraIsOff": "الكاميرا مغلقة"
+  ,"timer": "المؤقت"
+  ,"yourStudyLink": "رابط الدراسة الخاص بك:"
+  ,"linkCopied": "تم نسخ الرابط!"
+  ,"linkCopiedAndReady": "تم نسخ الرابط وجاهز للمشاركة!"
+  ,"copyAndShare": "نسخ ومشاركة"
+  ,"password": "كلمة المرور"
+  ,"enterPassword": "أدخل كلمة المرور"
+  ,"noPreviousCustomTimers": "لا توجد مؤقتات مخصصة سابقة."
+  ,"howIsYourModeWhileStudying": "كيف حالك أثناء الدراسة؟"
+  ,"makingGoodProgressToday": "هل تحرز تقدماً جيداً اليوم؟"
+  ,"yes": "نعم"
+  ,"no": "لا"
+  ,"takeBreak": "خذ استراحة"
+  ,"endCall": "إنهاء المكالمة"
+  ,"backToCall": "العودة للمكالمة"
+  ,"breakTime": "وقت الاستراحة"
+  ,"cameraPermissionRequired": "يجب السماح بالوصول للكاميرا لوضع مكالمة الفيديو."
 }

@@ -4,6 +4,16 @@ import 'package:mishka_app/core/utils/app_colors.dart';
 import 'package:mishka_app/core/utils/app_sizes.dart';
 import 'package:mishka_app/generated/assets.dart';
 
+/// Status bar inset for [MishkaAppBar.preferredSize] (no [BuildContext] available there).
+double _topSafeInsetForPreferredSize() {
+  try {
+    final views = WidgetsBinding.instance.platformDispatcher.views;
+    if (views.isEmpty) return 0;
+    return MediaQueryData.fromView(views.first).padding.top;
+  } catch (_) {
+    return 0;
+  }
+}
 
 class MishkaAppBar extends StatelessWidget implements PreferredSizeWidget {
   final String title;
@@ -12,6 +22,8 @@ class MishkaAppBar extends StatelessWidget implements PreferredSizeWidget {
   final bool showBottomBar;
   final VoidCallback? onMenuTap;
   final VoidCallback? onBackTap;
+  /// Shown before the Mishka logo in the top navy bar (e.g. edit / save actions).
+  final Widget? topTrailingAction;
 
   const MishkaAppBar({
     super.key,
@@ -21,61 +33,84 @@ class MishkaAppBar extends StatelessWidget implements PreferredSizeWidget {
     this.onMenuTap,
     this.onBackTap,
     this.topTitle,
+    this.topTrailingAction,
   });
 
+  double get _contentHeight =>
+      showBottomBar ? 120.h : AppSizes.appBarHeight;
+
   @override
-  Size get preferredSize =>
-      Size.fromHeight(showBottomBar ? 120.h : AppSizes.appBarHeight);
+  Size get preferredSize => Size.fromHeight(
+        _contentHeight + _topSafeInsetForPreferredSize(),
+      );
 
   @override
   Widget build(BuildContext context) {
+    final topInset = MediaQuery.paddingOf(context).top;
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
         Container(
-          height: AppSizes.appBarHeight,
+          width: double.infinity,
           decoration: const BoxDecoration(
             color: AppColors.appBarBackground,
           ),
-          padding: EdgeInsets.symmetric(horizontal: AppSizes.paddingMedium),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              GestureDetector(
-                onTap: onBackTap ?? () => Navigator.pop(context),
-                child: showBack
-                    ? Icon(
-                        Icons.arrow_back,
-                        color: AppColors.mainGold,
-                        size: AppSizes.iconMedium,
-                      )
-                    : SizedBox(width: 24.w),
-              ),
-              if (topTitle != null)
-                Text(
-                  topTitle!,
-                  style: TextStyle(
-                    color: AppColors.mainGold,
-                    fontWeight: FontWeight.bold,
-                    fontSize: AppSizes.fontSizeXXLarge,
-                    fontFamily: "Pridi",
-                  ),
-                )
-              else
-                SizedBox(width: 24.w),
-              Image.asset(
-                Assets.imagesLogoNoName,
-                height: 64.h,
-                width: 61.w,
-              ),
-            ],
+          padding: EdgeInsets.only(
+            top: topInset,
+            left: AppSizes.paddingMedium,
+            right: AppSizes.paddingMedium,
+          ),
+          child: SizedBox(
+            height: AppSizes.appBarHeight,
+            child: Row(
+              children: [
+                GestureDetector(
+                  onTap: onBackTap ?? () => Navigator.pop(context),
+                  child: showBack
+                      ? Icon(
+                          Icons.arrow_back,
+                          color: AppColors.mainGold,
+                          size: AppSizes.iconMedium,
+                        )
+                      : SizedBox(width: 24.w),
+                ),
+                if (topTitle != null)
+                  Expanded(
+                    child: Center(
+                      child: Text(
+                        topTitle!,
+                        style: TextStyle(
+                          color: AppColors.mainGold,
+                          fontWeight: FontWeight.bold,
+                          fontSize: AppSizes.fontSizeXXLarge,
+                          fontFamily: "Pridi",
+                        ),
+                      ),
+                    ),
+                  )
+                else
+                  const Spacer(),
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    if (topTrailingAction != null) topTrailingAction!,
+                    if (topTrailingAction != null) SizedBox(width: 8.w),
+                    Image.asset(
+                      Assets.imagesLogoNoName,
+                      height: 64.h,
+                      width: 61.w,
+                    ),
+                  ],
+                ),
+              ],
+            ),
           ),
         ),
         if (showBottomBar) SizedBox(height: 8.h),
         if (showBottomBar)
           Container(
             height: AppSizes.appBarBottomHeight,
-            color: AppColors.screenBackground,
+            color: Theme.of(context).scaffoldBackgroundColor,
             padding: EdgeInsets.symmetric(horizontal: AppSizes.paddingMedium),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -85,7 +120,7 @@ class MishkaAppBar extends StatelessWidget implements PreferredSizeWidget {
                   child: Icon(
                     Icons.menu,
                     size: AppSizes.iconLarge,
-                    color: AppColors.mainDark,
+                    color: Theme.of(context).colorScheme.onSurface,
                   ),
                 ),
                 Text(
@@ -94,7 +129,7 @@ class MishkaAppBar extends StatelessWidget implements PreferredSizeWidget {
                     fontFamily: "Pridi",
                     fontSize: AppSizes.fontSizeXLarge,
                     fontWeight: FontWeight.w700,
-                    color: AppColors.mainDark,
+                    color: Theme.of(context).colorScheme.onSurface,
                   ),
                 ),
                 CircleAvatar(

@@ -8,6 +8,8 @@ class SectionCard extends StatelessWidget {
   final String title;
   final String subtitle;
   final VoidCallback? onTap;
+  final bool isSaved;
+  final VoidCallback? onToggleSaved;
 
   const SectionCard({
     super.key,
@@ -15,6 +17,8 @@ class SectionCard extends StatelessWidget {
     required this.title,
     required this.subtitle,
     this.onTap,
+    this.isSaved = false,
+    this.onToggleSaved,
   });
 
   @override
@@ -81,11 +85,26 @@ class SectionCard extends StatelessWidget {
               ),
             ),
             Padding(
-              padding: EdgeInsetsDirectional.only(end: 12.w),
-              child: Icon(
-                Icons.arrow_forward_ios,
-                size: 20.w,
-                color: AppColors.mainDark,
+              padding: EdgeInsetsDirectional.only(end: 8.w),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  if (onToggleSaved != null)
+                    GestureDetector(
+                      onTap: onToggleSaved,
+                      child: Icon(
+                        isSaved ? Icons.bookmark : Icons.bookmark_border,
+                        size: 22.w,
+                        color: isSaved ? AppColors.mainGold : AppColors.lightText,
+                      ),
+                    ),
+                  SizedBox(width: 8.w),
+                  Icon(
+                    Icons.arrow_forward_ios,
+                    size: 20.w,
+                    color: AppColors.mainDark,
+                  ),
+                ],
               ),
             ),
           ],

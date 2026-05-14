@@ -1,14 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:mishka_app/l10n/app_localizations.dart';
 
 enum MonthDirection { next, previous }
 
 class CustomCalendar extends StatefulWidget {
   final List<DateTime> taskDates;
+  final void Function(DateTime)? onDaySelected;
 
   const CustomCalendar({
     super.key,
     required this.taskDates,
+    this.onDaySelected,
   });
 
   @override
@@ -16,9 +19,16 @@ class CustomCalendar extends StatefulWidget {
 }
 
 class _CustomCalendarState extends State<CustomCalendar> {
-  DateTime currentMonth = DateTime(2025, 12);
+  late DateTime currentMonth;
   DateTime? selectedDay;
   MonthDirection direction = MonthDirection.next;
+
+  @override
+  void initState() {
+    super.initState();
+    final now = DateTime.now();
+    currentMonth = DateTime(now.year, now.month);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -106,7 +116,8 @@ class _CustomCalendarState extends State<CustomCalendar> {
 
   // ---------------- WEEK DAYS ----------------
   Widget _buildWeekDays() {
-    final days = ['Mon', 'Tus', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+    final l10n = AppLocalizations.of(context)!;
+    final days = [l10n.mon, l10n.tue, l10n.wed, l10n.thu, l10n.fri, l10n.sat, l10n.sun];
 
     return Row(
       children: days
@@ -172,13 +183,14 @@ class _CustomCalendarState extends State<CustomCalendar> {
             setState(() {
               selectedDay = date;
             });
+            widget.onDaySelected?.call(date);
           },
           child: Container(
             decoration: BoxDecoration(
               color: isSelected
                   ? const Color(0xFFCCA85E)
                   : hasTask
-                  ? const Color(0xFFCCA85E).withOpacity(0.25)
+                  ? const Color(0xFFCCA85E).withValues(alpha: 0.25)
                   : Colors.transparent,
               borderRadius: BorderRadius.circular(8),
             ),

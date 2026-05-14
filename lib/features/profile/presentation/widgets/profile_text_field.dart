@@ -1,5 +1,7 @@
-import '../../../../core/utils/app_colors.dart';
 import 'package:flutter/material.dart';
+
+import '../../../../core/utils/app_colors.dart';
+
 class ProfileTextField extends StatelessWidget {
   final String label;
   final String value;
@@ -12,6 +14,12 @@ class ProfileTextField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    final fieldBg = Theme.of(context).brightness == Brightness.dark
+        ? scheme.surfaceContainerHighest.withValues(alpha: 0.35)
+        : AppColors.white;
+    final borderColor = Theme.of(context).dividerColor;
+
     return SizedBox(
       width: MediaQuery.of(context).size.width,
       child: Column(
@@ -19,11 +27,11 @@ class ProfileTextField extends StatelessWidget {
         children: [
           Text(
             label,
-            style: const TextStyle(
+            style: TextStyle(
               fontFamily: "Pridi",
               fontSize: 12,
               fontWeight: FontWeight.w500,
-              color: AppColors.mainDark,
+              color: scheme.onSurface.withValues(alpha: 0.9),
             ),
           ),
           const SizedBox(height: 4),
@@ -32,17 +40,17 @@ class ProfileTextField extends StatelessWidget {
             alignment: Alignment.centerLeft,
             padding: const EdgeInsets.symmetric(horizontal: 12),
             decoration: BoxDecoration(
-              color: AppColors.white,
+              color: fieldBg,
               borderRadius: BorderRadius.circular(6),
-              border: Border.all(color: AppColors.stroke),
+              border: Border.all(color: borderColor),
             ),
             child: Text(
               value,
-              style: const TextStyle(
+              style: TextStyle(
                 fontFamily: "Pridi",
                 fontSize: 12,
                 fontWeight: FontWeight.w400,
-                color: AppColors.mainDark,
+                color: scheme.onSurface,
               ),
             ),
           ),

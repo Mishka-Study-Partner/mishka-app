@@ -3,7 +3,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../../core/utils/app_sizes.dart';
 
 class SocialAuthButton extends StatelessWidget {
-  final ImageProvider icon;
+  final Widget icon;
   final VoidCallback onTap;
 
   const SocialAuthButton({
@@ -20,7 +20,8 @@ class SocialAuthButton extends StatelessWidget {
       child: Container(
         width: 48.w,
         height: 48.w,
-        child: Image(image: icon, fit: BoxFit.fill),
+        alignment: Alignment.center,
+        child: icon,
       ),
     );
   }

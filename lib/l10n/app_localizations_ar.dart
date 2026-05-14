@@ -89,6 +89,11 @@ class AppLocalizationsAr extends AppLocalizations {
       'أدخل رمز الخمسة أرقام الذي تلقيته على بريدك الإلكتروني: example123@gamil.com';
 
   @override
+  String enter6DigitsCodeEmail(String email) {
+    return 'أدخل رمز التحقق المكون من 6 أرقام الذي استلمته على بريدك الإلكتروني: $email';
+  }
+
+  @override
   String get verify => 'تحقق';
 
   @override
@@ -303,6 +308,33 @@ class AppLocalizationsAr extends AppLocalizations {
   String get profile => 'الملف الشخصي';
 
   @override
+  String get profileFieldNotSet => '—';
+
+  @override
+  String get profileLoadFailed => 'تعذّر تحديث الملف الشخصي.';
+
+  @override
+  String get removeProfilePhotoConfirm => 'إزالة صورة الملف الشخصي؟';
+
+  @override
+  String get remove => 'إزالة';
+
+  @override
+  String get editProfile => 'تعديل الملف الشخصي';
+
+  @override
+  String get profileUpdateFailed => 'تعذّر حفظ الملف الشخصي.';
+
+  @override
+  String get fieldRequired => 'هذا الحقل مطلوب.';
+
+  @override
+  String get invalidEmailHint => 'يرجى إدخال بريد إلكتروني صالح.';
+
+  @override
+  String get retry => 'إعادة المحاولة';
+
+  @override
   String get aiTools => 'الأدوات الذكية';
 
   @override
@@ -374,16 +406,34 @@ class AppLocalizationsAr extends AppLocalizations {
   String get english => 'الإنجليزية';
 
   @override
+  String get arabic => 'العربية';
+
+  @override
   String get theme => 'المظهر:';
 
   @override
   String get lightMode => 'الوضع الفاتح';
 
   @override
+  String get darkMode => 'الوضع الداكن';
+
+  @override
+  String get themeSystem => 'تلقائي (النظام)';
+
+  @override
   String get notification => 'الإشعارات:';
 
   @override
   String get enabled => 'مفعل';
+
+  @override
+  String get disabled => 'متوقف';
+
+  @override
+  String get chooseLanguage => 'اختر اللغة';
+
+  @override
+  String get chooseAppearance => 'اختر المظهر';
 
   @override
   String get privacyPolicy => 'سياسة الخصوصية';
@@ -651,6 +701,43 @@ class AppLocalizationsAr extends AppLocalizations {
   String get savedSummary => 'الملخص المحفوظ';
 
   @override
+  String get savedSearchHint => 'ابحث في المحفوظات...';
+
+  @override
+  String get savedDetailPlaceholder =>
+      'سيظهر المحتوى المحفوظ هنا عند ربط المكتبة.';
+
+  @override
+  String get savedNoSearchResults => 'لا توجد عناصر مطابقة لبحثك.';
+
+  @override
+  String get savedLibraryEmpty =>
+      'لا يوجد شيء محفوظ بعد. أنشئ محتوى من أدوات الذكاء الاصطناعي ثم احفظه.';
+
+  @override
+  String get savedDetailItemUnavailable => 'هذا العنصر لم يعد متاحاً.';
+
+  @override
+  String get savedDetailNotInLibraryAnymore =>
+      'هذا العنصر لم يعد في مكتبتك المحفوظة. اسحب للتحديث.';
+
+  @override
+  String get savedDetailNotFound => 'تعذر العثور على هذا العنصر.';
+
+  @override
+  String get savedDetailMissingListId =>
+      'لا يوجد معرّف لهذا العنصر. حدّث القائمة.';
+
+  @override
+  String get savedLibraryRemoveQuestion => 'إزالة هذا من مكتبتك المحفوظة؟';
+
+  @override
+  String get savedLibraryRemoved => 'تمت الإزالة من المحفوظات.';
+
+  @override
+  String get savedLibraryShared => 'تمت المشاركة إلى قنواتك.';
+
+  @override
   String get result => 'النتيجة';
 
   @override
@@ -673,4 +760,306 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get keepGoing => 'استمر';
+
+  @override
+  String get delete => 'حذف';
+
+  @override
+  String get undo => 'تراجع';
+
+  @override
+  String get deleteThisListQuestion => 'حذف هذه القائمة؟';
+
+  @override
+  String get listDeleted => 'تم حذف القائمة';
+
+  @override
+  String get renameList => 'إعادة تسمية القائمة';
+
+  @override
+  String get listRenamed => 'تم إعادة تسمية القائمة';
+
+  @override
+  String get errorPrefix => 'خطأ';
+
+  @override
+  String get pleaseFillAllRequiredFields => 'يرجى ملء جميع الحقول المطلوبة';
+
+  @override
+  String get pleaseEnterVerificationCode => 'يرجى إدخال رمز التحقق';
+
+  @override
+  String get pleaseEnterBothPasswordFields => 'يرجى إدخال حقلي كلمة المرور';
+
+  @override
+  String get passwordsDoNotMatch => 'كلمتا المرور غير متطابقتين';
+
+  @override
+  String get myTasks => 'مهامي';
+
+  @override
+  String get day => 'اليوم';
+
+  @override
+  String get month => 'الشهر';
+
+  @override
+  String get year => 'السنة';
+
+  @override
+  String get noUpcomingDeadlinesYet => 'لا توجد مواعيد نهائية قادمة بعد.';
+
+  @override
+  String get ok => 'حسنًا';
+
+  @override
+  String get privacyPolicyComingSoon => 'شاشة سياسة الخصوصية قريبًا.';
+
+  @override
+  String get helpSupportComingSoon => 'شاشة المساعدة والدعم قريبًا.';
+
+  @override
+  String get taskActionsComingSoon =>
+      'تعديل المهمة والحذف والإكمال ستتوفر في تحديث قادم.';
+
+  @override
+  String get deleteTaskConfirm => 'هل تريد حذف هذه المهمة؟';
+
+  @override
+  String get taskDeleted => 'تم حذف المهمة.';
+
+  @override
+  String get taskMarkedComplete => 'تم وضع علامة مكتمل على المهمة.';
+
+  @override
+  String get taskMarkedPending => 'تم إعادة المهمة إلى قيد الانتظار.';
+
+  @override
+  String get createListBeforeAddingTasks =>
+      'أنشئ قائمة أولاً ثم أضف المهام داخلها.';
+
+  @override
+  String get chooseListForNewTask => 'إلى أي قائمة تريد إضافة هذه المهمة؟';
+
+  @override
+  String get logoutConfirmationMessage => 'هل أنت متأكد أنك تريد تسجيل الخروج؟';
+
+  @override
+  String get couldNotReadFilePath => 'تعذر قراءة مسار الملف';
+
+  @override
+  String get mindMap => 'الخريطة الذهنية';
+
+  @override
+  String get share => 'مشاركة';
+
+  @override
+  String get shareToCommunityChannels => 'المشاركة إلى قنوات المجتمع';
+
+  @override
+  String get noCommunityChannelsFound => 'لا توجد قنوات مجتمع متاحة';
+
+  @override
+  String failedToLoadChannels(String error) {
+    return 'تعذر تحميل القنوات: $error';
+  }
+
+  @override
+  String shareFailed(String error) {
+    return 'فشلت المشاركة: $error';
+  }
+
+  @override
+  String sharedToChannelsCount(int count) {
+    return 'تمت المشاركة إلى $count قناة';
+  }
+
+  @override
+  String get uploadMaterialToGenerateSummary => 'ارفع المادة لإنشاء ملخص';
+
+  @override
+  String get uploadMaterialToGenerateQuiz => 'ارفع المادة لإنشاء اختبار';
+
+  @override
+  String get uploadMaterialToGenerateFlashcards =>
+      'ارفع المادة لإنشاء بطاقات تعليمية';
+
+  @override
+  String get uploadMaterialToGenerateMindMap =>
+      'ارفع المادة لإنشاء خريطة ذهنية';
+
+  @override
+  String generationFailed(String error) {
+    return 'فشل التوليد: $error';
+  }
+
+  @override
+  String get savedToYourLibrary => 'تم الحفظ في مكتبتك';
+
+  @override
+  String saveFailed(String error) {
+    return 'فشل الحفظ: $error';
+  }
+
+  @override
+  String fileLabel(String name) {
+    return 'الملف: $name';
+  }
+
+  @override
+  String get generating => 'جارٍ التوليد...';
+
+  @override
+  String get uploadMaterial => 'رفع المادة';
+
+  @override
+  String get calendar => 'التقويم';
+
+  @override
+  String get chooseYourStudyMode => 'اختر وضع الدراسة';
+
+  @override
+  String get cameraMode => 'وضع الكاميرا';
+
+  @override
+  String get concentrationMode => 'وضع التركيز';
+
+  @override
+  String get pomodoroTimers => 'مؤقت بومودورو';
+
+  @override
+  String get customTimer => 'مؤقت مخصص';
+
+  @override
+  String get createLinkWithFriends => 'أنشئ رابطاً مع الأصدقاء';
+
+  @override
+  String get studyWithYourFriends => 'ادرس مع أصدقائك';
+
+  @override
+  String get createNewLink => 'أنشئ رابطاً جديداً';
+
+  @override
+  String get createLinkAndPassword => 'أنشئ رابطاً وكلمة مرور';
+
+  @override
+  String get comingSoonFeature => 'هذه الميزة قادمة قريباً!';
+
+  @override
+  String get mentorLibrary => 'مكتبة المرشدين';
+
+  @override
+  String get communityEvents => 'فعاليات المجتمع';
+
+  @override
+  String get mentorshipHistory => 'سجل الإرشاد';
+
+  @override
+  String get joinNewCommunity => 'انضم لمجتمع جديد';
+
+  @override
+  String get rejoinSavedCommunity => 'أعد الانضمام لمجتمعك المحفوظ';
+
+  @override
+  String get theTask => 'المهمة:';
+
+  @override
+  String get typeYourTaskHere => 'اكتب مهمتك هنا';
+
+  @override
+  String get date => 'التاريخ:';
+
+  @override
+  String get time => 'الوقت:';
+
+  @override
+  String get startTimer => 'ابدأ المؤقت';
+
+  @override
+  String get studyTime => 'وقت الدراسة';
+
+  @override
+  String get shortBreak => 'استراحة قصيرة';
+
+  @override
+  String get longBreak => 'استراحة طويلة';
+
+  @override
+  String get mins => 'دقائق';
+
+  @override
+  String get completedCycles => 'الدورات المكتملة';
+
+  @override
+  String get areYouStillThere => 'هل ما زلت هنا؟';
+
+  @override
+  String get howIsYourMoodWhileStudying => 'كيف حالك أثناء الدراسة؟';
+
+  @override
+  String get yesContinue => 'نعم، أكمل';
+
+  @override
+  String get noStop => 'لا، توقف';
+
+  @override
+  String get customYourOwnTimer => 'خصص مؤقتك الخاص:';
+
+  @override
+  String get recentlyCustomizedTimers => 'المؤقتات المخصصة مؤخراً:';
+
+  @override
+  String get cameraOn => 'الكاميرا مفعلة';
+
+  @override
+  String get videoCallWithMishka => 'مكالمة فيديو مع مشكا';
+
+  @override
+  String get cameraIsOn => 'الكاميرا مفعلة';
+
+  @override
+  String get cameraIsOff => 'الكاميرا مغلقة';
+
+  @override
+  String get timer => 'المؤقت';
+
+  @override
+  String get yourStudyLink => 'رابط الدراسة الخاص بك:';
+
+  @override
+  String get linkCopied => 'تم نسخ الرابط!';
+
+  @override
+  String get linkCopiedAndReady => 'تم نسخ الرابط وجاهز للمشاركة!';
+
+  @override
+  String get copyAndShare => 'نسخ ومشاركة';
+
+  @override
+  String get enterPassword => 'أدخل كلمة المرور';
+
+  @override
+  String get noPreviousCustomTimers => 'لا توجد مؤقتات مخصصة سابقة.';
+
+  @override
+  String get howIsYourModeWhileStudying => 'كيف حالك أثناء الدراسة؟';
+
+  @override
+  String get makingGoodProgressToday => 'هل تحرز تقدماً جيداً اليوم؟';
+
+  @override
+  String get takeBreak => 'خذ استراحة';
+
+  @override
+  String get endCall => 'إنهاء المكالمة';
+
+  @override
+  String get backToCall => 'العودة للمكالمة';
+
+  @override
+  String get breakTime => 'وقت الاستراحة';
+
+  @override
+  String get cameraPermissionRequired =>
+      'يجب السماح بالوصول للكاميرا لوضع مكالمة الفيديو.';
 }

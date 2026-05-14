@@ -8,13 +8,22 @@ sealed class AuthEvent extends Equatable {
 }
 
 class AuthLoginRequested extends AuthEvent {
-  const AuthLoginRequested({required this.email, required this.password});
+  const AuthLoginRequested({
+    this.email,
+    this.phoneNumber,
+    this.countryCode,
+    required this.password,
+    this.rememberMe = false,
+  });
 
-  final String email;
+  final String? email;
+  final String? phoneNumber;
+  final String? countryCode;
   final String password;
+  final bool rememberMe;
 
   @override
-  List<Object?> get props => [email, password];
+  List<Object?> get props => [email, phoneNumber, countryCode, password, rememberMe];
 }
 
 class AuthRegisterRequested extends AuthEvent {
@@ -26,6 +35,8 @@ class AuthRegisterRequested extends AuthEvent {
     required this.agreeTerms,
     this.phoneNumber,
     this.countryCode,
+    this.educationStatus,
+    this.signupOtp,
   });
 
   final String firstName;
@@ -35,10 +46,22 @@ class AuthRegisterRequested extends AuthEvent {
   final bool agreeTerms;
   final String? phoneNumber;
   final String? countryCode;
+  final String? educationStatus;
+  final String? signupOtp;
 
   @override
   List<Object?> get props =>
-      [firstName, lastName, email, password, agreeTerms, phoneNumber, countryCode];
+      [
+        firstName,
+        lastName,
+        email,
+        password,
+        agreeTerms,
+        phoneNumber,
+        countryCode,
+        educationStatus,
+        signupOtp,
+      ];
 }
 
 class AuthLoadUserRequested extends AuthEvent {
@@ -47,4 +70,14 @@ class AuthLoadUserRequested extends AuthEvent {
 
 class AuthLogoutRequested extends AuthEvent {
   const AuthLogoutRequested();
+}
+
+/// Replace session user (e.g. after profile pull-to-refresh) without going through [AuthLoadUserRequested].
+class AuthReplaceUser extends AuthEvent {
+  const AuthReplaceUser(this.user);
+
+  final UserModel user;
+
+  @override
+  List<Object?> get props => [user];
 }

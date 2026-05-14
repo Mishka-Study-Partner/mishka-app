@@ -73,8 +73,6 @@ class MishkaAiService {
     // Simulate network delay
     await Future.delayed(const Duration(milliseconds: 1000));
 
-    final toolType = _toolType(action); // quizzes|flashcards|mind_maps
-
     switch (action) {
       case StudyAction.quiz:
         return _dummyQuiz(sessionId, complexity);
@@ -82,6 +80,8 @@ class MishkaAiService {
         return _dummyFlashcards(sessionId, complexity);
       case StudyAction.mindmap:
         return _dummyMindmap(sessionId, complexity);
+      case StudyAction.summarize:
+        return _dummySummary(sessionId, complexity);
     }
   }
 
@@ -286,6 +286,14 @@ class MishkaAiService {
     };
   }
 
+  Map<String, dynamic> _dummySummary(String sessionId, String complexity) {
+    return {
+      "tool_type": "summaries",
+      "title": "Generated Summary",
+      "summary": _buildExplanation('simple'),
+    };
+  }
+
   // ===========================
   // HELPERS
   // ===========================
@@ -381,17 +389,6 @@ The lecture demonstrates configuring INT1 for:
 This provides a complete foundation for interrupt handling
 in embedded systems.
 """;
-    }
-  }
-
-  String _toolType(StudyAction action) {
-    switch (action) {
-      case StudyAction.quiz:
-        return 'quizzes';
-      case StudyAction.flashcards:
-        return 'flashcards';
-      case StudyAction.mindmap:
-        return 'mind_maps';
     }
   }
 }

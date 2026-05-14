@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../../core/utils/app_colors.dart';
 import '../../../../core/widgets/custom_app_bar.dart';
+import '../../../../l10n/app_localizations.dart';
+import '../widgets/tool_preview_renderer.dart';
 
-/// Placeholder screen for Quiz tool
-/// Receives generated tool JSON from ChatWithMishkaScreen
 class QuizScreen extends StatelessWidget {
   final Map<String, dynamic> toolData;
 
@@ -15,41 +15,22 @@ class QuizScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
+    final data = Map<String, dynamic>.from(toolData);
+    data.putIfAbsent('tool_type', () => 'quiz');
+
     return Scaffold(
       backgroundColor: AppColors.screenBackground,
-      appBar: const MishkaAppBar(
-        title: "Quiz",
+      appBar: MishkaAppBar(
+        title: l10n.quizzes,
         showBack: true,
         showBottomBar: false,
       ),
-      body: Center(
-        child: Padding(
-          padding: EdgeInsets.all(16.w),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text(
-                "Quiz Screen",
-                style: TextStyle(
-                  fontSize: 24.sp,
-                  fontWeight: FontWeight.bold,
-                  color: AppColors.mainDark,
-                ),
-              ),
-              SizedBox(height: 16.h),
-              Text(
-                "Tool Data: ${toolData.toString()}",
-                style: TextStyle(
-                  fontSize: 14.sp,
-                  color: AppColors.lightText,
-                ),
-                textAlign: TextAlign.center,
-              ),
-            ],
-          ),
-        ),
+      body: SingleChildScrollView(
+        padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 16.h),
+        child: ToolPreviewRenderer(toolData: data),
       ),
     );
   }
 }
-

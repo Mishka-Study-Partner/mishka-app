@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:iconify_flutter/iconify_flutter.dart';
+import 'package:iconify_flutter/icons/mdi.dart';
 import 'package:mishka_app/core/utils/app_sizes.dart';
+import 'package:mishka_app/core/utils/app_colors.dart';
 import 'package:mishka_app/features/Auth/presentation/widgets/social_media_button.dart';
 
 class SocialAuthRow extends StatelessWidget {
@@ -21,20 +24,32 @@ class SocialAuthRow extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         SocialAuthButton(
-          icon: const AssetImage('assets/image/flat-color-icons_google.png'),
+          icon: Iconify(
+            Mdi.google,
+            size: AppSizes.iconMedium,
+            color: AppColors.mainDark,
+          ),
           onTap: onGoogle,
         ),
         SizedBox(width: 16.w),
 
         SocialAuthButton(
-          icon: const AssetImage('assets/image/logos_facebook.png'),
-          onTap: onApple,
+          icon: Iconify(
+            Mdi.facebook,
+            size: AppSizes.iconMedium,
+            color: AppColors.mainDark,
+          ),
+          onTap: onFacebook,
         ),
         SizedBox(width: 16.w),
 
         SocialAuthButton(
-          icon: const AssetImage('assets/image/icon-park-solid_apple.png'),
-          onTap: onFacebook,
+          icon: Iconify(
+            Mdi.apple,
+            size: AppSizes.iconMedium,
+            color: AppColors.mainDark,
+          ),
+          onTap: onApple,
         ),
       ],
     );

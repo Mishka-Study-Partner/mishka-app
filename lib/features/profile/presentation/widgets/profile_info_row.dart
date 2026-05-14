@@ -5,50 +5,75 @@ class ProfileInfoRow extends StatelessWidget {
   final IconData icon;
   final String title;
   final String value;
+  /// When set, shown on the right instead of [value].
+  final Widget? trailing;
   final VoidCallback? onTap;
 
   const ProfileInfoRow({
     super.key,
     required this.icon,
     required this.title,
-    required this.value,
+    this.value = '',
+    this.trailing,
     this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
+    final onSurface = Theme.of(context).colorScheme.onSurface;
+
+    Widget? rightChild;
+    if (trailing != null) {
+      rightChild = trailing;
+    } else if (value.isNotEmpty) {
+      rightChild = Text(
+        value,
+        style: TextStyle(
+          fontSize: 12,
+          fontWeight: FontWeight.w500,
+          fontFamily: "Pridi",
+          color: onSurface.withValues(alpha: 0.72),
+        ),
+      );
+    }
+
     Widget row = Row(
+      crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         Icon(icon, size: 14, color: AppColors.mainGold),
         const SizedBox(width: 8),
-        Text(
-          title,
-          style: const TextStyle(
-            fontSize: 14,
-            fontWeight: FontWeight.w500,
-            fontFamily: "Pridi",
+        Expanded(
+          child: Text(
+            title,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w500,
+              fontFamily: "Pridi",
+              color: onSurface,
+            ),
           ),
         ),
-        const Spacer(),
-        Text(
-          value,
-          style: const TextStyle(
-            fontSize: 12,
-            fontWeight: FontWeight.w500,
-            fontFamily: "Pridi",
-            color: AppColors.lightText,
+        if (rightChild != null)
+          Flexible(
+            flex: 0,
+            fit: FlexFit.loose,
+            child: rightChild,
           ),
-        ),
       ],
     );
-    
-    if (onTap != null) {
+
+    // Avoid stealing taps from [trailing] controls (Switch, SegmentedButton).
+    final tappableWholeRow = onTap != null && trailing == null;
+
+    if (tappableWholeRow) {
       return GestureDetector(
+        behavior: HitTestBehavior.opaque,
         onTap: onTap,
         child: row,
       );
     }
-    
     return row;
   }
 }

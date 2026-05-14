@@ -5,10 +5,14 @@ import 'package:mishka_app/l10n/app_localizations.dart';
 import '../../widgets/form_text.dart';
 
 class PasswordView extends StatelessWidget {
-  final TextEditingController phoneController = TextEditingController();
-  final TextEditingController passwordController = TextEditingController();
-  
-  PasswordView({super.key});
+  const PasswordView({
+    super.key,
+    required this.phoneController,
+    required this.passwordController,
+  });
+
+  final TextEditingController phoneController;
+  final TextEditingController passwordController;
 
   @override
   Widget build(BuildContext context) {

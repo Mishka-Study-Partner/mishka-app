@@ -20,6 +20,7 @@ class Assets {
   static const String imagesHomeTopCards = 'assets/images/home_top_cards.png';
   static const String imagesLogo = 'assets/images/logo.png';
   static const String imagesLogoNoName = 'assets/images/logo_no_name.png';
+  static const String imagesLongBreakMishka = 'assets/images/long_break_mishka.png';
   static const String imagesMishkaHappy = 'assets/images/mishka_happy.png';
   static const String imagesMishkaSad = 'assets/images/mishka_sad.png';
   static const String imagesMishkaStudyPartnerQR = 'assets/images/mishka_study_partner_QR.png';
@@ -30,7 +31,11 @@ class Assets {
   static const String imagesSavedCard1 = 'assets/images/saved_card_1.png';
   static const String imagesSavedCard2 = 'assets/images/saved_card_2.png';
   static const String imagesSavedCard3 = 'assets/images/saved_card_3.png';
+  static const String imagesShortBreakMishka = 'assets/images/short_break_mishka.png';
   static const String imagesStreakToday = 'assets/images/streak_today.png';
+  static const String imagesStudyCallMode = 'assets/images/study_call_mode.png';
+  static const String imagesStudyPopUp = 'assets/images/study_pop_up.png';
+  static const String imagesStudyTimeMishka = 'assets/images/study_time_mishka.png';
   static const String imagesStudyWithMe = 'assets/images/study_with_me.png';
   static const String imagesStudyWithMishkaHome = 'assets/images/study_with_mishka_home.png';
   static const String imagesTipBackground = 'assets/images/tip_background.png';

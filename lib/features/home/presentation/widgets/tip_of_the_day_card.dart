@@ -7,10 +7,12 @@ import 'package:mishka_app/l10n/app_localizations.dart';
 
 class TipOfTheDayCard extends StatelessWidget {
   final AppLocalizations l10n;
+  final String? tipText;
 
   const TipOfTheDayCard({
     super.key,
     required this.l10n,
+    this.tipText,
   });
 
   @override
@@ -90,7 +92,7 @@ class TipOfTheDayCard extends StatelessWidget {
               SizedBox(height: 12.h),
               // Quote text
               Text(
-                l10n.tipQuote,
+                (tipText == null || tipText!.trim().isEmpty) ? l10n.tipQuote : tipText!,
                 style: TextStyle(
                   fontFamily: "Pridi",
                   fontSize: 12.sp,

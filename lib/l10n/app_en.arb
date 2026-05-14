@@ -30,6 +30,14 @@
   "verificationCode": "Verification Code",
   "verifyByEmail": "Verify BY email address",
   "enter5DigitsCodeEmail": "Enter the 5 digits code you received at your Gmail : example123@gamil.com",
+  "enter6DigitsCodeEmail": "Enter the 6 digits code you received at your email: {email}",
+  "@enter6DigitsCodeEmail": {
+    "placeholders": {
+      "email": {
+        "type": "String"
+      }
+    }
+  },
   "verify": "Verify",
   "successfullyVerified": "successfully Verified",
   "letsStartSettingAccount": "Let's start setting your account so you can start using the app",
@@ -106,6 +114,15 @@
   "category": "Category",
   "saved": "Saved",
   "profile": "Profile",
+  "profileFieldNotSet": "—",
+  "profileLoadFailed": "Could not refresh profile.",
+  "removeProfilePhotoConfirm": "Remove your profile photo?",
+  "remove": "Remove",
+  "editProfile": "Edit profile",
+  "profileUpdateFailed": "Could not save profile.",
+  "fieldRequired": "This field is required.",
+  "invalidEmailHint": "Enter a valid email address.",
+  "retry": "Retry",
   "aiTools": "Ai tools",
   "aiToolsSubtitle": "Chat with Mishka, Quizzes, Flash Cards, Summary.",
   "toDoList": "To Do List",
@@ -129,10 +146,16 @@
   "exampleEmailContact": "example123@gmail.com",
   "language": "Language:",
   "english": "English",
+  "arabic": "Arabic",
   "theme": "Theme:",
   "lightMode": "Light mode",
+  "darkMode": "Dark mode",
+  "themeSystem": "System default",
   "notification": "Notification:",
   "enabled": "Enabled",
+  "disabled": "Disabled",
+  "chooseLanguage": "Choose language",
+  "chooseAppearance": "Choose appearance",
   "privacyPolicy": "Privacy Policy",
   "helpSupport": "Help & Support",
   "logOut": "Log Out",
@@ -228,6 +251,17 @@
   "view": "View",
   "savedQuizes": "Saved Quizes",
   "savedSummary": "Saved Summary",
+  "savedSearchHint": "Search saved items...",
+  "savedDetailPlaceholder": "Your saved content will load here when the library is connected.",
+  "savedNoSearchResults": "No saved items match your search.",
+  "savedLibraryEmpty": "Nothing saved yet. Create content from AI tools and tap Save.",
+  "savedDetailItemUnavailable": "This item is no longer available.",
+  "savedDetailNotInLibraryAnymore": "This is not in your saved library anymore. Pull to refresh the list.",
+  "savedDetailNotFound": "We could not find this item.",
+  "savedDetailMissingListId": "This item has no id. Try refreshing the list.",
+  "savedLibraryRemoveQuestion": "Remove this from your saved library?",
+  "savedLibraryRemoved": "Removed from saved library.",
+  "savedLibraryShared": "Shared to your channels.",
   "result": "Result",
   "congratulation": "Congratulation!",
   "keepItUp": "Keep it up",
@@ -236,4 +270,144 @@
   "answered80Percent": "you have answered 80% correct answers",
   "answered40Percent": "you have answered 40% correct answers",
   "keepGoing": "Keep going"
+  ,"delete": "Delete"
+  ,"undo": "Undo"
+  ,"deleteThisListQuestion": "Delete this list?"
+  ,"listDeleted": "List deleted"
+  ,"renameList": "Rename List"
+  ,"listRenamed": "List renamed"
+  ,"errorPrefix": "Error"
+  ,"pleaseFillAllRequiredFields": "Please fill all required fields"
+  ,"pleaseEnterVerificationCode": "Please enter verification code"
+  ,"pleaseEnterBothPasswordFields": "Please enter both password fields"
+  ,"passwordsDoNotMatch": "Passwords do not match"
+  ,"myTasks": "My Tasks"
+  ,"day": "Day"
+  ,"month": "Month"
+  ,"year": "Year"
+  ,"noUpcomingDeadlinesYet": "No upcoming deadlines yet."
+  ,"ok": "OK"
+  ,"privacyPolicyComingSoon": "Privacy Policy screen coming soon."
+  ,"helpSupportComingSoon": "Help & Support screen coming soon."
+  ,"taskActionsComingSoon": "Task edit, delete, and complete will be available in a future update."
+  ,"deleteTaskConfirm": "Delete this task?"
+  ,"taskDeleted": "Task deleted."
+  ,"taskMarkedComplete": "Task marked as completed."
+  ,"taskMarkedPending": "Task marked as pending."
+  ,"createListBeforeAddingTasks": "Create a list first, then add tasks inside it."
+  ,"chooseListForNewTask": "Which list should this task go in?"
+  ,"logoutConfirmationMessage": "Are you sure you want to log out?"
+  ,"couldNotReadFilePath": "Could not read file path"
+  ,"mindMap": "Mind Map"
+  ,"share": "Share"
+  ,"shareToCommunityChannels": "Share to community channels"
+  ,"noCommunityChannelsFound": "No community channels found"
+  ,"failedToLoadChannels": "Failed to load channels: {error}"
+  ,"shareFailed": "Share failed: {error}"
+  ,"sharedToChannelsCount": "Shared to {count} channel(s)"
+  ,"uploadMaterialToGenerateSummary": "Upload your material to generate summary"
+  ,"uploadMaterialToGenerateQuiz": "Upload your material to generate quiz"
+  ,"uploadMaterialToGenerateFlashcards": "Upload your material to generate flashcards"
+  ,"uploadMaterialToGenerateMindMap": "Upload your material to generate mind map"
+  ,"generationFailed": "Generation failed: {error}"
+  ,"savedToYourLibrary": "Saved to your library"
+  ,"saveFailed": "Save failed: {error}"
+  ,"fileLabel": "File: {name}"
+  ,"generating": "Generating..."
+  ,"uploadMaterial": "Upload material"
+  ,"@sharedToChannelsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  }
+  ,"@failedToLoadChannels": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  }
+  ,"@shareFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  }
+  ,"@generationFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  }
+  ,"@saveFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  }
+  ,"@fileLabel": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  }
+  ,"calendar": "Calendar"
+  ,"chooseYourStudyMode": "Choose your Study Mode"
+  ,"cameraMode": "Camera Mode"
+  ,"concentrationMode": "Concentration Mode"
+  ,"pomodoroTimers": "Pomodoro Timers"
+  ,"customTimer": "Custom Timer"
+  ,"createLinkWithFriends": "Create link with friends"
+  ,"studyWithYourFriends": "Study with your Friends"
+  ,"createNewLink": "Create new Link"
+  ,"createLinkAndPassword": "Create your Link and password"
+  ,"comingSoonFeature": "This feature is coming soon!"
+  ,"mentorLibrary": "Mentor Library"
+  ,"communityEvents": "Community Events"
+  ,"mentorshipHistory": "Mentorship History"
+  ,"joinNewCommunity": "Join a New Community"
+  ,"rejoinSavedCommunity": "Rejoin your Saved Community"
+  ,"theTask": "The Task:"
+  ,"typeYourTaskHere": "Type your task here"
+  ,"date": "Date:"
+  ,"time": "Time:"
+  ,"startTimer": "Start Timer"
+  ,"studyTime": "Study Time"
+  ,"shortBreak": "Short Break"
+  ,"longBreak": "Long Break"
+  ,"mins": "mins"
+  ,"completedCycles": "Completed cycles"
+  ,"areYouStillThere": "Are you still there?"
+  ,"howIsYourMoodWhileStudying": "How is your mood while studying?"
+  ,"yesContinue": "Yes, Continue"
+  ,"noStop": "No, Stop"
+  ,"customYourOwnTimer": "Custom Your Own Timer:"
+  ,"recentlyCustomizedTimers": "Recently customized Timers:"
+  ,"cameraOn": "Camera On"
+  ,"videoCallWithMishka": "Video call with Mishka"
+  ,"cameraIsOn": "Camera is On"
+  ,"cameraIsOff": "Camera is Off"
+  ,"timer": "Timer"
+  ,"yourStudyLink": "Your study link:"
+  ,"linkCopied": "Link copied!"
+  ,"linkCopiedAndReady": "Link copied and ready to share!"
+  ,"copyAndShare": "Copy & Share"
+  ,"password": "Password"
+  ,"enterPassword": "Enter password"
+  ,"noPreviousCustomTimers": "No previous custom timers."
+  ,"howIsYourModeWhileStudying": "How is your mode while studying?"
+  ,"makingGoodProgressToday": "Making good progress today?"
+  ,"yes": "Yes"
+  ,"no": "No"
+  ,"takeBreak": "Take Break"
+  ,"endCall": "End Call"
+  ,"backToCall": "Back to Call"
+  ,"breakTime": "Break Time"
+  ,"cameraPermissionRequired": "Camera permission is required for video call mode."
 }
