@@ -82,22 +82,28 @@ class AppLocalizationsEn extends AppLocalizations {
   String get verificationCode => 'Verification Code';
 
   @override
-  String get verifyByEmail => 'Verify BY email address';
+  String get verifyByEmail => 'Verify by Email Address';
 
   @override
-  String get enter5DigitsCodeEmail =>
-      'Enter the 5 digits code you received at your Gmail : example123@gamil.com';
+  String enter5DigitsCodeEmail(String email) {
+    return 'Enter the 5 digits code you received at your gmail: $email';
+  }
 
   @override
   String enter6DigitsCodeEmail(String email) {
-    return 'Enter the 6 digits code you received at your email: $email';
+    return 'Enter the 6 digits code you received at your gmail: $email';
+  }
+
+  @override
+  String enter6DigitsCodePhone(String phone) {
+    return 'Enter the 6 digits code you received (SMS) at $phone';
   }
 
   @override
   String get verify => 'Verify';
 
   @override
-  String get successfullyVerified => 'successfully Verified';
+  String get successfullyVerified => 'Successfully Verified';
 
   @override
   String get letsStartSettingAccount =>
@@ -131,7 +137,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get setPassword => 'Set Password';
 
   @override
-  String get passwordSuccessfullySet => 'Password is successfully set';
+  String get passwordSuccessfullySet => 'Password Is Successfully Set';
 
   @override
   String get writePhoneForCode =>
@@ -141,8 +147,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get verifyByPhoneNumber => 'Verify by phone number';
 
   @override
-  String get enter5DigitsCodePhone =>
-      'Enter the 5 digits code you received (SMS) at +20 1010101010';
+  String enter5DigitsCodePhone(String phone) {
+    return 'Enter the 5 digits code you received (SMS) at $phone';
+  }
 
   @override
   String get welcomeBackSara => 'Welcome, Back Ziad!';
@@ -187,6 +194,31 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get upcoming => 'Upcoming';
+
+  @override
+  String streakStats(int longest, int freezes) {
+    return 'Best: $longest · $freezes freezes left';
+  }
+
+  @override
+  String get streakMissed => 'Missed (tap to freeze)';
+
+  @override
+  String get streakFreezeTitle => 'Use streak freeze?';
+
+  @override
+  String streakFreezeMessage(String date) {
+    return 'Protect your streak for $date?';
+  }
+
+  @override
+  String get streakFreezeConfirm => 'Use freeze';
+
+  @override
+  String get streakFreezeSuccess => 'Streak freeze applied';
+
+  @override
+  String get streakFreezeFailed => 'Could not apply streak freeze';
 
   @override
   String get tipOfTheDay => 'Tip Of The Day';
@@ -242,6 +274,140 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get chatWithMishka => 'Chat with Mishka';
+
+  @override
+  String get yourHistory => 'Your History';
+
+  @override
+  String get searchYourHistory => 'Search your history...';
+
+  @override
+  String get historyChats => 'chats:';
+
+  @override
+  String get historyQuizzes => 'Quizzes:';
+
+  @override
+  String get historyFlashCards => 'FlashCards:';
+
+  @override
+  String get historySummarization => 'Summarization :';
+
+  @override
+  String get historyMindMaps => 'Mind Maps:';
+
+  @override
+  String get historyEmpty => 'No history found';
+
+  @override
+  String get historyLoadFailed => 'Could not load this chat session';
+
+  @override
+  String get chatGreeting =>
+      'Hello, please upload your material to start our journey';
+
+  @override
+  String get chatAnalyzingPdf => 'Analyzing PDF...';
+
+  @override
+  String get chatWhichTool => 'Which tool would you like to use?';
+
+  @override
+  String get chatWaitForExplanation =>
+      'Please wait for the explanation to complete first.';
+
+  @override
+  String get chatUploadPdfHint => 'Upload PDF to start';
+
+  @override
+  String get chatChooseDifficultyHint => 'Choose difficulty above';
+
+  @override
+  String get chatDifficultySimple => 'Simple';
+
+  @override
+  String get chatDifficultyIntermediate => 'Intermediate';
+
+  @override
+  String get chatDifficultyAdvanced => 'Advanced';
+
+  @override
+  String get chatToolQuiz => 'Quiz';
+
+  @override
+  String get chatToolFlashcards => 'Flashcards';
+
+  @override
+  String get chatToolMindMap => 'Mind Map';
+
+  @override
+  String get chatToolSummarize => 'Summarize';
+
+  @override
+  String get chatRegenerate => 'Regenerate';
+
+  @override
+  String get chatAnotherTool => 'Another Tool';
+
+  @override
+  String chatToolSelected(String tool) {
+    return 'Great! You selected: $tool. Generating it for you...';
+  }
+
+  @override
+  String chatRegenerating(String tool) {
+    return 'Regenerating $tool...';
+  }
+
+  @override
+  String chatRegenerationFailed(String error) {
+    return 'Regeneration failed.\n$error';
+  }
+
+  @override
+  String chatAnalyzePdfFailed(String error) {
+    return 'Failed to analyze PDF.\n$error';
+  }
+
+  @override
+  String chatToolGenerationFailed(String error) {
+    return 'Tool generation failed.\n$error';
+  }
+
+  @override
+  String chatMessageFailed(String error) {
+    return 'Chat failed.\n$error';
+  }
+
+  @override
+  String chatSessionStartFailed(String error) {
+    return 'Could not start chat session.\n$error';
+  }
+
+  @override
+  String get chatNewChatTitle => 'Start a new chat?';
+
+  @override
+  String get chatNewChatMessage =>
+      'Your current conversation stays in history. You can reopen it from the menu.';
+
+  @override
+  String get chatNewChatConfirm => 'New chat';
+
+  @override
+  String get chatNewChatAction => 'New chat';
+
+  @override
+  String get renameSavedItem => 'Rename item';
+
+  @override
+  String get savedItemRenamed => 'Item renamed';
+
+  @override
+  String get savedRenameUnavailable => 'This item cannot be renamed';
+
+  @override
+  String get savedItemTitleHint => 'Title';
 
   @override
   String get summarizeWithMishka => 'Summarize with Mishka';
@@ -333,6 +499,16 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get invalidEmailHint => 'Enter a valid email address.';
+
+  @override
+  String get invalidPhoneHint => 'Enter a valid phone number.';
+
+  @override
+  String get nameTooLong => 'Name must be 50 characters or fewer.';
+
+  @override
+  String get accountAlreadyExists =>
+      'An account with this email or phone number already exists.';
 
   @override
   String get retry => 'Retry';
@@ -439,6 +615,61 @@ class AppLocalizationsEn extends AppLocalizations {
   String get chooseAppearance => 'Choose appearance';
 
   @override
+  String get settings => 'Settings';
+
+  @override
+  String get settingsSubtitle => 'Language, theme, notifications';
+
+  @override
+  String get settingsDescription =>
+      'Choose how Mishka looks and how we reach you. Changes apply on this device and sync to your account when you are signed in.';
+
+  @override
+  String get settingsPreferencesSection => 'Preferences';
+
+  @override
+  String get settingsSyncFailed =>
+      'Could not sync settings to your account. Your choice is saved on this device.';
+
+  @override
+  String get privacyPolicyBody =>
+      'Mishka respects your privacy. We collect only the information needed to run your account, personalize study features, and improve the app.\n\nWe use your email and profile details to authenticate you and to communicate about your account. Study activity, tasks, and AI interactions are stored to provide history, streaks, and tutoring features you use.\n\nWe do not sell your personal data. We may share limited data with service providers that host our infrastructure and deliver notifications, under strict confidentiality.\n\nYou can update your profile, education details, and preferences in the app. Contact support if you need access, correction, or deletion of your data.\n\nThis summary is provided for convenience. A full legal policy may be published separately on our website.';
+
+  @override
+  String get helpSupportIntro =>
+      'Need help with Mishka? Reach us using the contacts below, or read the quick tips in this screen when contacts are not configured yet.';
+
+  @override
+  String get helpSupportContactsTitle => 'Contact us';
+
+  @override
+  String get helpSupportTapToOpen =>
+      'Tap a row to open Gmail, WhatsApp, or the link in its app.';
+
+  @override
+  String get linkOpenFailed => 'Could not open this link on your device.';
+
+  @override
+  String get linkOpenFailedCopied =>
+      'Could not open the app — copied to clipboard instead.';
+
+  @override
+  String get supportFacebook => 'Facebook';
+
+  @override
+  String get supportInstagram => 'Instagram';
+
+  @override
+  String get supportWhatsApp => 'WhatsApp';
+
+  @override
+  String get copiedToClipboard => 'Copied to clipboard';
+
+  @override
+  String get helpSupportBody =>
+      'Need help with Mishka? Here is how to get unstuck.\n\nAccount & sign-in: Use Forgot password on the login screen if you cannot sign in. Make sure your email or phone matches what you registered with.\n\nStudy With Mishka: Start a session from Home, pick a timer, and stay on the session screen until you finish or end early. If a session fails to start, check your connection and try again.\n\nTasks & lists: Create lists from the To-Do area, then add tasks with deadlines. Pull to refresh on Home to see upcoming tasks.\n\nProfile & education: Open Profile to edit your name, contact info, gender, and education level. Use Settings for language, theme, and notifications.\n\nStill stuck? Email our team at support@mishka.app with a short description and screenshots if possible. We typically reply within a few business days.';
+
+  @override
   String get privacyPolicy => 'Privacy Policy';
 
   @override
@@ -461,31 +692,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get summarize => 'Summarize';
-
-  @override
-  String get yourHistory => 'your History';
-
-  @override
-  String get searchYourHistory => 'Search your history...';
-
-  @override
-  String get chats => 'chats:';
-
-  @override
-  String get tellMeMoreAboutMishka => 'Tell me more about MISHKA app?';
-
-  @override
-  String get quizes => 'Quizes:';
-
-  @override
-  String get makeMeFlashcards =>
-      'make me flashcards and quizzes and summarize the article for these uploaded files';
-
-  @override
-  String get flashCardsColon => 'FlashCards:';
-
-  @override
-  String get summarization => 'Summarization :';
 
   @override
   String get mishka => 'Mishka';
@@ -864,6 +1070,31 @@ class AppLocalizationsEn extends AppLocalizations {
   String get shareToCommunityChannels => 'Share to community channels';
 
   @override
+  String get shareCommunitiesYouJoined => 'Communities You Joined';
+
+  @override
+  String get shareToSelectedGroups => 'Share to selected groups';
+
+  @override
+  String shareMembersGroupsCount(int members, int groups) {
+    return '$members members $groups groups';
+  }
+
+  @override
+  String shareGroupMembersCount(int count) {
+    return '$count members';
+  }
+
+  @override
+  String get shareSuccessTitle => 'Successfully Shared to the group';
+
+  @override
+  String get shareSuccessContinue => 'Continue';
+
+  @override
+  String get shareOpenGroup => 'Open group';
+
+  @override
   String get noCommunityChannelsFound => 'No community channels found';
 
   @override
@@ -1071,4 +1302,393 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get cameraPermissionRequired =>
       'Camera permission is required for video call mode.';
+
+  @override
+  String get onboardingIntroLine1 => 'I am Mishka, custodian of';
+
+  @override
+  String get onboardingIntroLine2 => 'knowledge our quest for glory';
+
+  @override
+  String get onboardingIntroLine3 => 'begins now!';
+
+  @override
+  String get welcomeToMishka => 'Welcome to Mishka!';
+
+  @override
+  String get welcomeToMishkaSubtitle =>
+      'Let the guardian of knowledge guide your path to discovery.';
+
+  @override
+  String get educationLevel => 'Education Level';
+
+  @override
+  String get educationLevelComingSoon =>
+      'Education level selection will be available in the next update.';
+
+  @override
+  String get educationStatusQuestion =>
+      'Which Of The Following Best Describes Your Current Education Status?';
+
+  @override
+  String get school => 'School';
+
+  @override
+  String get university => 'University';
+
+  @override
+  String get otherColon => 'Other:';
+
+  @override
+  String get schoolStageQuestion => 'Which School Stage Are You Currently In?';
+
+  @override
+  String get middleSchoolColon => 'Middle School:';
+
+  @override
+  String get highSchoolColon => 'High School:';
+
+  @override
+  String get firstPreparatory => '1st Preparatory';
+
+  @override
+  String get secondPreparatory => '2nd Preparatory';
+
+  @override
+  String get thirdPreparatory => '3rd Preparatory';
+
+  @override
+  String get firstSecondary => '1st Secondary';
+
+  @override
+  String get secondSecondary => '2nd Secondary';
+
+  @override
+  String get thirdSecondary => '3rd Secondary';
+
+  @override
+  String get universityYearQuestion =>
+      'Which Academic Year Are You Currently In?';
+
+  @override
+  String get universityColon => 'University:';
+
+  @override
+  String get firstYear => '1st Year';
+
+  @override
+  String get secondYear => '2nd Year';
+
+  @override
+  String get thirdYear => '3rd Year';
+
+  @override
+  String get fourthYear => '4th Year';
+
+  @override
+  String get fifthYear => '5th Year';
+
+  @override
+  String get pleaseSpecifyEducationStatus =>
+      'Please specify your education level:';
+
+  @override
+  String get educationOtherHint => 'Enter your education level';
+
+  @override
+  String get editEducation => 'Edit education';
+
+  @override
+  String get yourReport => 'Your Report';
+
+  @override
+  String get reportPeriodDaily => 'Daily';
+
+  @override
+  String get reportPeriodWeekly => 'Weekly';
+
+  @override
+  String get reportPeriodMonthly => 'Monthly';
+
+  @override
+  String get reportPeriodYearly => 'Yearly';
+
+  @override
+  String get reportPeriodDailySuffix => '/day';
+
+  @override
+  String get reportPeriodWeeklySuffix => '/week';
+
+  @override
+  String get reportPeriodMonthlySuffix => '/month';
+
+  @override
+  String get reportPeriodYearlySuffix => '/year';
+
+  @override
+  String get reportCreatePdfEmail => 'Create PDF and share';
+
+  @override
+  String get reportEmailMyReport => 'Email my report';
+
+  @override
+  String reportPdfEmailSent(String email) {
+    return 'Report sent to $email';
+  }
+
+  @override
+  String get reportPdfOpenFailed => 'Could not open the report PDF link.';
+
+  @override
+  String get reportPdfSharedLocally =>
+      'Server export unavailable — shared a local PDF copy instead.';
+
+  @override
+  String get reportUsingLegacyData =>
+      'Using classic report APIs until the new bundle is deployed.';
+
+  @override
+  String get reportStudyWithMishka => 'Study with Mishka';
+
+  @override
+  String get reportDuringConcentrationMode =>
+      'Total study time (Concentration + Camera modes):';
+
+  @override
+  String get reportAiTools => 'Using Mishka\'s AI tools';
+
+  @override
+  String get reportDailyStreak => 'Daily Streak';
+
+  @override
+  String get reportDailyStreakChartHint =>
+      'Each bar is one day: 100% = streak kept, 0% = missed.';
+
+  @override
+  String get reportStreakCurrent => 'Current';
+
+  @override
+  String get reportStreakLongest => 'Longest';
+
+  @override
+  String get reportStreakFreezes => 'Freezes left';
+
+  @override
+  String get reportTasksDue => 'Tasks completed';
+
+  @override
+  String get reportTasksDueHint =>
+      'Each bar is one day — how many to-do tasks you marked done.';
+
+  @override
+  String get reportNoTasksInPeriod => 'No tasks completed in this period yet.';
+
+  @override
+  String get reportTotalQuizzes => 'Total Quizzes';
+
+  @override
+  String get reportTotalFlashcards => 'Total Flashcards';
+
+  @override
+  String get reportTotalSummaries => 'Total Summaries';
+
+  @override
+  String get reportLoadFailed => 'Could not load your report. Pull to refresh.';
+
+  @override
+  String reportPdfFailed(String error) {
+    return 'Could not create report PDF: $error';
+  }
+
+  @override
+  String get settingsReportAutoEmail => 'Automatic report email';
+
+  @override
+  String get settingsReportAutoEmailHint =>
+      'Receive your weekly or monthly report by email.';
+
+  @override
+  String get reportEmailWeekly => 'Weekly';
+
+  @override
+  String get reportEmailMonthly => 'Monthly';
+
+  @override
+  String get settingsReportRecipientRow => 'Send reports to';
+
+  @override
+  String get settingsReportRecipientNotSet => 'Add email';
+
+  @override
+  String get settingsReportRecipientTitle => 'Report email address';
+
+  @override
+  String get settingsReportRecipientBody =>
+      'Enter the email address that should receive your weekly or monthly report, and one-off exports from Your Report.';
+
+  @override
+  String get settingsReportRecipientLabel => 'Recipient email';
+
+  @override
+  String get settingsReportRecipientSaved => 'Report email address saved.';
+
+  @override
+  String get settingsReportRecipientSavedLocal =>
+      'Saved on this device. Server sync will apply when the backend adds report email recipient support.';
+
+  @override
+  String settingsReportRecipientUseAccount(String email) {
+    return 'Use my account email ($email)';
+  }
+
+  @override
+  String get communityCreateTitle => 'Create New Community';
+
+  @override
+  String get communityCreateVisibilityLabel =>
+      'Select your community\'s visibility:';
+
+  @override
+  String get communityVisibilityPrivate => 'Private';
+
+  @override
+  String get communityVisibilityPublic => 'Public';
+
+  @override
+  String get communityCreateNameLabel => 'Community name:';
+
+  @override
+  String get communityCreateNameHint => 'Community name';
+
+  @override
+  String get communityCreateDescLabel => 'Description (optional):';
+
+  @override
+  String get communityCreateDescHint => 'Community description';
+
+  @override
+  String get communityCreateDiscoverSection => 'Discovery (public communities)';
+
+  @override
+  String get communityCreateDiscoverSubtitle =>
+      'Help others find your community in Discover and recommendations.';
+
+  @override
+  String get communityCreateNameRequired => 'Please enter a community name';
+
+  @override
+  String get communityCreateSuccess =>
+      'Your community was created successfully!';
+
+  @override
+  String get communityCreateButton => 'Create Community';
+
+  @override
+  String communityCreateEducationHintUniversity(String year) {
+    return 'Using your profile: University, year $year';
+  }
+
+  @override
+  String communityCreateEducationHintSchool(String grade) {
+    return 'Using your profile: School, grade $grade';
+  }
+
+  @override
+  String communityCreateEducationHintProfile(String status) {
+    return 'Using your profile: $status';
+  }
+
+  @override
+  String get communityHubSearchHint => 'Search...';
+
+  @override
+  String get communityHubCreateNew => 'Create New Community';
+
+  @override
+  String get communityHubJoinPrivate => 'Join Private Community';
+
+  @override
+  String get communityHubSavedSection => 'Saved Communities:';
+
+  @override
+  String get communityHubSavedEmpty =>
+      'No saved communities yet. Open a community and tap ⋮ → Save Community.';
+
+  @override
+  String get communityHubPrivateSection => 'Private Communities you\'re in:';
+
+  @override
+  String get communityHubPublicSection => 'Public Communities you\'re in:';
+
+  @override
+  String get communityHubRecommendedSection => 'Recommended for you';
+
+  @override
+  String get communityHubSeeAll => 'See all';
+
+  @override
+  String get communityHubDiscoverButton => 'Discover Communities';
+
+  @override
+  String get communityHubEmpty =>
+      'No communities yet. Create one or join with a code.';
+
+  @override
+  String get communityHubSavedEmptySnack =>
+      'No saved communities yet. Open a community and use ⋮ → Save Community.';
+
+  @override
+  String get communitySave => 'Save Community';
+
+  @override
+  String get communityUnsave => 'Unsave Community';
+
+  @override
+  String get communitySavedSuccess => 'Community saved successfully!';
+
+  @override
+  String get communityUnsavedSuccess => 'Community removed from saved.';
+
+  @override
+  String get communityDiscoverTitle => 'Discover Communities';
+
+  @override
+  String get communityDiscoverSearchHint => 'Search communities…';
+
+  @override
+  String get communityDiscoverForYou => 'For you';
+
+  @override
+  String get communityDiscoverPopular => 'Popular';
+
+  @override
+  String get communityDiscoverNew => 'New';
+
+  @override
+  String get communityDiscoverSubjects => 'Subjects';
+
+  @override
+  String get communityDiscoverAll => 'All';
+
+  @override
+  String get communityDiscoverProfileHint =>
+      'Complete your education in Profile to get better recommendations.';
+
+  @override
+  String get communityDiscoverEmpty => 'No communities to show yet.';
+
+  @override
+  String get communityDiscoverJoin => 'Join';
+
+  @override
+  String get communityMemberPromoteAdmin => 'Make Admin';
+
+  @override
+  String get communityMemberDemoteMember => 'Make Member';
+
+  @override
+  String get communityMemberRoleUpdated => 'Member role updated.';
+
+  @override
+  String get communityChatSenderMe => 'Me';
 }

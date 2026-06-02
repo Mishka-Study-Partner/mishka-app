@@ -9,20 +9,30 @@ import 'package:mishka_app/core/utils/app_colors.dart';
 import 'package:mishka_app/core/utils/app_sizes.dart';
 import 'package:mishka_app/core/widgets/custom_app_bar.dart';
 import 'package:mishka_app/features/Auth/view/bloc/auth_bloc.dart';
+import 'package:mishka_app/features/chat_with_mishka/presentation/screens/direct_tool_generator_screen.dart';
+import 'package:mishka_app/features/ctegory/data/models/ai_tool_api_model.dart';
+import 'package:mishka_app/features/ctegory/data/repositories/category_repository.dart';
+import 'package:mishka_app/features/ctegory/utils/ai_tool_ui_helper.dart';
+import 'package:mishka_app/features/home/data/models/daily_streak_model.dart';
 import 'package:mishka_app/features/home/data/repositories/home_repository.dart';
 import 'package:mishka_app/features/todo_lists/data/models/task_api_model.dart';
 import 'package:mishka_app/generated/assets.dart';
 import 'package:mishka_app/main.dart';
 
 import '../../../../l10n/app_localizations.dart';
+import '../widgets/daily_streak_week_row.dart';
 import '../widgets/tip_of_the_day_card.dart';
 import '../widgets/ai_tool_card.dart';
 import '../widgets/community_card.dart';
 import '../widgets/support_badge_card.dart';
+import 'package:mishka_app/features/our_community/presentation/screens/community_discover_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   final void Function(MainTab)? onTabSwitch;
-  final void Function(CategoryScreenType)? onCategoryNavigate;
+  final void Function(
+    CategoryScreenType screen, {
+    bool focusSavedCommunities,
+  })? onCategoryNavigate;
 
   const HomeScreen({
     super.key,
@@ -36,10 +46,13 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   final HomeRepository _homeRepository = HomeRepository();
+  final CategoryRepository _categoryRepository = CategoryRepository();
   int _streakDays = 0;
-  List<bool> _weekCompleted = const [];
+  int _freezesRemaining = 0;
+  List<DailyStreakDayModel> _streakWeek = const [];
   String? _tipText;
   List<TaskApiModel> _upcomingTasks = const [];
+  List<AiToolApiModel> _aiTools = const [];
   bool _isLoading = true;
 
   @override
@@ -55,6 +68,7 @@ class _HomeScreenState extends State<HomeScreen> {
         _homeRepository.getDailyStreak(),
         _homeRepository.getTips(),
         _homeRepository.getUpcomingTasks(),
+        _categoryRepository.getAiTools(),
       ]);
       if (!mounted) return;
       final tasks = (results[2] as List<TaskApiModel>).toList()
@@ -63,14 +77,17 @@ class _HomeScreenState extends State<HomeScreen> {
           final bd = b.deadline ?? DateTime(9999);
           return ad.compareTo(bd);
         });
-      final streakModel = results[0] as dynamic;
+      final streakModel = results[0] as DailyStreakModel;
+      final apiTools = results[3] as List<AiToolApiModel>;
       setState(() {
-        _streakDays = streakModel.days as int;
-        _weekCompleted = (streakModel.weekCompleted as List<bool>?) ?? const [];
+        _streakDays = streakModel.currentStreak;
+        _freezesRemaining = streakModel.freezesRemaining;
+        _streakWeek = streakModel.week;
         _tipText = (results[1] as dynamic).isNotEmpty
             ? (results[1] as dynamic).first.text as String
             : null;
         _upcomingTasks = tasks.take(2).toList();
+        _aiTools = apiTools;
       });
     } catch (_) {
       // Keep UI usable with defaults when backend data fails.
@@ -197,18 +214,46 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  /// Returns a 7-element list (Mon=0 … Sun=6) indicating completed days.
-  /// Uses API data when available, otherwise infers from streak count + today.
-  List<bool> _resolveWeekDays() {
-    if (_weekCompleted.length == 7) return _weekCompleted;
+  Future<void> _freezeMissedDay(DailyStreakDayModel day) async {
+    if (!day.isMissed || day.date.isEmpty || _freezesRemaining <= 0) return;
 
-    // Infer: assume streak is consecutive ending yesterday (or today).
-    final todayIndex = DateTime.now().weekday - 1; // 0=Mon … 6=Sun
-    final completedCount = _streakDays.clamp(0, todayIndex);
-    return List.generate(7, (i) {
-      if (i < todayIndex) return i >= (todayIndex - completedCount);
-      return false;
-    });
+    final l10n = AppLocalizations.of(context)!;
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: Text(l10n.streakFreezeTitle),
+        content: Text(l10n.streakFreezeMessage(day.date)),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext, false),
+            child: Text(l10n.cancel),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext, true),
+            child: Text(l10n.streakFreezeConfirm),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true || !mounted) return;
+
+    try {
+      final updated = await _homeRepository.freezeStreakDay(date: day.date);
+      if (!mounted) return;
+      setState(() {
+        _streakDays = updated.currentStreak;
+        _freezesRemaining = updated.freezesRemaining;
+        _streakWeek = updated.week;
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(l10n.streakFreezeSuccess)),
+      );
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(l10n.streakFreezeFailed)),
+      );
+    }
   }
 
   Widget _buildStreaksSection(
@@ -216,12 +261,6 @@ class _HomeScreenState extends State<HomeScreen> {
     AppLocalizations l10n,
     int streakDays,
   ) {
-    final dayLabels = [
-      l10n.mon, l10n.tue, l10n.wed, l10n.thu, l10n.fri, l10n.sat, l10n.sun,
-    ];
-    final weekDays = _resolveWeekDays();
-    final todayIndex = DateTime.now().weekday - 1;
-
     return Padding(
       padding: EdgeInsets.all(AppSizes.paddingMedium),
       child: Container(
@@ -246,128 +285,41 @@ class _HomeScreenState extends State<HomeScreen> {
                     color: AppColors.mainDark,
                   ),
                 ),
-                Row(
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
-                    Iconify(
-                      Mdi.fire,
-                      size: 18.w,
-                      color: AppColors.mainGold,
-                    ),
-                    SizedBox(width: 4.w),
-                    Text(
-                      l10n.days(streakDays),
-                      style: TextStyle(
-                        fontFamily: "Pridi",
-                        fontSize: AppSizes.fontSizeLarge,
-                        fontWeight: FontWeight.w600,
-                        color: AppColors.mainGold,
-                      ),
+                    Row(
+                      children: [
+                        Iconify(
+                          Mdi.fire,
+                          size: 18.w,
+                          color: AppColors.mainGold,
+                        ),
+                        SizedBox(width: 4.w),
+                        Text(
+                          l10n.days(streakDays),
+                          style: TextStyle(
+                            fontFamily: "Pridi",
+                            fontSize: AppSizes.fontSizeLarge,
+                            fontWeight: FontWeight.w600,
+                            color: AppColors.mainGold,
+                          ),
+                        ),
+                      ],
                     ),
                   ],
                 ),
               ],
             ),
             SizedBox(height: 16.h),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: List.generate(7, (i) {
-                final isToday = i == todayIndex;
-                final completed = weekDays[i];
-                return _buildDayItem(context, dayLabels[i], completed, isToday);
-              }),
-            ),
-            SizedBox(height: 16.h),
-            Divider(color: AppColors.stroke, height: 1.h),
-            SizedBox(height: 16.h),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                _buildLegendItem(AppColors.mainGold, l10n.completed),
-                SizedBox(width: 16.w),
-                _buildLegendItem(AppColors.white, l10n.today),
-                SizedBox(width: 16.w),
-                _buildLegendItem(AppColors.lightFrameBackground, l10n.upcoming),
-              ],
+            DailyStreakWeekRow(
+              week: _streakWeek,
+              freezesRemaining: _freezesRemaining,
+              onFreezeTap: _freezeMissedDay,
             ),
           ],
         ),
       ),
-    );
-  }
-
-  Widget _buildDayItem(BuildContext context, String day, bool completed, bool isToday) {
-    Color bgColor;
-    Widget? icon;
-    
-    if (completed) {
-      bgColor = AppColors.mainGold;
-      icon = Iconify(
-        Mdi.check,
-        size: 20.w,
-        color: AppColors.white,
-      );
-    } else if (isToday) {
-      bgColor = AppColors.white;
-      icon = Image.asset(
-        Assets.imagesStreakToday,
-        width: 22.w,
-        height: 30.w,
-        fit: BoxFit.contain,
-      );
-    } else {
-      bgColor = AppColors.lightFrameBackground;
-      icon = null;
-    }
-    
-    return Column(
-      children: [
-        Container(
-          width: 40.w,
-          height: 40.w,
-          decoration: BoxDecoration(
-            color: bgColor,
-            borderRadius: BorderRadius.circular(8.r),
-            border: isToday ? Border.all(color: AppColors.mainGold, width: 2) : null,
-          ),
-          child: Center(
-            child: icon ?? Text(
-              day,
-              style: TextStyle(
-                fontFamily: "Pridi",
-                fontSize: 12.sp,
-                fontWeight: FontWeight.w600,
-                color: AppColors.lightText,
-              ),
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildLegendItem(Color color, String text) {
-    return Row(
-      children: [
-        Container(
-          width: 12.w,
-          height: 12.w,
-          decoration: BoxDecoration(
-            color: color,
-            shape: BoxShape.circle,
-            border: color == AppColors.white ? Border.all(color: AppColors.stroke) : null,
-          ),
-        ),
-        SizedBox(width: 4.w),
-        Text(
-          text,
-          style: TextStyle(
-            fontFamily: "Pridi",
-            fontSize: 10.sp,
-            color: AppColors.lightText,
-          ),
-
-        ),
-      ],
     );
   }
 
@@ -607,7 +559,32 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
+  void _openAiTool(BuildContext context, AiToolApiModel tool) {
+    final kind = AiToolUiHelper.directKindForTitle(tool.title);
+    if (kind != null) {
+      Navigator.of(context).push(
+        MaterialPageRoute(
+          builder: (_) => DirectToolGeneratorScreen(
+            kind: kind,
+            title: tool.title,
+          ),
+        ),
+      );
+      return;
+    }
+    widget.onCategoryNavigate?.call(CategoryScreenType.chatWithMishka);
+  }
+
   Widget _buildAiToolsSection(BuildContext context, AppLocalizations l10n) {
+    final tools = _aiTools.isNotEmpty
+        ? _aiTools.take(4).toList()
+        : AiToolUiHelper.fallbackTools(
+            chatTitle: l10n.chatWithMishka,
+            summarizeTitle: l10n.summarizeWithMishka,
+            flashcardsTitle: l10n.flashCards,
+            quizzesTitle: l10n.quizzes,
+          );
+
     return Padding(
       padding:  EdgeInsets.only(left: AppSizes.paddingMedium,right: AppSizes.paddingMedium),
       child: Column(
@@ -651,39 +628,14 @@ class _HomeScreenState extends State<HomeScreen> {
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
           children: [
-          AiToolCard(
-          title: l10n.chatWithMishka,
-          imagePath: Assets.imagesHomeChatCard,
-          onTap: () {
-            widget.onCategoryNavigate?.call(CategoryScreenType.chatWithMishka);
-          },
-          cornerPosition: CardCornerPosition.topLeft,
-          ),
-          AiToolCard(
-          title: l10n.summarizeWithMishka,
-          imagePath: Assets.imagesHomeSumaryQuizzesCard,
-      onTap: () {
-        widget.onCategoryNavigate?.call(CategoryScreenType.chatWithMishka);
-      },
-      cornerPosition: CardCornerPosition.topRight,
-      ),
-      AiToolCard(
-      title: l10n.flashCards,
-      imagePath: Assets.imagesHomeFlashcardsCard,
-      onTap: () {
-        widget.onCategoryNavigate?.call(CategoryScreenType.chatWithMishka);
-      },
-      cornerPosition: CardCornerPosition.bottomLeft,
-      ),
-      AiToolCard(
-      title: l10n.quizzes,
-      imagePath: Assets.imagesHomeSumaryQuizzesCard,
-      onTap: () {
-        widget.onCategoryNavigate?.call(CategoryScreenType.chatWithMishka);
-      },
-      cornerPosition: CardCornerPosition.bottomRight,
-      ),
-      ],
+            for (var i = 0; i < tools.length; i++)
+              AiToolCard(
+                title: tools[i].title,
+                imagePath: AiToolUiHelper.imageForTitle(tools[i].title),
+                onTap: () => _openAiTool(context, tools[i]),
+                cornerPosition: AiToolUiHelper.cornerForIndex(i),
+              ),
+          ],
       )
 
       ],
@@ -806,8 +758,10 @@ class _HomeScreenState extends State<HomeScreen> {
                   l10n: l10n,
                   isRowLayout: false,
                   onStart: () {
-                    // Navigate to Our Community screen
-                    widget.onCategoryNavigate?.call(CategoryScreenType.ourCommunity);
+                    widget.onCategoryNavigate?.call(
+                      CategoryScreenType.ourCommunity,
+                      focusSavedCommunities: true,
+                    );
                   },
                 ),
               ),
@@ -821,8 +775,12 @@ class _HomeScreenState extends State<HomeScreen> {
             l10n: l10n,
             isRowLayout: true,
             onStart: () {
-              // Navigate to Our Community screen
-              widget.onCategoryNavigate?.call(CategoryScreenType.ourCommunity);
+              Navigator.push(
+                context,
+                MaterialPageRoute<void>(
+                  builder: (_) => const CommunityDiscoverScreen(),
+                ),
+              );
             },
           ),
         ],

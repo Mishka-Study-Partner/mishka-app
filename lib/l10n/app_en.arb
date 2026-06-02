@@ -28,9 +28,16 @@
   "writeEmailForCode": "write your email to receive your confirmation code to create your new password",
   "getCode": "Get Code",
   "verificationCode": "Verification Code",
-  "verifyByEmail": "Verify BY email address",
-  "enter5DigitsCodeEmail": "Enter the 5 digits code you received at your Gmail : example123@gamil.com",
-  "enter6DigitsCodeEmail": "Enter the 6 digits code you received at your email: {email}",
+  "verifyByEmail": "Verify by Email Address",
+  "enter5DigitsCodeEmail": "Enter the 5 digits code you received at your gmail: {email}",
+  "@enter5DigitsCodeEmail": {
+    "placeholders": {
+      "email": {
+        "type": "String"
+      }
+    }
+  },
+  "enter6DigitsCodeEmail": "Enter the 6 digits code you received at your gmail: {email}",
   "@enter6DigitsCodeEmail": {
     "placeholders": {
       "email": {
@@ -38,8 +45,16 @@
       }
     }
   },
+  "enter6DigitsCodePhone": "Enter the 6 digits code you received (SMS) at {phone}",
+  "@enter6DigitsCodePhone": {
+    "placeholders": {
+      "phone": {
+        "type": "String"
+      }
+    }
+  },
   "verify": "Verify",
-  "successfullyVerified": "successfully Verified",
+  "successfullyVerified": "Successfully Verified",
   "letsStartSettingAccount": "Let's start setting your account so you can start using the app",
   "enterNewPassword": "Enter your new password",
   "newPassword": "New Password",
@@ -50,10 +65,17 @@
   "passwordRequirement3": "1 or more numbers",
   "passwordRequirement4": "1 or more special character",
   "setPassword": "Set Password",
-  "passwordSuccessfullySet": "Password is successfully set",
+  "passwordSuccessfullySet": "Password Is Successfully Set",
   "writePhoneForCode": "write your PHONE NUMBER to receive your confirmation code to create your new password",
   "verifyByPhoneNumber": "Verify by phone number",
-  "enter5DigitsCodePhone": "Enter the 5 digits code you received (SMS) at +20 1010101010",
+  "enter5DigitsCodePhone": "Enter the 5 digits code you received (SMS) at {phone}",
+  "@enter5DigitsCodePhone": {
+    "placeholders": {
+      "phone": {
+        "type": "String"
+      }
+    }
+  },
   "welcomeBackSara": "Welcome, Back Ziad!",
   "sundayJan26": "Sunday, Jan 26, 2026",
   "dailyStreaks": "Daily Streaks:",
@@ -75,6 +97,24 @@
   "completed": "completed",
   "today": "Today",
   "upcoming": "Upcoming",
+  "streakStats": "Best: {longest} · {freezes} freezes left",
+  "@streakStats": {
+    "placeholders": {
+      "longest": { "type": "int" },
+      "freezes": { "type": "int" }
+    }
+  },
+  "streakMissed": "Missed (tap to freeze)",
+  "streakFreezeTitle": "Use streak freeze?",
+  "streakFreezeMessage": "Protect your streak for {date}?",
+  "@streakFreezeMessage": {
+    "placeholders": {
+      "date": { "type": "String" }
+    }
+  },
+  "streakFreezeConfirm": "Use freeze",
+  "streakFreezeSuccess": "Streak freeze applied",
+  "streakFreezeFailed": "Could not apply streak freeze",
   "tipOfTheDay": "Tip Of The Day",
   "tipQuote": "I am more impressed by your effort and your process than by the final grade.",
   "upComingDeadlines": "Up Coming Deadlines:",
@@ -93,6 +133,80 @@
   "mishkasAiTools": "Mishka's AI Tools:",
   "viewMore": "View more",
   "chatWithMishka": "Chat with Mishka",
+  "yourHistory": "Your History",
+  "searchYourHistory": "Search your history...",
+  "historyChats": "chats:",
+  "historyQuizzes": "Quizzes:",
+  "historyFlashCards": "FlashCards:",
+  "historySummarization": "Summarization :",
+  "historyMindMaps": "Mind Maps:",
+  "historyEmpty": "No history found",
+  "historyLoadFailed": "Could not load this chat session",
+  "chatGreeting": "Hello, please upload your material to start our journey",
+  "chatAnalyzingPdf": "Analyzing PDF...",
+  "chatWhichTool": "Which tool would you like to use?",
+  "chatWaitForExplanation": "Please wait for the explanation to complete first.",
+  "chatUploadPdfHint": "Upload PDF to start",
+  "chatChooseDifficultyHint": "Choose difficulty above",
+  "chatDifficultySimple": "Simple",
+  "chatDifficultyIntermediate": "Intermediate",
+  "chatDifficultyAdvanced": "Advanced",
+  "chatToolQuiz": "Quiz",
+  "chatToolFlashcards": "Flashcards",
+  "chatToolMindMap": "Mind Map",
+  "chatToolSummarize": "Summarize",
+  "chatRegenerate": "Regenerate",
+  "chatAnotherTool": "Another Tool",
+  "chatToolSelected": "Great! You selected: {tool}. Generating it for you...",
+  "@chatToolSelected": {
+    "placeholders": {
+      "tool": { "type": "String" }
+    }
+  },
+  "chatRegenerating": "Regenerating {tool}...",
+  "@chatRegenerating": {
+    "placeholders": {
+      "tool": { "type": "String" }
+    }
+  },
+  "chatRegenerationFailed": "Regeneration failed.\n{error}",
+  "@chatRegenerationFailed": {
+    "placeholders": {
+      "error": { "type": "String" }
+    }
+  },
+  "chatAnalyzePdfFailed": "Failed to analyze PDF.\n{error}",
+  "@chatAnalyzePdfFailed": {
+    "placeholders": {
+      "error": { "type": "String" }
+    }
+  },
+  "chatToolGenerationFailed": "Tool generation failed.\n{error}",
+  "@chatToolGenerationFailed": {
+    "placeholders": {
+      "error": { "type": "String" }
+    }
+  },
+  "chatMessageFailed": "Chat failed.\n{error}",
+  "@chatMessageFailed": {
+    "placeholders": {
+      "error": { "type": "String" }
+    }
+  },
+  "chatSessionStartFailed": "Could not start chat session.\n{error}",
+  "@chatSessionStartFailed": {
+    "placeholders": {
+      "error": { "type": "String" }
+    }
+  },
+  "chatNewChatTitle": "Start a new chat?",
+  "chatNewChatMessage": "Your current conversation stays in history. You can reopen it from the menu.",
+  "chatNewChatConfirm": "New chat",
+  "chatNewChatAction": "New chat",
+  "renameSavedItem": "Rename item",
+  "savedItemRenamed": "Item renamed",
+  "savedRenameUnavailable": "This item cannot be renamed",
+  "savedItemTitleHint": "Title",
   "summarizeWithMishka": "Summarize with Mishka",
   "makeFlashcardsWithMishka": "Make Flashcards with Mishka",
   "makeQuizzesWithMishka": "Make Quizes with Mishka",
@@ -122,6 +236,9 @@
   "profileUpdateFailed": "Could not save profile.",
   "fieldRequired": "This field is required.",
   "invalidEmailHint": "Enter a valid email address.",
+  "invalidPhoneHint": "Enter a valid phone number.",
+  "nameTooLong": "Name must be 50 characters or fewer.",
+  "accountAlreadyExists": "An account with this email or phone number already exists.",
   "retry": "Retry",
   "aiTools": "Ai tools",
   "aiToolsSubtitle": "Chat with Mishka, Quizzes, Flash Cards, Summary.",
@@ -156,6 +273,22 @@
   "disabled": "Disabled",
   "chooseLanguage": "Choose language",
   "chooseAppearance": "Choose appearance",
+  "settings": "Settings",
+  "settingsSubtitle": "Language, theme, notifications",
+  "settingsDescription": "Choose how Mishka looks and how we reach you. Changes apply on this device and sync to your account when you are signed in.",
+  "settingsPreferencesSection": "Preferences",
+  "settingsSyncFailed": "Could not sync settings to your account. Your choice is saved on this device.",
+  "privacyPolicyBody": "Mishka respects your privacy. We collect only the information needed to run your account, personalize study features, and improve the app.\n\nWe use your email and profile details to authenticate you and to communicate about your account. Study activity, tasks, and AI interactions are stored to provide history, streaks, and tutoring features you use.\n\nWe do not sell your personal data. We may share limited data with service providers that host our infrastructure and deliver notifications, under strict confidentiality.\n\nYou can update your profile, education details, and preferences in the app. Contact support if you need access, correction, or deletion of your data.\n\nThis summary is provided for convenience. A full legal policy may be published separately on our website.",
+  "helpSupportIntro": "Need help with Mishka? Reach us using the contacts below, or read the quick tips in this screen when contacts are not configured yet.",
+  "helpSupportContactsTitle": "Contact us",
+  "helpSupportTapToOpen": "Tap a row to open Gmail, WhatsApp, or the link in its app.",
+  "linkOpenFailed": "Could not open this link on your device.",
+  "linkOpenFailedCopied": "Could not open the app — copied to clipboard instead.",
+  "supportFacebook": "Facebook",
+  "supportInstagram": "Instagram",
+  "supportWhatsApp": "WhatsApp",
+  "copiedToClipboard": "Copied to clipboard",
+  "helpSupportBody": "Need help with Mishka? Here is how to get unstuck.\n\nAccount & sign-in: Use Forgot password on the login screen if you cannot sign in. Make sure your email or phone matches what you registered with.\n\nStudy With Mishka: Start a session from Home, pick a timer, and stay on the session screen until you finish or end early. If a session fails to start, check your connection and try again.\n\nTasks & lists: Create lists from the To-Do area, then add tasks with deadlines. Pull to refresh on Home to see upcoming tasks.\n\nProfile & education: Open Profile to edit your name, contact info, gender, and education level. Use Settings for language, theme, and notifications.\n\nStill stuck? Email our team at support@mishka.app with a short description and screenshots if possible. We typically reply within a few business days.",
   "privacyPolicy": "Privacy Policy",
   "helpSupport": "Help & Support",
   "logOut": "Log Out",
@@ -164,14 +297,6 @@
   "flashCards": "Flash Cards",
   "quizzes": "Quizzes",
   "summarize": "Summarize",
-  "yourHistory": "your History",
-  "searchYourHistory": "Search your history...",
-  "chats": "chats:",
-  "tellMeMoreAboutMishka": "Tell me more about MISHKA app?",
-  "quizes": "Quizes:",
-  "makeMeFlashcards": "make me flashcards and quizzes and summarize the article for these uploaded files",
-  "flashCardsColon": "FlashCards:",
-  "summarization": "Summarization :",
   "mishka": "Mishka",
   "helloSara": "Hello, Sara!",
   "askMishka": "Ask MISHKA ....",
@@ -301,6 +426,13 @@
   ,"mindMap": "Mind Map"
   ,"share": "Share"
   ,"shareToCommunityChannels": "Share to community channels"
+  ,"shareCommunitiesYouJoined": "Communities You Joined"
+  ,"shareToSelectedGroups": "Share to selected groups"
+  ,"shareMembersGroupsCount": "{members} members {groups} groups"
+  ,"shareGroupMembersCount": "{count} members"
+  ,"shareSuccessTitle": "Successfully Shared to the group"
+  ,"shareSuccessContinue": "Continue"
+  ,"shareOpenGroup": "Open group"
   ,"noCommunityChannelsFound": "No community channels found"
   ,"failedToLoadChannels": "Failed to load channels: {error}"
   ,"shareFailed": "Share failed: {error}"
@@ -316,6 +448,23 @@
   ,"generating": "Generating..."
   ,"uploadMaterial": "Upload material"
   ,"@sharedToChannelsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  }
+  ,"@shareMembersGroupsCount": {
+    "placeholders": {
+      "members": {
+        "type": "int"
+      },
+      "groups": {
+        "type": "int"
+      }
+    }
+  }
+  ,"@shareGroupMembersCount": {
     "placeholders": {
       "count": {
         "type": "int"
@@ -410,4 +559,151 @@
   ,"backToCall": "Back to Call"
   ,"breakTime": "Break Time"
   ,"cameraPermissionRequired": "Camera permission is required for video call mode."
+  ,"onboardingIntroLine1": "I am Mishka, custodian of"
+  ,"onboardingIntroLine2": "knowledge our quest for glory"
+  ,"onboardingIntroLine3": "begins now!"
+  ,"welcomeToMishka": "Welcome to Mishka!"
+  ,"welcomeToMishkaSubtitle": "Let the guardian of knowledge guide your path to discovery."
+  ,"educationLevel": "Education Level"
+  ,"educationLevelComingSoon": "Education level selection will be available in the next update."
+  ,"educationStatusQuestion": "Which Of The Following Best Describes Your Current Education Status?"
+  ,"school": "School"
+  ,"university": "University"
+  ,"otherColon": "Other:"
+  ,"schoolStageQuestion": "Which School Stage Are You Currently In?"
+  ,"middleSchoolColon": "Middle School:"
+  ,"highSchoolColon": "High School:"
+  ,"firstPreparatory": "1st Preparatory"
+  ,"secondPreparatory": "2nd Preparatory"
+  ,"thirdPreparatory": "3rd Preparatory"
+  ,"firstSecondary": "1st Secondary"
+  ,"secondSecondary": "2nd Secondary"
+  ,"thirdSecondary": "3rd Secondary"
+  ,"universityYearQuestion": "Which Academic Year Are You Currently In?"
+  ,"universityColon": "University:"
+  ,"firstYear": "1st Year"
+  ,"secondYear": "2nd Year"
+  ,"thirdYear": "3rd Year"
+  ,"fourthYear": "4th Year"
+  ,"fifthYear": "5th Year"
+  ,"pleaseSpecifyEducationStatus": "Please specify your education level:"
+  ,"educationOtherHint": "Enter your education level"
+  ,"editEducation": "Edit education"
+  ,"yourReport": "Your Report"
+  ,"reportPeriodDaily": "Daily"
+  ,"reportPeriodWeekly": "Weekly"
+  ,"reportPeriodMonthly": "Monthly"
+  ,"reportPeriodYearly": "Yearly"
+  ,"reportPeriodDailySuffix": "/day"
+  ,"reportPeriodWeeklySuffix": "/week"
+  ,"reportPeriodMonthlySuffix": "/month"
+  ,"reportPeriodYearlySuffix": "/year"
+  ,"reportCreatePdfEmail": "Create PDF and share"
+  ,"reportEmailMyReport": "Email my report"
+  ,"reportPdfEmailSent": "Report sent to {email}"
+  ,"@reportPdfEmailSent": {
+    "placeholders": {
+      "email": {
+        "type": "String"
+      }
+    }
+  }
+  ,"reportPdfOpenFailed": "Could not open the report PDF link."
+  ,"reportPdfSharedLocally": "Server export unavailable — shared a local PDF copy instead."
+  ,"reportUsingLegacyData": "Using classic report APIs until the new bundle is deployed."
+  ,"reportStudyWithMishka": "Study with Mishka"
+  ,"reportDuringConcentrationMode": "Total study time (Concentration + Camera modes):"
+  ,"reportAiTools": "Using Mishka's AI tools"
+  ,"reportDailyStreak": "Daily Streak"
+  ,"reportDailyStreakChartHint": "Each bar is one day: 100% = streak kept, 0% = missed."
+  ,"reportStreakCurrent": "Current"
+  ,"reportStreakLongest": "Longest"
+  ,"reportStreakFreezes": "Freezes left"
+  ,"reportTasksDue": "Tasks completed"
+  ,"reportTasksDueHint": "Each bar is one day — how many to-do tasks you marked done."
+  ,"reportNoTasksInPeriod": "No tasks completed in this period yet."
+  ,"reportTotalQuizzes": "Total Quizzes"
+  ,"reportTotalFlashcards": "Total Flashcards"
+  ,"reportTotalSummaries": "Total Summaries"
+  ,"reportLoadFailed": "Could not load your report. Pull to refresh."
+  ,"reportPdfFailed": "Could not create report PDF: {error}"
+  ,"settingsReportAutoEmail": "Automatic report email"
+  ,"settingsReportAutoEmailHint": "Receive your weekly or monthly report by email."
+  ,"reportEmailWeekly": "Weekly"
+  ,"reportEmailMonthly": "Monthly"
+  ,"settingsReportRecipientRow": "Send reports to"
+  ,"settingsReportRecipientNotSet": "Add email"
+  ,"settingsReportRecipientTitle": "Report email address"
+  ,"settingsReportRecipientBody": "Enter the email address that should receive your weekly or monthly report, and one-off exports from Your Report."
+  ,"settingsReportRecipientLabel": "Recipient email"
+  ,"settingsReportRecipientSaved": "Report email address saved."
+  ,"settingsReportRecipientSavedLocal": "Saved on this device. Server sync will apply when the backend adds report email recipient support."
+  ,"settingsReportRecipientUseAccount": "Use my account email ({email})"
+  ,"@settingsReportRecipientUseAccount": {
+    "placeholders": {
+      "email": { "type": "String" }
+    }
+  }
+  ,"@reportPdfFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  }
+  ,"communityCreateTitle": "Create New Community"
+  ,"communityCreateVisibilityLabel": "Select your community's visibility:"
+  ,"communityVisibilityPrivate": "Private"
+  ,"communityVisibilityPublic": "Public"
+  ,"communityCreateNameLabel": "Community name:"
+  ,"communityCreateNameHint": "Community name"
+  ,"communityCreateDescLabel": "Description (optional):"
+  ,"communityCreateDescHint": "Community description"
+  ,"communityCreateDiscoverSection": "Discovery (public communities)"
+  ,"communityCreateDiscoverSubtitle": "Help others find your community in Discover and recommendations."
+  ,"communityCreateNameRequired": "Please enter a community name"
+  ,"communityCreateSuccess": "Your community was created successfully!"
+  ,"communityCreateButton": "Create Community"
+  ,"communityCreateEducationHintUniversity": "Using your profile: University, year {year}"
+  ,"@communityCreateEducationHintUniversity": {
+    "placeholders": { "year": { "type": "String" } }
+  }
+  ,"communityCreateEducationHintSchool": "Using your profile: School, grade {grade}"
+  ,"@communityCreateEducationHintSchool": {
+    "placeholders": { "grade": { "type": "String" } }
+  }
+  ,"communityCreateEducationHintProfile": "Using your profile: {status}"
+  ,"@communityCreateEducationHintProfile": {
+    "placeholders": { "status": { "type": "String" } }
+  }
+  ,"communityHubSearchHint": "Search..."
+  ,"communityHubCreateNew": "Create New Community"
+  ,"communityHubJoinPrivate": "Join Private Community"
+  ,"communityHubSavedSection": "Saved Communities:"
+  ,"communityHubSavedEmpty": "No saved communities yet. Open a community and tap ⋮ → Save Community."
+  ,"communityHubPrivateSection": "Private Communities you're in:"
+  ,"communityHubPublicSection": "Public Communities you're in:"
+  ,"communityHubRecommendedSection": "Recommended for you"
+  ,"communityHubSeeAll": "See all"
+  ,"communityHubDiscoverButton": "Discover Communities"
+  ,"communityHubEmpty": "No communities yet. Create one or join with a code."
+  ,"communityHubSavedEmptySnack": "No saved communities yet. Open a community and use ⋮ → Save Community."
+  ,"communitySave": "Save Community"
+  ,"communityUnsave": "Unsave Community"
+  ,"communitySavedSuccess": "Community saved successfully!"
+  ,"communityUnsavedSuccess": "Community removed from saved."
+  ,"communityDiscoverTitle": "Discover Communities"
+  ,"communityDiscoverSearchHint": "Search communities…"
+  ,"communityDiscoverForYou": "For you"
+  ,"communityDiscoverPopular": "Popular"
+  ,"communityDiscoverNew": "New"
+  ,"communityDiscoverSubjects": "Subjects"
+  ,"communityDiscoverAll": "All"
+  ,"communityDiscoverProfileHint": "Complete your education in Profile to get better recommendations."
+  ,"communityDiscoverEmpty": "No communities to show yet."
+  ,"communityDiscoverJoin": "Join"
+  ,"communityMemberPromoteAdmin": "Make Admin"
+  ,"communityMemberDemoteMember": "Make Member"
+  ,"communityMemberRoleUpdated": "Member role updated."
+  ,"communityChatSenderMe": "Me"
 }

@@ -245,20 +245,26 @@ abstract class AppLocalizations {
   /// No description provided for @verifyByEmail.
   ///
   /// In en, this message translates to:
-  /// **'Verify BY email address'**
+  /// **'Verify by Email Address'**
   String get verifyByEmail;
 
   /// No description provided for @enter5DigitsCodeEmail.
   ///
   /// In en, this message translates to:
-  /// **'Enter the 5 digits code you received at your Gmail : example123@gamil.com'**
-  String get enter5DigitsCodeEmail;
+  /// **'Enter the 5 digits code you received at your gmail: {email}'**
+  String enter5DigitsCodeEmail(String email);
 
   /// No description provided for @enter6DigitsCodeEmail.
   ///
   /// In en, this message translates to:
-  /// **'Enter the 6 digits code you received at your email: {email}'**
+  /// **'Enter the 6 digits code you received at your gmail: {email}'**
   String enter6DigitsCodeEmail(String email);
+
+  /// No description provided for @enter6DigitsCodePhone.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter the 6 digits code you received (SMS) at {phone}'**
+  String enter6DigitsCodePhone(String phone);
 
   /// No description provided for @verify.
   ///
@@ -269,7 +275,7 @@ abstract class AppLocalizations {
   /// No description provided for @successfullyVerified.
   ///
   /// In en, this message translates to:
-  /// **'successfully Verified'**
+  /// **'Successfully Verified'**
   String get successfullyVerified;
 
   /// No description provided for @letsStartSettingAccount.
@@ -335,7 +341,7 @@ abstract class AppLocalizations {
   /// No description provided for @passwordSuccessfullySet.
   ///
   /// In en, this message translates to:
-  /// **'Password is successfully set'**
+  /// **'Password Is Successfully Set'**
   String get passwordSuccessfullySet;
 
   /// No description provided for @writePhoneForCode.
@@ -353,8 +359,8 @@ abstract class AppLocalizations {
   /// No description provided for @enter5DigitsCodePhone.
   ///
   /// In en, this message translates to:
-  /// **'Enter the 5 digits code you received (SMS) at +20 1010101010'**
-  String get enter5DigitsCodePhone;
+  /// **'Enter the 5 digits code you received (SMS) at {phone}'**
+  String enter5DigitsCodePhone(String phone);
 
   /// No description provided for @welcomeBackSara.
   ///
@@ -439,6 +445,48 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Upcoming'**
   String get upcoming;
+
+  /// No description provided for @streakStats.
+  ///
+  /// In en, this message translates to:
+  /// **'Best: {longest} · {freezes} freezes left'**
+  String streakStats(int longest, int freezes);
+
+  /// No description provided for @streakMissed.
+  ///
+  /// In en, this message translates to:
+  /// **'Missed (tap to freeze)'**
+  String get streakMissed;
+
+  /// No description provided for @streakFreezeTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Use streak freeze?'**
+  String get streakFreezeTitle;
+
+  /// No description provided for @streakFreezeMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Protect your streak for {date}?'**
+  String streakFreezeMessage(String date);
+
+  /// No description provided for @streakFreezeConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Use freeze'**
+  String get streakFreezeConfirm;
+
+  /// No description provided for @streakFreezeSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Streak freeze applied'**
+  String get streakFreezeSuccess;
+
+  /// No description provided for @streakFreezeFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not apply streak freeze'**
+  String get streakFreezeFailed;
 
   /// No description provided for @tipOfTheDay.
   ///
@@ -547,6 +595,240 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Chat with Mishka'**
   String get chatWithMishka;
+
+  /// No description provided for @yourHistory.
+  ///
+  /// In en, this message translates to:
+  /// **'Your History'**
+  String get yourHistory;
+
+  /// No description provided for @searchYourHistory.
+  ///
+  /// In en, this message translates to:
+  /// **'Search your history...'**
+  String get searchYourHistory;
+
+  /// No description provided for @historyChats.
+  ///
+  /// In en, this message translates to:
+  /// **'chats:'**
+  String get historyChats;
+
+  /// No description provided for @historyQuizzes.
+  ///
+  /// In en, this message translates to:
+  /// **'Quizzes:'**
+  String get historyQuizzes;
+
+  /// No description provided for @historyFlashCards.
+  ///
+  /// In en, this message translates to:
+  /// **'FlashCards:'**
+  String get historyFlashCards;
+
+  /// No description provided for @historySummarization.
+  ///
+  /// In en, this message translates to:
+  /// **'Summarization :'**
+  String get historySummarization;
+
+  /// No description provided for @historyMindMaps.
+  ///
+  /// In en, this message translates to:
+  /// **'Mind Maps:'**
+  String get historyMindMaps;
+
+  /// No description provided for @historyEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No history found'**
+  String get historyEmpty;
+
+  /// No description provided for @historyLoadFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not load this chat session'**
+  String get historyLoadFailed;
+
+  /// No description provided for @chatGreeting.
+  ///
+  /// In en, this message translates to:
+  /// **'Hello, please upload your material to start our journey'**
+  String get chatGreeting;
+
+  /// No description provided for @chatAnalyzingPdf.
+  ///
+  /// In en, this message translates to:
+  /// **'Analyzing PDF...'**
+  String get chatAnalyzingPdf;
+
+  /// No description provided for @chatWhichTool.
+  ///
+  /// In en, this message translates to:
+  /// **'Which tool would you like to use?'**
+  String get chatWhichTool;
+
+  /// No description provided for @chatWaitForExplanation.
+  ///
+  /// In en, this message translates to:
+  /// **'Please wait for the explanation to complete first.'**
+  String get chatWaitForExplanation;
+
+  /// No description provided for @chatUploadPdfHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Upload PDF to start'**
+  String get chatUploadPdfHint;
+
+  /// No description provided for @chatChooseDifficultyHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose difficulty above'**
+  String get chatChooseDifficultyHint;
+
+  /// No description provided for @chatDifficultySimple.
+  ///
+  /// In en, this message translates to:
+  /// **'Simple'**
+  String get chatDifficultySimple;
+
+  /// No description provided for @chatDifficultyIntermediate.
+  ///
+  /// In en, this message translates to:
+  /// **'Intermediate'**
+  String get chatDifficultyIntermediate;
+
+  /// No description provided for @chatDifficultyAdvanced.
+  ///
+  /// In en, this message translates to:
+  /// **'Advanced'**
+  String get chatDifficultyAdvanced;
+
+  /// No description provided for @chatToolQuiz.
+  ///
+  /// In en, this message translates to:
+  /// **'Quiz'**
+  String get chatToolQuiz;
+
+  /// No description provided for @chatToolFlashcards.
+  ///
+  /// In en, this message translates to:
+  /// **'Flashcards'**
+  String get chatToolFlashcards;
+
+  /// No description provided for @chatToolMindMap.
+  ///
+  /// In en, this message translates to:
+  /// **'Mind Map'**
+  String get chatToolMindMap;
+
+  /// No description provided for @chatToolSummarize.
+  ///
+  /// In en, this message translates to:
+  /// **'Summarize'**
+  String get chatToolSummarize;
+
+  /// No description provided for @chatRegenerate.
+  ///
+  /// In en, this message translates to:
+  /// **'Regenerate'**
+  String get chatRegenerate;
+
+  /// No description provided for @chatAnotherTool.
+  ///
+  /// In en, this message translates to:
+  /// **'Another Tool'**
+  String get chatAnotherTool;
+
+  /// No description provided for @chatToolSelected.
+  ///
+  /// In en, this message translates to:
+  /// **'Great! You selected: {tool}. Generating it for you...'**
+  String chatToolSelected(String tool);
+
+  /// No description provided for @chatRegenerating.
+  ///
+  /// In en, this message translates to:
+  /// **'Regenerating {tool}...'**
+  String chatRegenerating(String tool);
+
+  /// No description provided for @chatRegenerationFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Regeneration failed.\n{error}'**
+  String chatRegenerationFailed(String error);
+
+  /// No description provided for @chatAnalyzePdfFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to analyze PDF.\n{error}'**
+  String chatAnalyzePdfFailed(String error);
+
+  /// No description provided for @chatToolGenerationFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Tool generation failed.\n{error}'**
+  String chatToolGenerationFailed(String error);
+
+  /// No description provided for @chatMessageFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Chat failed.\n{error}'**
+  String chatMessageFailed(String error);
+
+  /// No description provided for @chatSessionStartFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not start chat session.\n{error}'**
+  String chatSessionStartFailed(String error);
+
+  /// No description provided for @chatNewChatTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Start a new chat?'**
+  String get chatNewChatTitle;
+
+  /// No description provided for @chatNewChatMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Your current conversation stays in history. You can reopen it from the menu.'**
+  String get chatNewChatMessage;
+
+  /// No description provided for @chatNewChatConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'New chat'**
+  String get chatNewChatConfirm;
+
+  /// No description provided for @chatNewChatAction.
+  ///
+  /// In en, this message translates to:
+  /// **'New chat'**
+  String get chatNewChatAction;
+
+  /// No description provided for @renameSavedItem.
+  ///
+  /// In en, this message translates to:
+  /// **'Rename item'**
+  String get renameSavedItem;
+
+  /// No description provided for @savedItemRenamed.
+  ///
+  /// In en, this message translates to:
+  /// **'Item renamed'**
+  String get savedItemRenamed;
+
+  /// No description provided for @savedRenameUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'This item cannot be renamed'**
+  String get savedRenameUnavailable;
+
+  /// No description provided for @savedItemTitleHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Title'**
+  String get savedItemTitleHint;
 
   /// No description provided for @summarizeWithMishka.
   ///
@@ -721,6 +1003,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Enter a valid email address.'**
   String get invalidEmailHint;
+
+  /// No description provided for @invalidPhoneHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a valid phone number.'**
+  String get invalidPhoneHint;
+
+  /// No description provided for @nameTooLong.
+  ///
+  /// In en, this message translates to:
+  /// **'Name must be 50 characters or fewer.'**
+  String get nameTooLong;
+
+  /// No description provided for @accountAlreadyExists.
+  ///
+  /// In en, this message translates to:
+  /// **'An account with this email or phone number already exists.'**
+  String get accountAlreadyExists;
 
   /// No description provided for @retry.
   ///
@@ -926,6 +1226,102 @@ abstract class AppLocalizations {
   /// **'Choose appearance'**
   String get chooseAppearance;
 
+  /// No description provided for @settings.
+  ///
+  /// In en, this message translates to:
+  /// **'Settings'**
+  String get settings;
+
+  /// No description provided for @settingsSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Language, theme, notifications'**
+  String get settingsSubtitle;
+
+  /// No description provided for @settingsDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose how Mishka looks and how we reach you. Changes apply on this device and sync to your account when you are signed in.'**
+  String get settingsDescription;
+
+  /// No description provided for @settingsPreferencesSection.
+  ///
+  /// In en, this message translates to:
+  /// **'Preferences'**
+  String get settingsPreferencesSection;
+
+  /// No description provided for @settingsSyncFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not sync settings to your account. Your choice is saved on this device.'**
+  String get settingsSyncFailed;
+
+  /// No description provided for @privacyPolicyBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Mishka respects your privacy. We collect only the information needed to run your account, personalize study features, and improve the app.\n\nWe use your email and profile details to authenticate you and to communicate about your account. Study activity, tasks, and AI interactions are stored to provide history, streaks, and tutoring features you use.\n\nWe do not sell your personal data. We may share limited data with service providers that host our infrastructure and deliver notifications, under strict confidentiality.\n\nYou can update your profile, education details, and preferences in the app. Contact support if you need access, correction, or deletion of your data.\n\nThis summary is provided for convenience. A full legal policy may be published separately on our website.'**
+  String get privacyPolicyBody;
+
+  /// No description provided for @helpSupportIntro.
+  ///
+  /// In en, this message translates to:
+  /// **'Need help with Mishka? Reach us using the contacts below, or read the quick tips in this screen when contacts are not configured yet.'**
+  String get helpSupportIntro;
+
+  /// No description provided for @helpSupportContactsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Contact us'**
+  String get helpSupportContactsTitle;
+
+  /// No description provided for @helpSupportTapToOpen.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap a row to open Gmail, WhatsApp, or the link in its app.'**
+  String get helpSupportTapToOpen;
+
+  /// No description provided for @linkOpenFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not open this link on your device.'**
+  String get linkOpenFailed;
+
+  /// No description provided for @linkOpenFailedCopied.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not open the app — copied to clipboard instead.'**
+  String get linkOpenFailedCopied;
+
+  /// No description provided for @supportFacebook.
+  ///
+  /// In en, this message translates to:
+  /// **'Facebook'**
+  String get supportFacebook;
+
+  /// No description provided for @supportInstagram.
+  ///
+  /// In en, this message translates to:
+  /// **'Instagram'**
+  String get supportInstagram;
+
+  /// No description provided for @supportWhatsApp.
+  ///
+  /// In en, this message translates to:
+  /// **'WhatsApp'**
+  String get supportWhatsApp;
+
+  /// No description provided for @copiedToClipboard.
+  ///
+  /// In en, this message translates to:
+  /// **'Copied to clipboard'**
+  String get copiedToClipboard;
+
+  /// No description provided for @helpSupportBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Need help with Mishka? Here is how to get unstuck.\n\nAccount & sign-in: Use Forgot password on the login screen if you cannot sign in. Make sure your email or phone matches what you registered with.\n\nStudy With Mishka: Start a session from Home, pick a timer, and stay on the session screen until you finish or end early. If a session fails to start, check your connection and try again.\n\nTasks & lists: Create lists from the To-Do area, then add tasks with deadlines. Pull to refresh on Home to see upcoming tasks.\n\nProfile & education: Open Profile to edit your name, contact info, gender, and education level. Use Settings for language, theme, and notifications.\n\nStill stuck? Email our team at support@mishka.app with a short description and screenshots if possible. We typically reply within a few business days.'**
+  String get helpSupportBody;
+
   /// No description provided for @privacyPolicy.
   ///
   /// In en, this message translates to:
@@ -973,54 +1369,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Summarize'**
   String get summarize;
-
-  /// No description provided for @yourHistory.
-  ///
-  /// In en, this message translates to:
-  /// **'your History'**
-  String get yourHistory;
-
-  /// No description provided for @searchYourHistory.
-  ///
-  /// In en, this message translates to:
-  /// **'Search your history...'**
-  String get searchYourHistory;
-
-  /// No description provided for @chats.
-  ///
-  /// In en, this message translates to:
-  /// **'chats:'**
-  String get chats;
-
-  /// No description provided for @tellMeMoreAboutMishka.
-  ///
-  /// In en, this message translates to:
-  /// **'Tell me more about MISHKA app?'**
-  String get tellMeMoreAboutMishka;
-
-  /// No description provided for @quizes.
-  ///
-  /// In en, this message translates to:
-  /// **'Quizes:'**
-  String get quizes;
-
-  /// No description provided for @makeMeFlashcards.
-  ///
-  /// In en, this message translates to:
-  /// **'make me flashcards and quizzes and summarize the article for these uploaded files'**
-  String get makeMeFlashcards;
-
-  /// No description provided for @flashCardsColon.
-  ///
-  /// In en, this message translates to:
-  /// **'FlashCards:'**
-  String get flashCardsColon;
-
-  /// No description provided for @summarization.
-  ///
-  /// In en, this message translates to:
-  /// **'Summarization :'**
-  String get summarization;
 
   /// No description provided for @mishka.
   ///
@@ -1736,6 +2084,48 @@ abstract class AppLocalizations {
   /// **'Share to community channels'**
   String get shareToCommunityChannels;
 
+  /// No description provided for @shareCommunitiesYouJoined.
+  ///
+  /// In en, this message translates to:
+  /// **'Communities You Joined'**
+  String get shareCommunitiesYouJoined;
+
+  /// No description provided for @shareToSelectedGroups.
+  ///
+  /// In en, this message translates to:
+  /// **'Share to selected groups'**
+  String get shareToSelectedGroups;
+
+  /// No description provided for @shareMembersGroupsCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{members} members {groups} groups'**
+  String shareMembersGroupsCount(int members, int groups);
+
+  /// No description provided for @shareGroupMembersCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} members'**
+  String shareGroupMembersCount(int count);
+
+  /// No description provided for @shareSuccessTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Successfully Shared to the group'**
+  String get shareSuccessTitle;
+
+  /// No description provided for @shareSuccessContinue.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue'**
+  String get shareSuccessContinue;
+
+  /// No description provided for @shareOpenGroup.
+  ///
+  /// In en, this message translates to:
+  /// **'Open group'**
+  String get shareOpenGroup;
+
   /// No description provided for @noCommunityChannelsFound.
   ///
   /// In en, this message translates to:
@@ -2119,6 +2509,720 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Camera permission is required for video call mode.'**
   String get cameraPermissionRequired;
+
+  /// No description provided for @onboardingIntroLine1.
+  ///
+  /// In en, this message translates to:
+  /// **'I am Mishka, custodian of'**
+  String get onboardingIntroLine1;
+
+  /// No description provided for @onboardingIntroLine2.
+  ///
+  /// In en, this message translates to:
+  /// **'knowledge our quest for glory'**
+  String get onboardingIntroLine2;
+
+  /// No description provided for @onboardingIntroLine3.
+  ///
+  /// In en, this message translates to:
+  /// **'begins now!'**
+  String get onboardingIntroLine3;
+
+  /// No description provided for @welcomeToMishka.
+  ///
+  /// In en, this message translates to:
+  /// **'Welcome to Mishka!'**
+  String get welcomeToMishka;
+
+  /// No description provided for @welcomeToMishkaSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Let the guardian of knowledge guide your path to discovery.'**
+  String get welcomeToMishkaSubtitle;
+
+  /// No description provided for @educationLevel.
+  ///
+  /// In en, this message translates to:
+  /// **'Education Level'**
+  String get educationLevel;
+
+  /// No description provided for @educationLevelComingSoon.
+  ///
+  /// In en, this message translates to:
+  /// **'Education level selection will be available in the next update.'**
+  String get educationLevelComingSoon;
+
+  /// No description provided for @educationStatusQuestion.
+  ///
+  /// In en, this message translates to:
+  /// **'Which Of The Following Best Describes Your Current Education Status?'**
+  String get educationStatusQuestion;
+
+  /// No description provided for @school.
+  ///
+  /// In en, this message translates to:
+  /// **'School'**
+  String get school;
+
+  /// No description provided for @university.
+  ///
+  /// In en, this message translates to:
+  /// **'University'**
+  String get university;
+
+  /// No description provided for @otherColon.
+  ///
+  /// In en, this message translates to:
+  /// **'Other:'**
+  String get otherColon;
+
+  /// No description provided for @schoolStageQuestion.
+  ///
+  /// In en, this message translates to:
+  /// **'Which School Stage Are You Currently In?'**
+  String get schoolStageQuestion;
+
+  /// No description provided for @middleSchoolColon.
+  ///
+  /// In en, this message translates to:
+  /// **'Middle School:'**
+  String get middleSchoolColon;
+
+  /// No description provided for @highSchoolColon.
+  ///
+  /// In en, this message translates to:
+  /// **'High School:'**
+  String get highSchoolColon;
+
+  /// No description provided for @firstPreparatory.
+  ///
+  /// In en, this message translates to:
+  /// **'1st Preparatory'**
+  String get firstPreparatory;
+
+  /// No description provided for @secondPreparatory.
+  ///
+  /// In en, this message translates to:
+  /// **'2nd Preparatory'**
+  String get secondPreparatory;
+
+  /// No description provided for @thirdPreparatory.
+  ///
+  /// In en, this message translates to:
+  /// **'3rd Preparatory'**
+  String get thirdPreparatory;
+
+  /// No description provided for @firstSecondary.
+  ///
+  /// In en, this message translates to:
+  /// **'1st Secondary'**
+  String get firstSecondary;
+
+  /// No description provided for @secondSecondary.
+  ///
+  /// In en, this message translates to:
+  /// **'2nd Secondary'**
+  String get secondSecondary;
+
+  /// No description provided for @thirdSecondary.
+  ///
+  /// In en, this message translates to:
+  /// **'3rd Secondary'**
+  String get thirdSecondary;
+
+  /// No description provided for @universityYearQuestion.
+  ///
+  /// In en, this message translates to:
+  /// **'Which Academic Year Are You Currently In?'**
+  String get universityYearQuestion;
+
+  /// No description provided for @universityColon.
+  ///
+  /// In en, this message translates to:
+  /// **'University:'**
+  String get universityColon;
+
+  /// No description provided for @firstYear.
+  ///
+  /// In en, this message translates to:
+  /// **'1st Year'**
+  String get firstYear;
+
+  /// No description provided for @secondYear.
+  ///
+  /// In en, this message translates to:
+  /// **'2nd Year'**
+  String get secondYear;
+
+  /// No description provided for @thirdYear.
+  ///
+  /// In en, this message translates to:
+  /// **'3rd Year'**
+  String get thirdYear;
+
+  /// No description provided for @fourthYear.
+  ///
+  /// In en, this message translates to:
+  /// **'4th Year'**
+  String get fourthYear;
+
+  /// No description provided for @fifthYear.
+  ///
+  /// In en, this message translates to:
+  /// **'5th Year'**
+  String get fifthYear;
+
+  /// No description provided for @pleaseSpecifyEducationStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Please specify your education level:'**
+  String get pleaseSpecifyEducationStatus;
+
+  /// No description provided for @educationOtherHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter your education level'**
+  String get educationOtherHint;
+
+  /// No description provided for @editEducation.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit education'**
+  String get editEducation;
+
+  /// No description provided for @yourReport.
+  ///
+  /// In en, this message translates to:
+  /// **'Your Report'**
+  String get yourReport;
+
+  /// No description provided for @reportPeriodDaily.
+  ///
+  /// In en, this message translates to:
+  /// **'Daily'**
+  String get reportPeriodDaily;
+
+  /// No description provided for @reportPeriodWeekly.
+  ///
+  /// In en, this message translates to:
+  /// **'Weekly'**
+  String get reportPeriodWeekly;
+
+  /// No description provided for @reportPeriodMonthly.
+  ///
+  /// In en, this message translates to:
+  /// **'Monthly'**
+  String get reportPeriodMonthly;
+
+  /// No description provided for @reportPeriodYearly.
+  ///
+  /// In en, this message translates to:
+  /// **'Yearly'**
+  String get reportPeriodYearly;
+
+  /// No description provided for @reportPeriodDailySuffix.
+  ///
+  /// In en, this message translates to:
+  /// **'/day'**
+  String get reportPeriodDailySuffix;
+
+  /// No description provided for @reportPeriodWeeklySuffix.
+  ///
+  /// In en, this message translates to:
+  /// **'/week'**
+  String get reportPeriodWeeklySuffix;
+
+  /// No description provided for @reportPeriodMonthlySuffix.
+  ///
+  /// In en, this message translates to:
+  /// **'/month'**
+  String get reportPeriodMonthlySuffix;
+
+  /// No description provided for @reportPeriodYearlySuffix.
+  ///
+  /// In en, this message translates to:
+  /// **'/year'**
+  String get reportPeriodYearlySuffix;
+
+  /// No description provided for @reportCreatePdfEmail.
+  ///
+  /// In en, this message translates to:
+  /// **'Create PDF and share'**
+  String get reportCreatePdfEmail;
+
+  /// No description provided for @reportEmailMyReport.
+  ///
+  /// In en, this message translates to:
+  /// **'Email my report'**
+  String get reportEmailMyReport;
+
+  /// No description provided for @reportPdfEmailSent.
+  ///
+  /// In en, this message translates to:
+  /// **'Report sent to {email}'**
+  String reportPdfEmailSent(String email);
+
+  /// No description provided for @reportPdfOpenFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not open the report PDF link.'**
+  String get reportPdfOpenFailed;
+
+  /// No description provided for @reportPdfSharedLocally.
+  ///
+  /// In en, this message translates to:
+  /// **'Server export unavailable — shared a local PDF copy instead.'**
+  String get reportPdfSharedLocally;
+
+  /// No description provided for @reportUsingLegacyData.
+  ///
+  /// In en, this message translates to:
+  /// **'Using classic report APIs until the new bundle is deployed.'**
+  String get reportUsingLegacyData;
+
+  /// No description provided for @reportStudyWithMishka.
+  ///
+  /// In en, this message translates to:
+  /// **'Study with Mishka'**
+  String get reportStudyWithMishka;
+
+  /// No description provided for @reportDuringConcentrationMode.
+  ///
+  /// In en, this message translates to:
+  /// **'Total study time (Concentration + Camera modes):'**
+  String get reportDuringConcentrationMode;
+
+  /// No description provided for @reportAiTools.
+  ///
+  /// In en, this message translates to:
+  /// **'Using Mishka\'s AI tools'**
+  String get reportAiTools;
+
+  /// No description provided for @reportDailyStreak.
+  ///
+  /// In en, this message translates to:
+  /// **'Daily Streak'**
+  String get reportDailyStreak;
+
+  /// No description provided for @reportDailyStreakChartHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Each bar is one day: 100% = streak kept, 0% = missed.'**
+  String get reportDailyStreakChartHint;
+
+  /// No description provided for @reportStreakCurrent.
+  ///
+  /// In en, this message translates to:
+  /// **'Current'**
+  String get reportStreakCurrent;
+
+  /// No description provided for @reportStreakLongest.
+  ///
+  /// In en, this message translates to:
+  /// **'Longest'**
+  String get reportStreakLongest;
+
+  /// No description provided for @reportStreakFreezes.
+  ///
+  /// In en, this message translates to:
+  /// **'Freezes left'**
+  String get reportStreakFreezes;
+
+  /// No description provided for @reportTasksDue.
+  ///
+  /// In en, this message translates to:
+  /// **'Tasks completed'**
+  String get reportTasksDue;
+
+  /// No description provided for @reportTasksDueHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Each bar is one day — how many to-do tasks you marked done.'**
+  String get reportTasksDueHint;
+
+  /// No description provided for @reportNoTasksInPeriod.
+  ///
+  /// In en, this message translates to:
+  /// **'No tasks completed in this period yet.'**
+  String get reportNoTasksInPeriod;
+
+  /// No description provided for @reportTotalQuizzes.
+  ///
+  /// In en, this message translates to:
+  /// **'Total Quizzes'**
+  String get reportTotalQuizzes;
+
+  /// No description provided for @reportTotalFlashcards.
+  ///
+  /// In en, this message translates to:
+  /// **'Total Flashcards'**
+  String get reportTotalFlashcards;
+
+  /// No description provided for @reportTotalSummaries.
+  ///
+  /// In en, this message translates to:
+  /// **'Total Summaries'**
+  String get reportTotalSummaries;
+
+  /// No description provided for @reportLoadFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not load your report. Pull to refresh.'**
+  String get reportLoadFailed;
+
+  /// No description provided for @reportPdfFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not create report PDF: {error}'**
+  String reportPdfFailed(String error);
+
+  /// No description provided for @settingsReportAutoEmail.
+  ///
+  /// In en, this message translates to:
+  /// **'Automatic report email'**
+  String get settingsReportAutoEmail;
+
+  /// No description provided for @settingsReportAutoEmailHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Receive your weekly or monthly report by email.'**
+  String get settingsReportAutoEmailHint;
+
+  /// No description provided for @reportEmailWeekly.
+  ///
+  /// In en, this message translates to:
+  /// **'Weekly'**
+  String get reportEmailWeekly;
+
+  /// No description provided for @reportEmailMonthly.
+  ///
+  /// In en, this message translates to:
+  /// **'Monthly'**
+  String get reportEmailMonthly;
+
+  /// No description provided for @settingsReportRecipientRow.
+  ///
+  /// In en, this message translates to:
+  /// **'Send reports to'**
+  String get settingsReportRecipientRow;
+
+  /// No description provided for @settingsReportRecipientNotSet.
+  ///
+  /// In en, this message translates to:
+  /// **'Add email'**
+  String get settingsReportRecipientNotSet;
+
+  /// No description provided for @settingsReportRecipientTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Report email address'**
+  String get settingsReportRecipientTitle;
+
+  /// No description provided for @settingsReportRecipientBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter the email address that should receive your weekly or monthly report, and one-off exports from Your Report.'**
+  String get settingsReportRecipientBody;
+
+  /// No description provided for @settingsReportRecipientLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Recipient email'**
+  String get settingsReportRecipientLabel;
+
+  /// No description provided for @settingsReportRecipientSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Report email address saved.'**
+  String get settingsReportRecipientSaved;
+
+  /// No description provided for @settingsReportRecipientSavedLocal.
+  ///
+  /// In en, this message translates to:
+  /// **'Saved on this device. Server sync will apply when the backend adds report email recipient support.'**
+  String get settingsReportRecipientSavedLocal;
+
+  /// No description provided for @settingsReportRecipientUseAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'Use my account email ({email})'**
+  String settingsReportRecipientUseAccount(String email);
+
+  /// No description provided for @communityCreateTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Create New Community'**
+  String get communityCreateTitle;
+
+  /// No description provided for @communityCreateVisibilityLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Select your community\'s visibility:'**
+  String get communityCreateVisibilityLabel;
+
+  /// No description provided for @communityVisibilityPrivate.
+  ///
+  /// In en, this message translates to:
+  /// **'Private'**
+  String get communityVisibilityPrivate;
+
+  /// No description provided for @communityVisibilityPublic.
+  ///
+  /// In en, this message translates to:
+  /// **'Public'**
+  String get communityVisibilityPublic;
+
+  /// No description provided for @communityCreateNameLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Community name:'**
+  String get communityCreateNameLabel;
+
+  /// No description provided for @communityCreateNameHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Community name'**
+  String get communityCreateNameHint;
+
+  /// No description provided for @communityCreateDescLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Description (optional):'**
+  String get communityCreateDescLabel;
+
+  /// No description provided for @communityCreateDescHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Community description'**
+  String get communityCreateDescHint;
+
+  /// No description provided for @communityCreateDiscoverSection.
+  ///
+  /// In en, this message translates to:
+  /// **'Discovery (public communities)'**
+  String get communityCreateDiscoverSection;
+
+  /// No description provided for @communityCreateDiscoverSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Help others find your community in Discover and recommendations.'**
+  String get communityCreateDiscoverSubtitle;
+
+  /// No description provided for @communityCreateNameRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter a community name'**
+  String get communityCreateNameRequired;
+
+  /// No description provided for @communityCreateSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Your community was created successfully!'**
+  String get communityCreateSuccess;
+
+  /// No description provided for @communityCreateButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Create Community'**
+  String get communityCreateButton;
+
+  /// No description provided for @communityCreateEducationHintUniversity.
+  ///
+  /// In en, this message translates to:
+  /// **'Using your profile: University, year {year}'**
+  String communityCreateEducationHintUniversity(String year);
+
+  /// No description provided for @communityCreateEducationHintSchool.
+  ///
+  /// In en, this message translates to:
+  /// **'Using your profile: School, grade {grade}'**
+  String communityCreateEducationHintSchool(String grade);
+
+  /// No description provided for @communityCreateEducationHintProfile.
+  ///
+  /// In en, this message translates to:
+  /// **'Using your profile: {status}'**
+  String communityCreateEducationHintProfile(String status);
+
+  /// No description provided for @communityHubSearchHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Search...'**
+  String get communityHubSearchHint;
+
+  /// No description provided for @communityHubCreateNew.
+  ///
+  /// In en, this message translates to:
+  /// **'Create New Community'**
+  String get communityHubCreateNew;
+
+  /// No description provided for @communityHubJoinPrivate.
+  ///
+  /// In en, this message translates to:
+  /// **'Join Private Community'**
+  String get communityHubJoinPrivate;
+
+  /// No description provided for @communityHubSavedSection.
+  ///
+  /// In en, this message translates to:
+  /// **'Saved Communities:'**
+  String get communityHubSavedSection;
+
+  /// No description provided for @communityHubSavedEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No saved communities yet. Open a community and tap ⋮ → Save Community.'**
+  String get communityHubSavedEmpty;
+
+  /// No description provided for @communityHubPrivateSection.
+  ///
+  /// In en, this message translates to:
+  /// **'Private Communities you\'re in:'**
+  String get communityHubPrivateSection;
+
+  /// No description provided for @communityHubPublicSection.
+  ///
+  /// In en, this message translates to:
+  /// **'Public Communities you\'re in:'**
+  String get communityHubPublicSection;
+
+  /// No description provided for @communityHubRecommendedSection.
+  ///
+  /// In en, this message translates to:
+  /// **'Recommended for you'**
+  String get communityHubRecommendedSection;
+
+  /// No description provided for @communityHubSeeAll.
+  ///
+  /// In en, this message translates to:
+  /// **'See all'**
+  String get communityHubSeeAll;
+
+  /// No description provided for @communityHubDiscoverButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Discover Communities'**
+  String get communityHubDiscoverButton;
+
+  /// No description provided for @communityHubEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No communities yet. Create one or join with a code.'**
+  String get communityHubEmpty;
+
+  /// No description provided for @communityHubSavedEmptySnack.
+  ///
+  /// In en, this message translates to:
+  /// **'No saved communities yet. Open a community and use ⋮ → Save Community.'**
+  String get communityHubSavedEmptySnack;
+
+  /// No description provided for @communitySave.
+  ///
+  /// In en, this message translates to:
+  /// **'Save Community'**
+  String get communitySave;
+
+  /// No description provided for @communityUnsave.
+  ///
+  /// In en, this message translates to:
+  /// **'Unsave Community'**
+  String get communityUnsave;
+
+  /// No description provided for @communitySavedSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Community saved successfully!'**
+  String get communitySavedSuccess;
+
+  /// No description provided for @communityUnsavedSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Community removed from saved.'**
+  String get communityUnsavedSuccess;
+
+  /// No description provided for @communityDiscoverTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Discover Communities'**
+  String get communityDiscoverTitle;
+
+  /// No description provided for @communityDiscoverSearchHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Search communities…'**
+  String get communityDiscoverSearchHint;
+
+  /// No description provided for @communityDiscoverForYou.
+  ///
+  /// In en, this message translates to:
+  /// **'For you'**
+  String get communityDiscoverForYou;
+
+  /// No description provided for @communityDiscoverPopular.
+  ///
+  /// In en, this message translates to:
+  /// **'Popular'**
+  String get communityDiscoverPopular;
+
+  /// No description provided for @communityDiscoverNew.
+  ///
+  /// In en, this message translates to:
+  /// **'New'**
+  String get communityDiscoverNew;
+
+  /// No description provided for @communityDiscoverSubjects.
+  ///
+  /// In en, this message translates to:
+  /// **'Subjects'**
+  String get communityDiscoverSubjects;
+
+  /// No description provided for @communityDiscoverAll.
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get communityDiscoverAll;
+
+  /// No description provided for @communityDiscoverProfileHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Complete your education in Profile to get better recommendations.'**
+  String get communityDiscoverProfileHint;
+
+  /// No description provided for @communityDiscoverEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No communities to show yet.'**
+  String get communityDiscoverEmpty;
+
+  /// No description provided for @communityDiscoverJoin.
+  ///
+  /// In en, this message translates to:
+  /// **'Join'**
+  String get communityDiscoverJoin;
+
+  /// No description provided for @communityMemberPromoteAdmin.
+  ///
+  /// In en, this message translates to:
+  /// **'Make Admin'**
+  String get communityMemberPromoteAdmin;
+
+  /// No description provided for @communityMemberDemoteMember.
+  ///
+  /// In en, this message translates to:
+  /// **'Make Member'**
+  String get communityMemberDemoteMember;
+
+  /// No description provided for @communityMemberRoleUpdated.
+  ///
+  /// In en, this message translates to:
+  /// **'Member role updated.'**
+  String get communityMemberRoleUpdated;
+
+  /// No description provided for @communityChatSenderMe.
+  ///
+  /// In en, this message translates to:
+  /// **'Me'**
+  String get communityChatSenderMe;
 }
 
 class _AppLocalizationsDelegate

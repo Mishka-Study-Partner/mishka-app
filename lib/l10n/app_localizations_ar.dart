@@ -85,12 +85,18 @@ class AppLocalizationsAr extends AppLocalizations {
   String get verifyByEmail => 'التحقق عبر عنوان البريد الإلكتروني';
 
   @override
-  String get enter5DigitsCodeEmail =>
-      'أدخل رمز الخمسة أرقام الذي تلقيته على بريدك الإلكتروني: example123@gamil.com';
+  String enter5DigitsCodeEmail(String email) {
+    return 'أدخل رمز الخمسة أرقام الذي تلقيته على بريدك الإلكتروني: $email';
+  }
 
   @override
   String enter6DigitsCodeEmail(String email) {
     return 'أدخل رمز التحقق المكون من 6 أرقام الذي استلمته على بريدك الإلكتروني: $email';
+  }
+
+  @override
+  String enter6DigitsCodePhone(String phone) {
+    return 'أدخل رمز الـ 6 أرقام الذي تلقيته (SMS) على $phone';
   }
 
   @override
@@ -141,8 +147,9 @@ class AppLocalizationsAr extends AppLocalizations {
   String get verifyByPhoneNumber => 'التحقق عبر رقم الهاتف';
 
   @override
-  String get enter5DigitsCodePhone =>
-      'أدخل رمز الخمسة أرقام الذي تلقيته (SMS) على +20 1010101010';
+  String enter5DigitsCodePhone(String phone) {
+    return 'أدخل رمز الخمسة أرقام الذي تلقيته (SMS) على $phone';
+  }
 
   @override
   String get welcomeBackSara => 'مرحباً بعودتك، زياد!';
@@ -187,6 +194,31 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get upcoming => 'قادم';
+
+  @override
+  String streakStats(int longest, int freezes) {
+    return 'الأفضل: $longest · $freezes تجميدات متبقية';
+  }
+
+  @override
+  String get streakMissed => 'فائت (اضغط للتجميد)';
+
+  @override
+  String get streakFreezeTitle => 'استخدام تجميد السلسلة؟';
+
+  @override
+  String streakFreezeMessage(String date) {
+    return 'حماية سلسلتك ليوم $date؟';
+  }
+
+  @override
+  String get streakFreezeConfirm => 'استخدام التجميد';
+
+  @override
+  String get streakFreezeSuccess => 'تم تطبيق تجميد السلسلة';
+
+  @override
+  String get streakFreezeFailed => 'تعذر تطبيق تجميد السلسلة';
 
   @override
   String get tipOfTheDay => 'نصيحة اليوم';
@@ -241,6 +273,138 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get chatWithMishka => 'الدردشة مع ميشكا';
+
+  @override
+  String get yourHistory => 'سجلّك';
+
+  @override
+  String get searchYourHistory => 'ابحث في سجلّك...';
+
+  @override
+  String get historyChats => 'المحادثات:';
+
+  @override
+  String get historyQuizzes => 'الاختبارات:';
+
+  @override
+  String get historyFlashCards => 'البطاقات:';
+
+  @override
+  String get historySummarization => 'الملخصات :';
+
+  @override
+  String get historyMindMaps => 'الخرائط الذهنية:';
+
+  @override
+  String get historyEmpty => 'لا يوجد سجل';
+
+  @override
+  String get historyLoadFailed => 'تعذر تحميل هذه المحادثة';
+
+  @override
+  String get chatGreeting => 'مرحباً، ارفع مادتك لنبدأ رحلتنا';
+
+  @override
+  String get chatAnalyzingPdf => 'جاري تحليل PDF...';
+
+  @override
+  String get chatWhichTool => 'أي أداة تريد استخدامها؟';
+
+  @override
+  String get chatWaitForExplanation => 'يرجى انتظار اكتمال الشرح أولاً.';
+
+  @override
+  String get chatUploadPdfHint => 'ارفع PDF للبدء';
+
+  @override
+  String get chatChooseDifficultyHint => 'اختر مستوى الصعوبة أعلاه';
+
+  @override
+  String get chatDifficultySimple => 'بسيط';
+
+  @override
+  String get chatDifficultyIntermediate => 'متوسط';
+
+  @override
+  String get chatDifficultyAdvanced => 'متقدم';
+
+  @override
+  String get chatToolQuiz => 'اختبار';
+
+  @override
+  String get chatToolFlashcards => 'بطاقات';
+
+  @override
+  String get chatToolMindMap => 'خريطة ذهنية';
+
+  @override
+  String get chatToolSummarize => 'تلخيص';
+
+  @override
+  String get chatRegenerate => 'إعادة إنشاء';
+
+  @override
+  String get chatAnotherTool => 'أداة أخرى';
+
+  @override
+  String chatToolSelected(String tool) {
+    return 'رائع! اخترت: $tool. جاري إنشاؤها...';
+  }
+
+  @override
+  String chatRegenerating(String tool) {
+    return 'جاري إعادة إنشاء $tool...';
+  }
+
+  @override
+  String chatRegenerationFailed(String error) {
+    return 'فشلت إعادة الإنشاء.\n$error';
+  }
+
+  @override
+  String chatAnalyzePdfFailed(String error) {
+    return 'فشل تحليل PDF.\n$error';
+  }
+
+  @override
+  String chatToolGenerationFailed(String error) {
+    return 'فشل إنشاء الأداة.\n$error';
+  }
+
+  @override
+  String chatMessageFailed(String error) {
+    return 'فشلت الدردشة.\n$error';
+  }
+
+  @override
+  String chatSessionStartFailed(String error) {
+    return 'تعذر بدء جلسة الدردشة.\n$error';
+  }
+
+  @override
+  String get chatNewChatTitle => 'بدء محادثة جديدة؟';
+
+  @override
+  String get chatNewChatMessage =>
+      'محادثتك الحالية تبقى في السجل. يمكنك إعادة فتحها من القائمة.';
+
+  @override
+  String get chatNewChatConfirm => 'محادثة جديدة';
+
+  @override
+  String get chatNewChatAction => 'محادثة جديدة';
+
+  @override
+  String get renameSavedItem => 'إعادة تسمية العنصر';
+
+  @override
+  String get savedItemRenamed => 'تمت إعادة تسمية العنصر';
+
+  @override
+  String get savedRenameUnavailable => 'لا يمكن إعادة تسمية هذا العنصر';
+
+  @override
+  String get savedItemTitleHint => 'العنوان';
 
   @override
   String get summarizeWithMishka => 'تلخيص مع ميشكا';
@@ -330,6 +494,16 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get invalidEmailHint => 'يرجى إدخال بريد إلكتروني صالح.';
+
+  @override
+  String get invalidPhoneHint => 'يرجى إدخال رقم هاتف صالح.';
+
+  @override
+  String get nameTooLong => 'يجب ألا يزيد الاسم عن 50 حرفاً.';
+
+  @override
+  String get accountAlreadyExists =>
+      'يوجد حساب مسجّل بهذا البريد أو رقم الهاتف مسبقاً.';
 
   @override
   String get retry => 'إعادة المحاولة';
@@ -436,6 +610,61 @@ class AppLocalizationsAr extends AppLocalizations {
   String get chooseAppearance => 'اختر المظهر';
 
   @override
+  String get settings => 'الإعدادات';
+
+  @override
+  String get settingsSubtitle => 'اللغة، المظهر، الإشعارات';
+
+  @override
+  String get settingsDescription =>
+      'اختر شكل تطبيق Mishka وكيف نتواصل معك. تُطبَّق التغييرات على هذا الجهاز وتُزامَن مع حسابك عند تسجيل الدخول.';
+
+  @override
+  String get settingsPreferencesSection => 'التفضيلات';
+
+  @override
+  String get settingsSyncFailed =>
+      'تعذّر مزامنة الإعدادات مع حسابك. تم حفظ اختيارك على هذا الجهاز.';
+
+  @override
+  String get privacyPolicyBody =>
+      'يحترم Mishka خصوصيتك. نجمع فقط المعلومات اللازمة لتشغيل حسابك وتخصيص ميزات الدراسة وتحسين التطبيق.\n\nنستخدم بريدك الإلكتروني وبيانات ملفك للمصادقة والتواصل بشأن حسابك. يُخزَّن نشاط الدراسة والمهام وتفاعلات الذكاء الاصطناعي لتوفير السجل والسلاسل وميزات التدريس التي تستخدمها.\n\nلا نبيع بياناتك الشخصية. قد نشارك بيانات محدودة مع مزودي البنية التحتية والإشعارات بموجب سرية صارمة.\n\nيمكنك تحديث ملفك وتعليمك وتفضيلاتك من التطبيق. تواصل مع الدعم إذا احتجت الوصول أو التصحيح أو الحذف.\n\nهذا ملخص للتيسير. قد تُنشر سياسة قانونية كاملة لاحقًا على موقعنا.';
+
+  @override
+  String get helpSupportIntro =>
+      'تحتاج مساعدة في Mishka؟ تواصل معنا عبر بيانات الاتصال أدناه.';
+
+  @override
+  String get helpSupportContactsTitle => 'تواصل معنا';
+
+  @override
+  String get helpSupportTapToOpen =>
+      'اضغط على الصف لفتح Gmail أو واتساب أو الرابط في التطبيق المناسب.';
+
+  @override
+  String get linkOpenFailed => 'تعذّر فتح هذا الرابط على جهازك.';
+
+  @override
+  String get linkOpenFailedCopied =>
+      'تعذّر فتح التطبيق — تم النسخ إلى الحافظة.';
+
+  @override
+  String get supportFacebook => 'فيسبوك';
+
+  @override
+  String get supportInstagram => 'إنستغرام';
+
+  @override
+  String get supportWhatsApp => 'واتساب';
+
+  @override
+  String get copiedToClipboard => 'تم النسخ';
+
+  @override
+  String get helpSupportBody =>
+      'تحتاج مساعدة في Mishka؟ إليك خطوات سريعة.\n\nالحساب وتسجيل الدخول: استخدم «نسيت كلمة المرور» من شاشة الدخول. تأكد أن البريد أو الهاتف يطابق ما سجّلت به.\n\nالدراسة مع Mishka: ابدأ جلسة من الرئيسية، اختر مؤقتًا، وابقَ على شاشة الجلسة حتى تنهي أو تتوقف مبكرًا. إن فشل البدء، تحقق من الاتصال وأعد المحاولة.\n\nالمهام والقوائم: أنشئ قوائم من قسم المهام، ثم أضف مهامًا بمواعيد. اسحب للتحديث في الرئيسية لرؤية المهام القادمة.\n\nالملف والتعليم: افتح الملف الشخصي لتعديل الاسم والاتصال والجنس والمستوى التعليمي. استخدم الإعدادات للغة والمظهر والإشعارات.\n\nما زلت بحاجة لمساعدة؟ راسلنا على support@mishka.app مع وصف مختصر ولقطات إن أمكن. نرد عادة خلال أيام عمل.';
+
+  @override
   String get privacyPolicy => 'سياسة الخصوصية';
 
   @override
@@ -458,31 +687,6 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get summarize => 'تلخيص';
-
-  @override
-  String get yourHistory => 'سجلك';
-
-  @override
-  String get searchYourHistory => 'ابحث في سجلك...';
-
-  @override
-  String get chats => 'المحادثات:';
-
-  @override
-  String get tellMeMoreAboutMishka => 'أخبرني المزيد عن تطبيق MISHKA؟';
-
-  @override
-  String get quizes => 'الاختبارات:';
-
-  @override
-  String get makeMeFlashcards =>
-      'اصنع لي بطاقات تعليمية واختبارات وملخص للمقال لهذه الملفات المرفوعة';
-
-  @override
-  String get flashCardsColon => 'البطاقات التعليمية:';
-
-  @override
-  String get summarization => 'التلخيص:';
 
   @override
   String get mishka => 'ميشكا';
@@ -857,6 +1061,31 @@ class AppLocalizationsAr extends AppLocalizations {
   String get shareToCommunityChannels => 'المشاركة إلى قنوات المجتمع';
 
   @override
+  String get shareCommunitiesYouJoined => 'المجتمعات التي انضممت إليها';
+
+  @override
+  String get shareToSelectedGroups => 'المشاركة إلى المجموعات المحددة';
+
+  @override
+  String shareMembersGroupsCount(int members, int groups) {
+    return '$members عضو $groups مجموعات';
+  }
+
+  @override
+  String shareGroupMembersCount(int count) {
+    return '$count عضو';
+  }
+
+  @override
+  String get shareSuccessTitle => 'تمت المشاركة بنجاح إلى المجموعة';
+
+  @override
+  String get shareSuccessContinue => 'متابعة';
+
+  @override
+  String get shareOpenGroup => 'فتح المجموعة';
+
+  @override
   String get noCommunityChannelsFound => 'لا توجد قنوات مجتمع متاحة';
 
   @override
@@ -1062,4 +1291,388 @@ class AppLocalizationsAr extends AppLocalizations {
   @override
   String get cameraPermissionRequired =>
       'يجب السماح بالوصول للكاميرا لوضع مكالمة الفيديو.';
+
+  @override
+  String get onboardingIntroLine1 => 'أنا ميشكا، حارس المعرفة،';
+
+  @override
+  String get onboardingIntroLine2 => 'تبدأ رحلتنا نحو المجد';
+
+  @override
+  String get onboardingIntroLine3 => 'الآن!';
+
+  @override
+  String get welcomeToMishka => 'مرحباً بك في ميشكا!';
+
+  @override
+  String get welcomeToMishkaSubtitle =>
+      'دع حارس المعرفة يرشدك في طريق الاكتشاف.';
+
+  @override
+  String get educationLevel => 'المستوى التعليمي';
+
+  @override
+  String get educationLevelComingSoon =>
+      'اختيار المستوى التعليمي سيتوفر في التحديث القادم.';
+
+  @override
+  String get educationStatusQuestion =>
+      'أيٌّ مما يلي يصف وضعك التعليمي الحالي بشكل أفضل؟';
+
+  @override
+  String get school => 'مدرسة';
+
+  @override
+  String get university => 'جامعة';
+
+  @override
+  String get otherColon => 'أخرى:';
+
+  @override
+  String get schoolStageQuestion => 'في أي مرحلة مدرسية أنت الآن؟';
+
+  @override
+  String get middleSchoolColon => 'المرحلة الإعدادية:';
+
+  @override
+  String get highSchoolColon => 'المرحلة الثانوية:';
+
+  @override
+  String get firstPreparatory => 'الإعدادي الأول';
+
+  @override
+  String get secondPreparatory => 'الإعدادي الثاني';
+
+  @override
+  String get thirdPreparatory => 'الإعدادي الثالث';
+
+  @override
+  String get firstSecondary => 'الثانوي الأول';
+
+  @override
+  String get secondSecondary => 'الثانوي الثاني';
+
+  @override
+  String get thirdSecondary => 'الثانوي الثالث';
+
+  @override
+  String get universityYearQuestion => 'في أي سنة دراسية جامعية أنت الآن؟';
+
+  @override
+  String get universityColon => 'الجامعة:';
+
+  @override
+  String get firstYear => 'السنة الأولى';
+
+  @override
+  String get secondYear => 'السنة الثانية';
+
+  @override
+  String get thirdYear => 'السنة الثالثة';
+
+  @override
+  String get fourthYear => 'السنة الرابعة';
+
+  @override
+  String get fifthYear => 'السنة الخامسة';
+
+  @override
+  String get pleaseSpecifyEducationStatus => 'يرجى تحديد مستواك التعليمي:';
+
+  @override
+  String get educationOtherHint => 'أدخل مستواك التعليمي';
+
+  @override
+  String get editEducation => 'تعديل التعليم';
+
+  @override
+  String get yourReport => 'تقريرك';
+
+  @override
+  String get reportPeriodDaily => 'يومي';
+
+  @override
+  String get reportPeriodWeekly => 'أسبوعي';
+
+  @override
+  String get reportPeriodMonthly => 'شهري';
+
+  @override
+  String get reportPeriodYearly => 'سنوي';
+
+  @override
+  String get reportPeriodDailySuffix => '/يوم';
+
+  @override
+  String get reportPeriodWeeklySuffix => '/أسبوع';
+
+  @override
+  String get reportPeriodMonthlySuffix => '/شهر';
+
+  @override
+  String get reportPeriodYearlySuffix => '/سنة';
+
+  @override
+  String get reportCreatePdfEmail => 'إنشاء PDF ومشاركته';
+
+  @override
+  String get reportEmailMyReport => 'إرسال التقرير بالبريد';
+
+  @override
+  String reportPdfEmailSent(String email) {
+    return 'تم إرسال التقرير إلى $email';
+  }
+
+  @override
+  String get reportPdfOpenFailed => 'تعذر فتح رابط PDF للتقرير.';
+
+  @override
+  String get reportPdfSharedLocally =>
+      'تعذر التصدير من الخادم — تمت مشاركة نسخة PDF محلية.';
+
+  @override
+  String get reportUsingLegacyData =>
+      'يتم استخدام واجهات التقرير الكلاسيكية حتى يتم نشر الحزمة الجديدة.';
+
+  @override
+  String get reportStudyWithMishka => 'الدراسة مع ميشكا';
+
+  @override
+  String get reportDuringConcentrationMode =>
+      'إجمالي وقت الدراسة (وضع التركيز + الكاميرا):';
+
+  @override
+  String get reportAiTools => 'استخدام أدوات ميشكا الذكية';
+
+  @override
+  String get reportDailyStreak => 'سلسلة الأيام';
+
+  @override
+  String get reportDailyStreakChartHint =>
+      'كل شريط = يوم: 100% = حافظت على السلسلة، 0% = فاتك.';
+
+  @override
+  String get reportStreakCurrent => 'الحالية';
+
+  @override
+  String get reportStreakLongest => 'الأطول';
+
+  @override
+  String get reportStreakFreezes => 'تجميدات متبقية';
+
+  @override
+  String get reportTasksDue => 'المهام المنجزة';
+
+  @override
+  String get reportTasksDueHint => 'كل شريط = يوم — عدد المهام التي أنجزتها.';
+
+  @override
+  String get reportNoTasksInPeriod => 'لم تنجز مهاماً في هذه الفترة بعد.';
+
+  @override
+  String get reportTotalQuizzes => 'إجمالي الاختبارات';
+
+  @override
+  String get reportTotalFlashcards => 'إجمالي البطاقات';
+
+  @override
+  String get reportTotalSummaries => 'إجمالي الملخصات';
+
+  @override
+  String get reportLoadFailed => 'تعذر تحميل تقريرك. اسحب للتحديث.';
+
+  @override
+  String reportPdfFailed(String error) {
+    return 'تعذر إنشاء PDF للتقرير: $error';
+  }
+
+  @override
+  String get settingsReportAutoEmail => 'إرسال التقرير تلقائياً';
+
+  @override
+  String get settingsReportAutoEmailHint =>
+      'استلم تقريرك الأسبوعي أو الشهري بالبريد.';
+
+  @override
+  String get reportEmailWeekly => 'أسبوعي';
+
+  @override
+  String get reportEmailMonthly => 'شهري';
+
+  @override
+  String get settingsReportRecipientRow => 'إرسال التقارير إلى';
+
+  @override
+  String get settingsReportRecipientNotSet => 'أضف بريداً';
+
+  @override
+  String get settingsReportRecipientTitle => 'بريد استلام التقرير';
+
+  @override
+  String get settingsReportRecipientBody =>
+      'أدخل البريد الذي يستلم تقريرك الأسبوعي أو الشهري، وتصدير التقرير من شاشة «تقريرك».';
+
+  @override
+  String get settingsReportRecipientLabel => 'بريد المستلم';
+
+  @override
+  String get settingsReportRecipientSaved => 'تم حفظ بريد استلام التقرير.';
+
+  @override
+  String get settingsReportRecipientSavedLocal =>
+      'تم الحفظ على هذا الجهاز. ستتم المزامنة مع الخادم عند دعم حقل بريد المستلم.';
+
+  @override
+  String settingsReportRecipientUseAccount(String email) {
+    return 'استخدام بريد حسابي ($email)';
+  }
+
+  @override
+  String get communityCreateTitle => 'إنشاء مجتمع جديد';
+
+  @override
+  String get communityCreateVisibilityLabel => 'اختر نوع المجتمع:';
+
+  @override
+  String get communityVisibilityPrivate => 'خاص';
+
+  @override
+  String get communityVisibilityPublic => 'عام';
+
+  @override
+  String get communityCreateNameLabel => 'اسم المجتمع:';
+
+  @override
+  String get communityCreateNameHint => 'اسم المجتمع';
+
+  @override
+  String get communityCreateDescLabel => 'الوصف (اختياري):';
+
+  @override
+  String get communityCreateDescHint => 'وصف المجتمع';
+
+  @override
+  String get communityCreateDiscoverSection => 'الاكتشاف (مجتمعات عامة)';
+
+  @override
+  String get communityCreateDiscoverSubtitle =>
+      'ساعد الآخرين على إيجاد مجتمعك في الاكتشاف والتوصيات.';
+
+  @override
+  String get communityCreateNameRequired => 'يرجى إدخال اسم المجتمع';
+
+  @override
+  String get communityCreateSuccess => 'تم إنشاء مجتمعك بنجاح!';
+
+  @override
+  String get communityCreateButton => 'إنشاء المجتمع';
+
+  @override
+  String communityCreateEducationHintUniversity(String year) {
+    return 'من ملفك: جامعة، السنة $year';
+  }
+
+  @override
+  String communityCreateEducationHintSchool(String grade) {
+    return 'من ملفك: مدرسة، الصف $grade';
+  }
+
+  @override
+  String communityCreateEducationHintProfile(String status) {
+    return 'من ملفك: $status';
+  }
+
+  @override
+  String get communityHubSearchHint => 'بحث...';
+
+  @override
+  String get communityHubCreateNew => 'إنشاء مجتمع جديد';
+
+  @override
+  String get communityHubJoinPrivate => 'انضم لمجتمع خاص';
+
+  @override
+  String get communityHubSavedSection => 'المجتمعات المحفوظة:';
+
+  @override
+  String get communityHubSavedEmpty =>
+      'No saved communities yet. Open a community and tap ⋮ → Save Community.';
+
+  @override
+  String get communityHubPrivateSection => 'مجتمعات خاصة أنت فيها:';
+
+  @override
+  String get communityHubPublicSection => 'مجتمعات عامة أنت فيها:';
+
+  @override
+  String get communityHubRecommendedSection => 'موصى به لك';
+
+  @override
+  String get communityHubSeeAll => 'عرض الكل';
+
+  @override
+  String get communityHubDiscoverButton => 'اكتشف المجتمعات';
+
+  @override
+  String get communityHubEmpty =>
+      'لا توجد مجتمعات بعد. أنشئ واحداً أو انضم برمز.';
+
+  @override
+  String get communityHubSavedEmptySnack =>
+      'لا توجد مجتمعات محفوظة. افتح مجتمعاً واستخدم ⋮ → حفظ المجتمع.';
+
+  @override
+  String get communitySave => 'حفظ المجتمع';
+
+  @override
+  String get communityUnsave => 'إلغاء الحفظ';
+
+  @override
+  String get communitySavedSuccess => 'تم حفظ المجتمع بنجاح!';
+
+  @override
+  String get communityUnsavedSuccess => 'تمت إزالة المجتمع من المحفوظة.';
+
+  @override
+  String get communityDiscoverTitle => 'اكتشف المجتمعات';
+
+  @override
+  String get communityDiscoverSearchHint => 'ابحث في المجتمعات…';
+
+  @override
+  String get communityDiscoverForYou => 'لك';
+
+  @override
+  String get communityDiscoverPopular => 'الأكثر شعبية';
+
+  @override
+  String get communityDiscoverNew => 'جديد';
+
+  @override
+  String get communityDiscoverSubjects => 'المواد';
+
+  @override
+  String get communityDiscoverAll => 'الكل';
+
+  @override
+  String get communityDiscoverProfileHint =>
+      'أكمل تعليمك في الملف الشخصي للحصول على توصيات أفضل.';
+
+  @override
+  String get communityDiscoverEmpty => 'لا توجد مجتمعات للعرض بعد.';
+
+  @override
+  String get communityDiscoverJoin => 'انضم';
+
+  @override
+  String get communityMemberPromoteAdmin => 'تعيين مشرف';
+
+  @override
+  String get communityMemberDemoteMember => 'تعيين عضو';
+
+  @override
+  String get communityMemberRoleUpdated => 'تم تحديث دور العضو.';
+
+  @override
+  String get communityChatSenderMe => 'أنا';
 }
