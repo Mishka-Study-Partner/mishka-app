@@ -3,8 +3,10 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import 'package:mishka_app/core/utils/app_colors.dart';
 import 'package:mishka_app/core/utils/app_sizes.dart';
+import 'package:mishka_app/l10n/app_localizations.dart';
 
 import '../../community_styles.dart';
+import '../../data/community_error_helpers.dart';
 import '../../data/community_models.dart';
 
 Future<bool?> showCommunityConfirmDialog(
@@ -27,6 +29,7 @@ class CommunityConfirmDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Dialog(
       backgroundColor: AppColors.white,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppSizes.radiusSmall)),
@@ -41,13 +44,13 @@ class CommunityConfirmDialog extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 _ActionChip(
-                  label: 'No',
+                  label: l10n.no,
                   color: AppColors.green,
                   onTap: () => Navigator.pop(context, false),
                 ),
                 SizedBox(width: 10.w),
                 _ActionChip(
-                  label: 'Yes',
+                  label: l10n.yes,
                   color: AppColors.red,
                   onTap: () => Navigator.pop(context, true),
                 ),
@@ -121,6 +124,7 @@ class CommunitySuccessDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Dialog(
       backgroundColor: AppColors.white,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppSizes.radiusMedium)),
@@ -141,7 +145,7 @@ class CommunitySuccessDialog extends StatelessWidget {
                   onDismiss?.call();
                 },
                 style: CommunityStyles.goldButtonStyle(verticalPadding: 12.h),
-                child: const Text('OK'),
+                child: Text(l10n.ok),
               ),
             ),
           ],
@@ -159,6 +163,8 @@ Future<void> showJoinPrivateCommunityDialog(
   final controller = TextEditingController();
   var submitting = false;
 
+  final l10n = AppLocalizations.of(context)!;
+
   return showDialog<void>(
     context: context,
     builder: (ctx) => StatefulBuilder(
@@ -172,15 +178,17 @@ Future<void> showJoinPrivateCommunityDialog(
               mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
-                  'Join Private Community',
+                  l10n.communityJoinPrivateTitle,
                   style: CommunityStyles.bodyLarge.copyWith(fontWeight: FontWeight.w600),
                 ),
                 SizedBox(height: 10.h),
-                Text("Insert your community's code:", style: CommunityStyles.body),
+                Text(l10n.communityJoinPrivateCodePrompt, style: CommunityStyles.body),
                 SizedBox(height: 8.h),
                 TextField(
                   controller: controller,
-                  decoration: CommunityStyles.inputDecoration('Community code'),
+                  decoration: CommunityStyles.inputDecoration(
+                    l10n.communityJoinPrivateCodeHint,
+                  ),
                 ),
                 SizedBox(height: 14.h),
                 SizedBox(
@@ -199,13 +207,14 @@ Future<void> showJoinPrivateCommunityDialog(
                               Navigator.pop(ctx);
                               await showCommunitySuccessDialog(
                                 context,
-                                message: 'You have joined the community!',
+                                message: l10n.communityJoinPrivateSuccess,
                                 onDismiss: () => onSuccess(community),
                               );
                             } catch (e) {
                               if (!context.mounted) return;
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(content: Text('$e', style: CommunityStyles.snackBar)),
+                              CommunityStyles.showSnackBar(
+                                context,
+                                communityErrorMessage(e, l10n: l10n),
                               );
                               setState(() => submitting = false);
                             }
@@ -216,7 +225,7 @@ Future<void> showJoinPrivateCommunityDialog(
                             height: 20.w,
                             child: const CircularProgressIndicator(strokeWidth: 2),
                           )
-                        : const Text('Join community'),
+                        : Text(l10n.communityJoinPrivateButton),
                   ),
                 ),
               ],

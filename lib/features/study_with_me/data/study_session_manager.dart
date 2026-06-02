@@ -14,19 +14,29 @@ class StudySessionManager extends ChangeNotifier {
 
   SmartTimerController? _controller;
   String? _backendSessionId;
+  bool _isCallMode = false;
 
   SmartTimerController? get controller => _controller;
   String? get backendSessionId => _backendSessionId;
   bool get hasActiveSession => _controller != null;
   bool get isRunning => _controller?.isRunning ?? false;
+  bool get isCallMode => _isCallMode;
 
   void startSession(StudyTimerModel model) {
     _controller?.dispose();
+    _isCallMode = model.modeId == 'call_with_mishka';
     _controller = SmartTimerController(model);
     _controller!.addListener(_onUpdate);
-    _controller!.onPause = notifyPause;
-    _controller!.onResume = notifyResume;
-    _controller!.onPhaseAdvance = notifyAdvancePhase;
+    // Call mode uses call-break/* only; concentration uses pause/resume/advance-phase.
+    if (_isCallMode) {
+      _controller!.onPause = null;
+      _controller!.onResume = null;
+      _controller!.onPhaseAdvance = null;
+    } else {
+      _controller!.onPause = notifyPause;
+      _controller!.onResume = notifyResume;
+      _controller!.onPhaseAdvance = notifyAdvancePhase;
+    }
     notifyListeners();
     _startBackendSession(model);
   }
@@ -35,16 +45,22 @@ class StudySessionManager extends ChangeNotifier {
     final isCall = model.modeId == 'call_with_mishka';
     String? concentrationPreset;
     if (!isCall) {
-      // Map modeId to the backend concentrationPreset enum value
-      concentrationPreset = model.modeId ?? 'custom';
+      concentrationPreset = _normalizeConcentrationPreset(model.modeId);
     }
     _backendSessionId = await _remote.startSession(
       topLevelMode: isCall ? 'call_with_mishka' : 'concentration',
       concentrationPreset: concentrationPreset,
+      customPresetId: model.customPresetId,
       focusMinutes: model.studyMinutes > 0 ? model.studyMinutes : null,
       shortBreakMinutes: model.shortBreakMinutes,
       longBreakMinutes: model.longBreakMinutes,
     );
+  }
+
+  String _normalizeConcentrationPreset(String? modeId) {
+    if (modeId == null || modeId.isEmpty) return 'custom';
+    if (modeId == 'custom_timer') return 'custom';
+    return modeId;
   }
 
   void endSession({String outcome = 'completed'}) {
@@ -52,6 +68,7 @@ class StudySessionManager extends ChangeNotifier {
     _controller?.stop();
     _controller?.dispose();
     _controller = null;
+    _isCallMode = false;
     if (_backendSessionId != null) {
       _remote.endSession(_backendSessionId!, outcome: outcome);
       _backendSessionId = null;

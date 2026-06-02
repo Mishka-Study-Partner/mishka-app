@@ -6,10 +6,13 @@ import 'package:mishka_app/core/network/api_service.dart';
 import 'package:mishka_app/core/utils/app_colors.dart';
 import 'package:mishka_app/core/utils/app_sizes.dart';
 import 'package:mishka_app/features/Auth/data/data_sources/auth_remote_data_source.dart';
+import 'package:mishka_app/features/Auth/utils/auth_navigation.dart';
+import 'package:mishka_app/features/Auth/utils/auth_validators.dart';
 import 'package:mishka_app/l10n/app_localizations.dart';
 import 'package:mishka_app/features/Auth/view/bloc/auth_bloc.dart';
 
 import '../../../../core/widgets/custom_app_bar.dart';
+import '../widgets/auth_checkbox_row.dart';
 import '../widgets/custom_elevated_button.dart';
 import '../widgets/form_text.dart';
 import '../widgets/social_media_total_buttons.dart';
@@ -25,6 +28,7 @@ class SignUpScreen extends StatefulWidget {
 
 class _SignUpScreenState extends State<SignUpScreen> {
   static const bool _signupOtpOptional = false;
+  final _formKey = GlobalKey<FormState>();
   final TextEditingController emailController =TextEditingController();
   final TextEditingController firstNameController =TextEditingController();
   final TextEditingController lastNameController =TextEditingController();
@@ -45,14 +49,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
   Future<void> _submitSignUp() async {
     final l10n = AppLocalizations.of(context)!;
-    if (firstNameController.text.trim().isEmpty ||
-        lastNameController.text.trim().isEmpty ||
-        emailController.text.trim().isEmpty ||
-        phoneController.text.trim().isEmpty ||
-        passwordController.text.trim().isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(l10n.pleaseFillAllRequiredFields)),
-      );
+    FocusScope.of(context).unfocus();
+    if (!(_formKey.currentState?.validate() ?? false)) {
       return;
     }
     if (!isChecked2) {
@@ -71,7 +69,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(_errorMessage(e))),
+          SnackBar(content: Text(_errorMessage(e, l10n))),
         );
       }
       return;
@@ -88,18 +86,21 @@ class _SignUpScreenState extends State<SignUpScreen> {
         builder: (context) => OtpVerificationScreen(
           title: l10n.verifyByEmail,
           subtitle: l10n.enter6DigitsCodeEmail(email),
-          // Keep optional until final signup OTP UX is locked.
           allowEmptyCode: _signupOtpOptional,
+          showVerifiedDialog: true,
           onVerify: (otpCode) async {
-            final dataSource = AuthRemoteDataSource(ApiService());
             final trimmedOtp = otpCode.trim();
             if (trimmedOtp.isNotEmpty) {
-              await dataSource.verifySignupOtp(
+              await AuthRemoteDataSource(ApiService()).verifySignupOtp(
                 email: email,
                 otpCode: trimmedOtp,
               );
             }
-            context.read<AuthBloc>().add(
+          },
+          afterVerified: (otpCode) async {
+            final bloc = context.read<AuthBloc>();
+            final trimmedOtp = otpCode.trim();
+            bloc.add(
               AuthRegisterRequested(
                 firstName: firstNameController.text.trim(),
                 lastName: lastNameController.text.trim(),
@@ -107,20 +108,29 @@ class _SignUpScreenState extends State<SignUpScreen> {
                 password: passwordController.text,
                 agreeTerms: isChecked2,
                 phoneNumber: phoneController.text.trim(),
-                // Temporary fallback until education status selector is implemented.
-                educationStatus: 'other',
                 signupOtp: trimmedOtp.isEmpty ? null : trimmedOtp,
               ),
             );
-            Navigator.pop(context);
+            final result = await bloc.stream.firstWhere(
+              (s) => s is AuthSuccess || s is AuthError,
+            );
+            if (result is AuthError) {
+              throw ApiException(
+                message: result.message,
+                error: result.errorCode,
+              );
+            }
           },
         ),
       ),
     );
   }
 
-  String _errorMessage(Object error) {
+  String _errorMessage(Object error, AppLocalizations l10n) {
     if (error is ApiException) {
+      if (error.error == 'UNIQUE_VIOLATION') {
+        return l10n.accountAlreadyExists;
+      }
       final buffer = StringBuffer();
       if (error.statusCode != null) {
         buffer.write('[${error.statusCode}] ');
@@ -142,14 +152,17 @@ class _SignUpScreenState extends State<SignUpScreen> {
     final l10n = AppLocalizations.of(context)!;
 
     return BlocConsumer<AuthBloc, AuthState>(
-      listener: (context, state) {
+      listener: (context, state) async {
         if (state is AuthSuccess) {
-          Navigator.of(context).popUntil((route) => route.isFirst);
+          await AuthNavigation.goAfterAuthentication(context, state.user);
           return;
         }
         if (state is AuthError) {
+          final message = state.errorCode == 'UNIQUE_VIOLATION'
+              ? l10n.accountAlreadyExists
+              : state.message;
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(state.message)),
+            SnackBar(content: Text(message)),
           );
         }
       },
@@ -164,7 +177,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
           bottom: AppSizes.paddingMedium,
         ),
         child: SingleChildScrollView(
-          child: Column(
+          child: Form(
+            key: _formKey,
+            child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             mainAxisAlignment: MainAxisAlignment.start,
             children: [
@@ -185,91 +200,57 @@ class _SignUpScreenState extends State<SignUpScreen> {
                   fontWeight: FontWeight.w500,
                 ),
               ),
-              SizedBox(height: 24.h),
+              SizedBox(height: CustomInputField.spacingBetweenFields),
               CustomInputField(
                 label: l10n.firstName,
                 hint: l10n.firstName,
                 controller: firstNameController,
+                validator: (v) => AuthValidators.validateFirstName(v, l10n),
               ),
-              SizedBox(height: 24.h),
+              SizedBox(height: CustomInputField.spacingBetweenFields),
               CustomInputField(
                 label: l10n.lastName,
                 hint: l10n.lastName,
                 controller: lastNameController,
+                validator: (v) => AuthValidators.validateLastName(v, l10n),
               ),
-              SizedBox(height: 24.h),
+              SizedBox(height: CustomInputField.spacingBetweenFields),
               CustomInputField(
                 label: l10n.phoneNumber,
                 hint: '+20 ${l10n.phoneNumber}',
                 controller: phoneController,
+                validator: (v) => AuthValidators.validatePhone(v, l10n),
               ),
-              SizedBox(height: 24.h),
+              SizedBox(height: CustomInputField.spacingBetweenFields),
               CustomInputField(
                 label: l10n.emailAddress,
                 hint: l10n.exampleEmail,
                 controller: emailController,
+                validator: (v) => AuthValidators.validateEmail(v, l10n),
               ),
-              SizedBox(height: 24.h),
+              SizedBox(height: CustomInputField.spacingBetweenFields),
               CustomInputField(
                 label: l10n.password,
                 hint: l10n.examplePassword,
                 controller: passwordController,
                 isPassword: true,
+                validator: (v) => AuthValidators.validatePassword(v, l10n),
               ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.start,
-                children: [
-          Checkbox(
-            value: isChecked1,
-            activeColor: AppColors.mainGold,
-            materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-            onChanged: (value) {
-              setState(() {
-                isChecked1 = value!;
-              });
-            },
-          ),
-          Text(
-            l10n.rememberMe,
-            style: TextStyle(
-              fontSize: AppSizes.fontSizeSmall,
-              fontFamily: "Pridi",
-              fontWeight: FontWeight.w500,
-              color: AppColors.mainDark,
-            ),
-          ),
-                ],
+              SizedBox(height: 16.h),
+              AuthCheckboxRow(
+                value: isChecked1,
+                onChanged: (value) {
+                  setState(() => isChecked1 = value ?? false);
+                },
+                label: l10n.rememberMe,
               ),
-
-          ],),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.start,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Checkbox(
-                    value: isChecked2,
-                    materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                    activeColor: AppColors.mainGold,
-                    onChanged: (value) {
-                      setState(() {
-                        isChecked2 = value!;
-                      });
-                    },
-                  ),
-                  Text(
-                    l10n.agreeToTerms,
-                    style: TextStyle(
-                      fontSize: AppSizes.fontSizeSmall,
-                      fontFamily: "Pridi",
-                      fontWeight: FontWeight.w500,
-                      color: AppColors.mainDark,
-                    ),
-                  )
-                ],
+              SizedBox(height: 8.h),
+              AuthCheckboxRow(
+                value: isChecked2,
+                onChanged: (value) {
+                  setState(() => isChecked2 = value ?? false);
+                },
+                label: l10n.agreeToTerms,
               ),
               SizedBox(height: 24.h),
               AuthButton(
@@ -340,10 +321,11 @@ class _SignUpScreenState extends State<SignUpScreen> {
                 ],
               ),
               SocialAuthRow(onGoogle: () {  }, onApple: () {  }, onFacebook: () {  },),
-          ],),
+            ],
+            ),
+          ),
         ),
       ),
-
     );
       },
     );

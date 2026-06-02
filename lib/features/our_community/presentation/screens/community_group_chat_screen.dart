@@ -11,6 +11,7 @@ import 'package:mishka_app/features/chat_with_mishka/presentation/widgets/chat_i
 import 'package:mishka_app/features/saved/data/repositories/saved_repository.dart';
 import 'package:mishka_app/l10n/app_localizations.dart';
 
+import '../../community_display_helper.dart';
 import '../../community_styles.dart';
 import '../../data/community_json_helpers.dart';
 import '../../data/community_models.dart';
@@ -110,22 +111,9 @@ class _CommunityGroupChatScreenState extends State<CommunityGroupChatScreen> {
     }
   }
 
-  Future<void> _refreshCommunity() async {
-    try {
-      final refreshed = await widget.repository.refreshCommunity(
-        _community.id,
-        seed: _community,
-      );
-      if (refreshed != null && mounted) {
-        setState(() => _community = refreshed);
-        _syncCurrentUserRole();
-      }
-    } catch (_) {}
-  }
-
   String _senderDisplayLabel(CommunityChatMessage message) {
     final l10n = AppLocalizations.of(context)!;
-    if (message.isMishka) return 'Mishka';
+    if (message.isMishka) return l10n.communityBrandMishka;
     if (_isOwnMessage(message)) return l10n.communityChatSenderMe;
 
     // Backend `senderDisplay` is authoritative when present.
@@ -139,27 +127,30 @@ class _CommunityGroupChatScreenState extends State<CommunityGroupChatScreen> {
       if (mapped != null && mapped.isNotEmpty) return mapped;
     }
 
-    return 'Member';
+    return communityMemberDisplayName('', l10n);
   }
 
   String? _senderRoleLabel(CommunityChatMessage message) {
     if (message.isMishka) return null;
 
+    final l10n = AppLocalizations.of(context)!;
+    final String raw;
     if (message.senderRole.isNotEmpty) {
-      return message.senderRole;
+      raw = message.senderRole;
+    } else {
+      final userId = message.senderUserId.isNotEmpty
+          ? message.senderUserId
+          : (_isOwnMessage(message) ? _currentUserId : '');
+      raw = resolveMemberCommunityRole(
+        userId: userId,
+        rawRole: _isOwnMessage(message) ? _community.myRole : null,
+        ownerUserId: _community.ownerUserId,
+        memberListRole:
+            userId.isNotEmpty ? _memberRolesByUserId[userId] : null,
+      );
     }
-
-    final userId = message.senderUserId.isNotEmpty
-        ? message.senderUserId
-        : (_isOwnMessage(message) ? _currentUserId : '');
-
-    return resolveMemberCommunityRole(
-      userId: userId,
-      rawRole: _isOwnMessage(message) ? _community.myRole : null,
-      ownerUserId: _community.ownerUserId,
-      memberListRole:
-          userId.isNotEmpty ? _memberRolesByUserId[userId] : null,
-    );
+    if (raw.isEmpty) return null;
+    return communityRoleDisplayLabel(raw, l10n);
   }
 
   Future<void> _ensureChannelJoined() async {
@@ -256,9 +247,7 @@ class _CommunityGroupChatScreenState extends State<CommunityGroupChatScreen> {
       _scrollToBottom();
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(_errorMessage(e), style: CommunityStyles.snackBar)),
-      );
+      CommunityStyles.showSnackBar(context, _errorMessage(e));
     } finally {
       if (mounted) setState(() => _sending = false);
     }
@@ -278,9 +267,7 @@ class _CommunityGroupChatScreenState extends State<CommunityGroupChatScreen> {
       );
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(_errorMessage(e), style: CommunityStyles.snackBar)),
-      );
+      CommunityStyles.showSnackBar(context, _errorMessage(e));
     } finally {
       if (mounted) setState(() => _sharing = false);
     }
@@ -309,10 +296,7 @@ class _CommunityGroupChatScreenState extends State<CommunityGroupChatScreen> {
           context,
           community: _community,
           repository: widget.repository,
-          onChanged: () async {
-            await _refreshCommunity();
-            if (mounted) setState(() {});
-          },
+          onChanged: _loadMessages,
         ),
       ),
       body: Column(
@@ -335,7 +319,7 @@ class _CommunityGroupChatScreenState extends State<CommunityGroupChatScreen> {
                               SizedBox(height: 12.h),
                               TextButton(
                                 onPressed: _loadMessages,
-                                child: const Text('Retry'),
+                                child: Text(l10n.retry),
                               ),
                             ],
                           ),
@@ -350,7 +334,7 @@ class _CommunityGroupChatScreenState extends State<CommunityGroupChatScreen> {
                                   SizedBox(height: 48.h),
                                   Center(
                                     child: Text(
-                                      'No messages yet. Say hello!',
+                                      l10n.communityChatEmpty,
                                       style: CommunityStyles.caption,
                                     ),
                                   ),
@@ -388,7 +372,7 @@ class _CommunityGroupChatScreenState extends State<CommunityGroupChatScreen> {
               onSend: _send,
               uploadHint: l10n.shareToCommunityChannels,
               chooseDifficultyHint: l10n.askMishka,
-              askHint: 'Type a message...',
+              askHint: l10n.communityChatTypeHint,
             ),
           ),
         ],

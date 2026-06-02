@@ -102,7 +102,7 @@ class CommunityDiscoverCard {
 
     return CommunityModel(
       id: id,
-      name: name.isEmpty ? 'Community' : name,
+      name: name,
       subtitle: subtitle,
       description: description,
       imageUrl: imageUrl,

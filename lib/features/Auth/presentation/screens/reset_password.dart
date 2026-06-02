@@ -6,7 +6,6 @@ import 'package:mishka_app/l10n/app_localizations.dart';
 import 'package:mishka_app/features/Auth/presentation/screens/reset_password_views/email_view.dart';
 import 'package:mishka_app/features/Auth/presentation/screens/reset_password_views/reset_phone_view.dart';
 import '../../../../core/widgets/custom_app_bar.dart';
-import '../widgets/custom_elevated_button.dart';
 import '../widgets/custom_segmanted_button.dart';
 
 
@@ -47,15 +46,6 @@ class _ResetPasswordState extends State<ResetPassword> {
                   fontSize: AppSizes.fontSizeTitle,
                   fontFamily: "Pridi",
                   fontWeight: FontWeight.w600,
-                ),
-              ),
-              SizedBox(height: 4.h),
-              Text(
-                l10n.resetPasswordUsing,
-                style: TextStyle(
-                  fontSize: AppSizes.fontSizeMedium,
-                  fontFamily: "Pridi",
-                  fontWeight: FontWeight.w500,
                 ),
               ),
               SizedBox(height: 24.h),

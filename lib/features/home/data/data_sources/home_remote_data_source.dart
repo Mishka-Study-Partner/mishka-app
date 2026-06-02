@@ -14,7 +14,32 @@ class HomeRemoteDataSource {
       ApiEndpoints.dailyStreaks,
       dataFromJson: (raw) => DailyStreakModel.fromJson(raw),
     );
-    return env.data ?? const DailyStreakModel(days: 0);
+    return env.data ?? const DailyStreakModel();
+  }
+
+  /// Marks today's UTC calendar day as completed (`POST /daily-streaks/ping`).
+  Future<DailyStreakModel?> pingDailyStreak() async {
+    final env = await _api.post<DailyStreakModel?>(
+      ApiEndpoints.dailyStreaksPing,
+      data: const <String, dynamic>{},
+      dataFromJson: (raw) {
+        if (raw is Map) {
+          return DailyStreakModel.fromJson(raw);
+        }
+        return null;
+      },
+    );
+    return env.data;
+  }
+
+  /// Spends one streak freeze on a UTC calendar day (`POST /daily-streaks/freeze`).
+  Future<DailyStreakModel> freezeStreakDay({required String date}) async {
+    final env = await _api.post<DailyStreakModel>(
+      ApiEndpoints.dailyStreaksFreeze,
+      data: {'date': date},
+      dataFromJson: (raw) => DailyStreakModel.fromJson(raw),
+    );
+    return env.data ?? const DailyStreakModel();
   }
 
   Future<List<HomeTipModel>> getTips() async {

@@ -30,7 +30,7 @@ class AuthButton extends StatelessWidget {
           backgroundColor: AppColors.mainGold,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(
-              borderRadius ?? AppSizes.radiusLarge,
+              borderRadius ?? 6.r,
             ),
           ),
           elevation: 0,

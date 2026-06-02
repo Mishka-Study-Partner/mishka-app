@@ -5,6 +5,9 @@ import 'package:mishka_app/core/utils/app_colors.dart';
 import 'package:mishka_app/core/utils/app_sizes.dart';
 import 'package:mishka_app/generated/assets.dart';
 
+import 'package:mishka_app/l10n/app_localizations.dart';
+
+import '../../community_display_helper.dart';
 import '../../community_styles.dart';
 import '../../data/community_json_helpers.dart';
 import '../../data/community_models.dart';
@@ -43,6 +46,7 @@ class CommunityChatAppBar extends StatelessWidget implements PreferredSizeWidget
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final topInset = MediaQuery.paddingOf(context).top;
     final memberLabel = memberCountLabel(community.memberCount);
 
@@ -95,7 +99,7 @@ class CommunityChatAppBar extends StatelessWidget implements PreferredSizeWidget
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      community.name,
+                      communityDisplayName(community.name, l10n),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: CommunityStyles.bodyLarge.copyWith(

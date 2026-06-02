@@ -1,59 +1,15 @@
 import 'package:flutter/material.dart';
 
-import '../../core/utils/app_colors.dart';
-import '../../core/widgets/custom_app_bar.dart';
-import '../../l10n/app_localizations.dart';
-import '../Auth/presentation/widgets/custom_segmanted_button.dart';
-class Gamification extends StatefulWidget {
+import 'package:mishka_app/features/report/presentation/screens/your_report_screen.dart';
+
+/// Progress report screen (replaces gamification placeholder).
+class Gamification extends StatelessWidget {
+  const Gamification({super.key, this.onBack});
+
   final VoidCallback? onBack;
-  
-  const Gamification({
-    super.key,
-    this.onBack,
-  });
-
-  @override
-  State<Gamification> createState() => _GamificationState();
-}
-
-class _GamificationState extends State<Gamification> {
-  int selectedIndex = 0; // 0 = Email, 1 = Phone
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
-    return Scaffold(
-      backgroundColor: AppColors.screenBackground,
-      appBar: MishkaAppBar(
-        title: l10n.gamification,
-        showBack: true,
-        showBottomBar: false,
-        onBackTap: widget.onBack,
-      ),
-
-      body: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Center(
-            child:  CustomSegmentedButton(
-              selectedIndex: selectedIndex,
-              onChanged: (i) => setState(() => selectedIndex = i),
-              segments: const ['Email', 'phone Number'],
-            ),
-
-          ),
-          const SizedBox(height: 20),
-          /*
-          // Here content changes
-          Expanded(
-            child: selectedIndex == 0
-                ? const EmailLoginForm()
-                : const PhoneLoginForm(),
-          ),
-      */
-        ],
-      ),
-    );
+    return YourReportScreen(onBack: onBack);
   }
-
 }

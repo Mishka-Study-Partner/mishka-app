@@ -25,16 +25,23 @@ class ProfileInfoRow extends StatelessWidget {
     Widget? rightChild;
     if (trailing != null) {
       rightChild = trailing;
-    } else if (value.isNotEmpty) {
-      rightChild = Text(
-        value,
-        style: TextStyle(
-          fontSize: 12,
-          fontWeight: FontWeight.w500,
-          fontFamily: "Pridi",
-          color: onSurface.withValues(alpha: 0.72),
-        ),
-      );
+    } else if (value.isNotEmpty || onTap != null) {
+      rightChild = value.isNotEmpty
+          ? Text(
+              value,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              textAlign: TextAlign.end,
+              style: TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.w500,
+                fontFamily: 'Pridi',
+                color: onTap != null
+                    ? AppColors.mainGold
+                    : onSurface.withValues(alpha: 0.72),
+              ),
+            )
+          : null;
     }
 
     Widget row = Row(
@@ -43,6 +50,7 @@ class ProfileInfoRow extends StatelessWidget {
         Icon(icon, size: 14, color: AppColors.mainGold),
         const SizedBox(width: 8),
         Expanded(
+          flex: 2,
           child: Text(
             title,
             maxLines: 1,
@@ -55,12 +63,13 @@ class ProfileInfoRow extends StatelessWidget {
             ),
           ),
         ),
-        if (rightChild != null)
-          Flexible(
-            flex: 0,
-            fit: FlexFit.loose,
+        if (rightChild != null) ...[
+          const SizedBox(width: 8),
+          Expanded(
+            flex: 3,
             child: rightChild,
           ),
+        ],
       ],
     );
 

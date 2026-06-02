@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import 'package:mishka_app/core/utils/app_colors.dart';
+import 'package:mishka_app/l10n/app_localizations.dart';
 import 'package:mishka_app/core/utils/app_sizes.dart';
 
 import '../../community_styles.dart';
@@ -25,6 +26,7 @@ class CommunityChatBubble extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Padding(
       padding: EdgeInsets.symmetric(vertical: 6.h),
       child: Column(
@@ -110,7 +112,7 @@ class CommunityChatBubble extends StatelessWidget {
                         border: Border.all(color: AppColors.mainGold),
                       ),
                       child: Text(
-                        'Shared from Mishka',
+                        l10n.communityChatSharedFromMishka,
                         style: CommunityStyles.bodySemiBold.copyWith(
                           fontSize: AppSizes.fontSizeSmall,
                         ),

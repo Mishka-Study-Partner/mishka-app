@@ -3223,6 +3223,576 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Me'**
   String get communityChatSenderMe;
+
+  /// No description provided for @communityShareMenuTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Share Community'**
+  String get communityShareMenuTitle;
+
+  /// No description provided for @communityShareSendLink.
+  ///
+  /// In en, this message translates to:
+  /// **'Send Link'**
+  String get communityShareSendLink;
+
+  /// No description provided for @communityShareCreateCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Create code'**
+  String get communityShareCreateCode;
+
+  /// No description provided for @communityShareInsertEmail.
+  ///
+  /// In en, this message translates to:
+  /// **'Insert Email'**
+  String get communityShareInsertEmail;
+
+  /// No description provided for @communityShareInsertUsername.
+  ///
+  /// In en, this message translates to:
+  /// **'Insert User Name'**
+  String get communityShareInsertUsername;
+
+  /// No description provided for @communityShareDialogTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Share Community:'**
+  String get communityShareDialogTitle;
+
+  /// No description provided for @communitySharePublicLinkHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Anyone with this link can find and join your public community.'**
+  String get communitySharePublicLinkHint;
+
+  /// No description provided for @communitySharePrivateCodeHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Share this invite code so others can join your private community.'**
+  String get communitySharePrivateCodeHint;
+
+  /// No description provided for @communitySharePublicCodeHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Public communities share by link. This ID helps others join in the app.'**
+  String get communitySharePublicCodeHint;
+
+  /// No description provided for @communityShareYourCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Your code'**
+  String get communityShareYourCode;
+
+  /// No description provided for @communityShareGenerateNewCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Generate new code'**
+  String get communityShareGenerateNewCode;
+
+  /// No description provided for @communityEditCommunity.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit Community'**
+  String get communityEditCommunity;
+
+  /// No description provided for @communityDeleteCommunity.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete Community'**
+  String get communityDeleteCommunity;
+
+  /// No description provided for @communityHubRecommendedEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'You\'re all caught up — explore Discover for more communities.'**
+  String get communityHubRecommendedEmpty;
+
+  /// No description provided for @communityInviteRequiresAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'The person must already have a Mishka account (signed up in the app).'**
+  String get communityInviteRequiresAccount;
+
+  /// No description provided for @communityInviteUserNotFound.
+  ///
+  /// In en, this message translates to:
+  /// **'No Mishka account found for that email or username.'**
+  String get communityInviteUserNotFound;
+
+  /// No description provided for @communityInviteCannotInviteSelf.
+  ///
+  /// In en, this message translates to:
+  /// **'You cannot invite yourself. Use another member\'s email or username.'**
+  String get communityInviteCannotInviteSelf;
+
+  /// No description provided for @communityInviteUsernameHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Mishka username (no @)'**
+  String get communityInviteUsernameHint;
+
+  /// No description provided for @communityInviteSend.
+  ///
+  /// In en, this message translates to:
+  /// **'Send invite'**
+  String get communityInviteSend;
+
+  /// No description provided for @communityInviteEmailSent.
+  ///
+  /// In en, this message translates to:
+  /// **'Invitation sent to {email}'**
+  String communityInviteEmailSent(String email);
+
+  /// No description provided for @communityJoinPrivateTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Join Private Community'**
+  String get communityJoinPrivateTitle;
+
+  /// No description provided for @communityJoinPrivateCodePrompt.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter your community invite code:'**
+  String get communityJoinPrivateCodePrompt;
+
+  /// No description provided for @communityJoinPrivateCodeHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Community code'**
+  String get communityJoinPrivateCodeHint;
+
+  /// No description provided for @communityJoinPrivateButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Join community'**
+  String get communityJoinPrivateButton;
+
+  /// No description provided for @communityJoinPrivateSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'You have joined the community!'**
+  String get communityJoinPrivateSuccess;
+
+  /// No description provided for @communityDeleteConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to delete this community?'**
+  String get communityDeleteConfirm;
+
+  /// No description provided for @communityDeletedSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Community deleted successfully!'**
+  String get communityDeletedSuccess;
+
+  /// No description provided for @communityConfirmJoinGroup.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to join this group?'**
+  String get communityConfirmJoinGroup;
+
+  /// No description provided for @communityJoinedGroupSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'You joined the group.'**
+  String get communityJoinedGroupSuccess;
+
+  /// No description provided for @communityConfirmDeleteGroup.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to delete this group?'**
+  String get communityConfirmDeleteGroup;
+
+  /// No description provided for @communityExitConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to leave this community?'**
+  String get communityExitConfirm;
+
+  /// No description provided for @communityExitAndDeleteConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Leave and remove this community from your list?'**
+  String get communityExitAndDeleteConfirm;
+
+  /// No description provided for @communityRemoveMemberConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove this member from the community?'**
+  String get communityRemoveMemberConfirm;
+
+  /// No description provided for @communityMemberRemovedSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Member removed from the community.'**
+  String get communityMemberRemovedSuccess;
+
+  /// No description provided for @communityRemoveFromGroupConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove this member from the group?'**
+  String get communityRemoveFromGroupConfirm;
+
+  /// No description provided for @communityMemberRemovedFromGroupSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Member removed from the group.'**
+  String get communityMemberRemovedFromGroupSuccess;
+
+  /// No description provided for @communityInviteUsernameSent.
+  ///
+  /// In en, this message translates to:
+  /// **'Invitation sent to @{username}'**
+  String communityInviteUsernameSent(String username);
+
+  /// No description provided for @communityHubJoinFailedOpenAnyway.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not join community. Opening anyway…'**
+  String get communityHubJoinFailedOpenAnyway;
+
+  /// No description provided for @communityHubNoneYet.
+  ///
+  /// In en, this message translates to:
+  /// **'None yet.'**
+  String get communityHubNoneYet;
+
+  /// No description provided for @communityHomeTypeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Community'**
+  String get communityHomeTypeLabel;
+
+  /// No description provided for @communityHomeAnnouncements.
+  ///
+  /// In en, this message translates to:
+  /// **'Announcements'**
+  String get communityHomeAnnouncements;
+
+  /// No description provided for @communityHomeWelcomeDefault.
+  ///
+  /// In en, this message translates to:
+  /// **'Welcome to your community'**
+  String get communityHomeWelcomeDefault;
+
+  /// No description provided for @communityHomeNoGroups.
+  ///
+  /// In en, this message translates to:
+  /// **'No groups yet. Add your first group.'**
+  String get communityHomeNoGroups;
+
+  /// No description provided for @communityHomeAddGroup.
+  ///
+  /// In en, this message translates to:
+  /// **'Add Group'**
+  String get communityHomeAddGroup;
+
+  /// No description provided for @communityDetailStats.
+  ///
+  /// In en, this message translates to:
+  /// **'Community: {groupCount} groups • {memberCount} members'**
+  String communityDetailStats(int groupCount, int memberCount);
+
+  /// No description provided for @communityDetailViewGroups.
+  ///
+  /// In en, this message translates to:
+  /// **'View Groups'**
+  String get communityDetailViewGroups;
+
+  /// No description provided for @communityDetailViewMembers.
+  ///
+  /// In en, this message translates to:
+  /// **'View Members:'**
+  String get communityDetailViewMembers;
+
+  /// No description provided for @communityDetailManageMembers.
+  ///
+  /// In en, this message translates to:
+  /// **'Manage Members'**
+  String get communityDetailManageMembers;
+
+  /// No description provided for @communityDetailExitCommunity.
+  ///
+  /// In en, this message translates to:
+  /// **'Leave community'**
+  String get communityDetailExitCommunity;
+
+  /// No description provided for @communityDetailExitAndDelete.
+  ///
+  /// In en, this message translates to:
+  /// **'Leave and remove from your list'**
+  String get communityDetailExitAndDelete;
+
+  /// No description provided for @communityGroupsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'{communityName} Groups'**
+  String communityGroupsTitle(String communityName);
+
+  /// No description provided for @communityMembersTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'{communityName} Members'**
+  String communityMembersTitle(String communityName);
+
+  /// No description provided for @communityGroupJoin.
+  ///
+  /// In en, this message translates to:
+  /// **'Join Group'**
+  String get communityGroupJoin;
+
+  /// No description provided for @communityGroupDelete.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete Group'**
+  String get communityGroupDelete;
+
+  /// No description provided for @communityGroupAddNew.
+  ///
+  /// In en, this message translates to:
+  /// **'+ Add new Group'**
+  String get communityGroupAddNew;
+
+  /// No description provided for @communityAddGroupTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Add Group'**
+  String get communityAddGroupTitle;
+
+  /// No description provided for @communityAddGroupSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Your group was added to the community!'**
+  String get communityAddGroupSuccess;
+
+  /// No description provided for @communityAddGroupHeader.
+  ///
+  /// In en, this message translates to:
+  /// **'Add New Group To Your Community'**
+  String get communityAddGroupHeader;
+
+  /// No description provided for @communityAddGroupProfileLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Add your group\'s profile:'**
+  String get communityAddGroupProfileLabel;
+
+  /// No description provided for @communityAddGroupNameLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Group name:'**
+  String get communityAddGroupNameLabel;
+
+  /// No description provided for @communityAddGroupNameHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Group name'**
+  String get communityAddGroupNameHint;
+
+  /// No description provided for @communityAddGroupDescLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Group description'**
+  String get communityAddGroupDescLabel;
+
+  /// No description provided for @communityAddGroupDescHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Group description'**
+  String get communityAddGroupDescHint;
+
+  /// No description provided for @communityAddButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Add'**
+  String get communityAddButton;
+
+  /// No description provided for @communityLabelOptional.
+  ///
+  /// In en, this message translates to:
+  /// **'(optional):'**
+  String get communityLabelOptional;
+
+  /// No description provided for @communityEditProfileHeader.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit your community profile:'**
+  String get communityEditProfileHeader;
+
+  /// No description provided for @communityEditNameLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Community name:'**
+  String get communityEditNameLabel;
+
+  /// No description provided for @communityEditDescHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Community description'**
+  String get communityEditDescHint;
+
+  /// No description provided for @communityEditGroupsLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Community groups:'**
+  String get communityEditGroupsLabel;
+
+  /// No description provided for @communityEditSaving.
+  ///
+  /// In en, this message translates to:
+  /// **'Saving…'**
+  String get communityEditSaving;
+
+  /// No description provided for @communityChatEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No messages yet. Say hello!'**
+  String get communityChatEmpty;
+
+  /// No description provided for @communityChatTypeHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Type a message…'**
+  String get communityChatTypeHint;
+
+  /// No description provided for @communityChatMemberFallback.
+  ///
+  /// In en, this message translates to:
+  /// **'Member'**
+  String get communityChatMemberFallback;
+
+  /// No description provided for @communityChatSharedFromMishka.
+  ///
+  /// In en, this message translates to:
+  /// **'Shared from Mishka'**
+  String get communityChatSharedFromMishka;
+
+  /// No description provided for @communityMemberAddToGroup.
+  ///
+  /// In en, this message translates to:
+  /// **'Add to group'**
+  String get communityMemberAddToGroup;
+
+  /// No description provided for @communityMemberRemoveFromCommunity.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove from community'**
+  String get communityMemberRemoveFromCommunity;
+
+  /// No description provided for @communitySelectGroupPrompt.
+  ///
+  /// In en, this message translates to:
+  /// **'Select a group for {memberName}'**
+  String communitySelectGroupPrompt(String memberName);
+
+  /// No description provided for @communityMemberAddedToGroupSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Member added to the group.'**
+  String get communityMemberAddedToGroupSuccess;
+
+  /// No description provided for @communityShareChooseMaterial.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose saved AI material to share with this group.'**
+  String get communityShareChooseMaterial;
+
+  /// No description provided for @communityShareNoSavedInCategory.
+  ///
+  /// In en, this message translates to:
+  /// **'No saved items in this category yet.'**
+  String get communityShareNoSavedInCategory;
+
+  /// No description provided for @communityDiscoverySubjectsOptional.
+  ///
+  /// In en, this message translates to:
+  /// **'Subjects (optional)'**
+  String get communityDiscoverySubjectsOptional;
+
+  /// No description provided for @communityDiscoveryPurposeOptional.
+  ///
+  /// In en, this message translates to:
+  /// **'Purpose (optional)'**
+  String get communityDiscoveryPurposeOptional;
+
+  /// No description provided for @communityInviteEmailHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Email address'**
+  String get communityInviteEmailHint;
+
+  /// No description provided for @communityErrorServerUnreachable.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not reach the server. Check that the backend is running.'**
+  String get communityErrorServerUnreachable;
+
+  /// No description provided for @communityRoleOwner.
+  ///
+  /// In en, this message translates to:
+  /// **'Owner'**
+  String get communityRoleOwner;
+
+  /// No description provided for @communityRoleAdmin.
+  ///
+  /// In en, this message translates to:
+  /// **'Admin'**
+  String get communityRoleAdmin;
+
+  /// No description provided for @communityRoleMember.
+  ///
+  /// In en, this message translates to:
+  /// **'Member'**
+  String get communityRoleMember;
+
+  /// No description provided for @communityFallbackName.
+  ///
+  /// In en, this message translates to:
+  /// **'Community'**
+  String get communityFallbackName;
+
+  /// No description provided for @communityFallbackGroupName.
+  ///
+  /// In en, this message translates to:
+  /// **'Group'**
+  String get communityFallbackGroupName;
+
+  /// No description provided for @communityFallbackMemberName.
+  ///
+  /// In en, this message translates to:
+  /// **'Member'**
+  String get communityFallbackMemberName;
+
+  /// No description provided for @communityBrandMishka.
+  ///
+  /// In en, this message translates to:
+  /// **'Mishka'**
+  String get communityBrandMishka;
+
+  /// No description provided for @reportCommunitySection.
+  ///
+  /// In en, this message translates to:
+  /// **'Our Community'**
+  String get reportCommunitySection;
+
+  /// No description provided for @reportCommunityMessages.
+  ///
+  /// In en, this message translates to:
+  /// **'Messages posted'**
+  String get reportCommunityMessages;
+
+  /// No description provided for @reportCommunityMaterialShares.
+  ///
+  /// In en, this message translates to:
+  /// **'Materials shared'**
+  String get reportCommunityMaterialShares;
+
+  /// No description provided for @reportCommunityChannelJoins.
+  ///
+  /// In en, this message translates to:
+  /// **'Channel joins'**
+  String get reportCommunityChannelJoins;
 }
 
 class _AppLocalizationsDelegate

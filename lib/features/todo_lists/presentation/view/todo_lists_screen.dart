@@ -3,7 +3,11 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:mishka_app/core/network/api_exception.dart';
 import 'package:mishka_app/core/utils/app_colors.dart';
 import 'package:mishka_app/core/utils/app_sizes.dart';
+import 'package:iconify_flutter/icons/mdi.dart';
+import 'package:mishka_app/features/todo_lists/data/models/icon_api_model.dart';
+import 'package:mishka_app/features/todo_lists/data/models/todo_list_api_model.dart';
 import 'package:mishka_app/features/todo_lists/data/repositories/todo_repository.dart';
+import 'package:mishka_app/features/todo_lists/utils/todo_icon_catalog.dart';
 import 'package:mishka_app/l10n/app_localizations.dart';
 import 'package:mishka_app/generated/assets.dart';
 import '../../../../core/widgets/custom_app_bar.dart';
@@ -35,21 +39,31 @@ class _TodoScreenState extends State<TodoScreen> {
     _loadLists();
   }
 
+  TodoListItemModel _mapRemoteList(
+    TodoListApiModel remote,
+    Map<int, TodoIconOption> iconsById,
+  ) {
+    return TodoListItemModel(
+      id: remote.id,
+      title: remote.title,
+      icon: TodoIconCatalog.resolve(iconId: remote.iconId, byId: iconsById),
+    );
+  }
+
   Future<void> _loadLists() async {
     setState(() => _isLoading = true);
     try {
-      final remoteLists = await _repository.getTodoLists();
+      final results = await Future.wait([
+        _repository.getTodoLists(),
+        _repository.getIcons(),
+      ]);
       if (!mounted) return;
-      final mapped = remoteLists
-          .map(
-            (e) => TodoListItemModel(
-              id: e.id,
-              title: e.title,
-              icon: Icons.list_alt,
-              iconColor: AppColors.mainGold,
-            ),
-          )
-          .toList();
+      final remoteLists = results[0] as List<TodoListApiModel>;
+      final apiIcons = results[1] as List<IconApiModel>;
+      final iconsById = TodoIconCatalog.indexById(
+        TodoIconCatalog.merge(apiIcons),
+      );
+      final mapped = remoteLists.map((e) => _mapRemoteList(e, iconsById)).toList();
       setState(() {
         lists = mapped;
       });
@@ -92,8 +106,10 @@ class _TodoScreenState extends State<TodoScreen> {
 
     final title = (result['title'] ?? '').toString().trim();
     if (title.isEmpty) return;
+    final selectedIcon = result['icon'];
+    final iconId = selectedIcon is TodoIconOption ? selectedIcon.id : null;
     try {
-      await _repository.createTodoList(listName: title);
+      await _repository.createTodoList(listName: title, iconId: iconId);
       await _loadLists();
     } catch (e) {
       if (!mounted) return;
@@ -431,8 +447,11 @@ class _TodoScreenState extends State<TodoScreen> {
                           padding: EdgeInsets.only(bottom: 8.h),
                           child: TodoListItem(
                             title: l10n.calendar,
-                            icon: Icons.calendar_month,
-                            iconColor: AppColors.mainGold,
+                            icon: const TodoIconOption(
+                              iconify: Mdi.calendar,
+                              color: AppColors.mainGold,
+                              label: 'calendar',
+                            ),
                             onTap: () {
                               Navigator.of(context).push(
                                 MaterialPageRoute(
@@ -446,8 +465,11 @@ class _TodoScreenState extends State<TodoScreen> {
                           padding: EdgeInsets.only(bottom: 8.h),
                           child: TodoListItem(
                             title: l10n.allTasks,
-                            icon: Icons.task_alt,
-                            iconColor: AppColors.mainGold,
+                            icon: const TodoIconOption(
+                              iconify: Mdi.format_list_checks,
+                              color: AppColors.mainGold,
+                              label: 'tasks',
+                            ),
                             onTap: () {
                               Navigator.of(context).push(
                                 MaterialPageRoute(
@@ -483,7 +505,6 @@ class _TodoScreenState extends State<TodoScreen> {
                               child: TodoListItem(
                                 title: item.title,
                                 icon: item.icon,
-                                iconColor: item.iconColor,
                                 onTap: () {
                                   Navigator.of(context).push(
                                     MaterialPageRoute(

@@ -1,3 +1,8 @@
+import 'dart:convert';
+
+import 'package:mishka_app/features/chat_with_mishka/data/chat_flow_strings.dart';
+import 'package:mishka_app/features/chat_with_mishka/data/data_sources/chat_session_remote_data_source.dart';
+
 enum ChatStep {
   idle,
   pdfUploaded,
@@ -26,7 +31,7 @@ enum MessageType {
   file,
   options,
   selection,
-  toolPreview, // for displaying quiz/flashcards inline in chat
+  toolPreview,
 }
 
 class ChatMessage {
@@ -34,11 +39,11 @@ class ChatMessage {
   final MessageType type;
   final DateTime time;
 
-  final String? text;                 // for system/explanation
-  final String? fileName;             // for file
-  final List<String>? options;         // for options bubble (difficulty/actions)
-  final String? selectedOption;        // for selection bubble (Option B)
-  final Map<String, dynamic>? toolData; // for toolPreview (quiz/flashcards)
+  final String? text;
+  final String? fileName;
+  final List<String>? options;
+  final String? selectedOption;
+  final Map<String, dynamic>? toolData;
 
   const ChatMessage({
     required this.isFromMishka,
@@ -53,38 +58,182 @@ class ChatMessage {
 }
 
 class ChatFlowController {
+  ChatFlowController({
+    ChatFlowStrings? strings,
+    bool withGreeting = true,
+  })  : _strings = strings {
+    if (withGreeting) {
+      _addGreeting();
+    }
+  }
+
+  ChatFlowStrings? _strings;
+
   ChatStep step = ChatStep.idle;
 
   String? uploadedPdfName;
   DifficultyLevel? difficulty;
   String? sessionId;
-  StudyAction? lastSelectedTool; // Track last tool for regenerate
+  StudyAction? lastSelectedTool;
 
   final List<ChatMessage> messages = [];
 
-  // =========================
-  // PROPERTIES
-  // =========================
   bool get isTypingEnabled => step == ChatStep.freeInteraction;
 
-  // =========================
-  // INITIALIZATION
-  // =========================
-  ChatFlowController() {
-    // Add initial greeting
+  void updateStrings(ChatFlowStrings strings) {
+    _strings = strings;
+  }
+
+  void reset({bool withGreeting = true}) {
+    messages.clear();
+    uploadedPdfName = null;
+    difficulty = null;
+    sessionId = null;
+    lastSelectedTool = null;
+    step = ChatStep.idle;
+    if (withGreeting) {
+      _addGreeting();
+    }
+  }
+
+  void _addGreeting() {
     messages.add(
       ChatMessage(
         isFromMishka: true,
         type: MessageType.text,
-        text: "Hello, please upload your material to start our journey",
+        text: _strings?.greeting ??
+            'Hello, please upload your material to start our journey',
         time: DateTime.now(),
       ),
     );
   }
 
-  // =========================
-  // PDF UPLOAD
-  // =========================
+  void restoreFromTimeline(ChatSessionTimeline timeline, String? aiSessionId) {
+    messages.clear();
+
+    if (aiSessionId != null && aiSessionId.isNotEmpty) {
+      sessionId = aiSessionId;
+    }
+
+    uploadedPdfName = timeline.session.uploadOriginalFilename;
+
+    for (final msg in timeline.messages) {
+      if (msg.inputType == 'session_meta') {
+        try {
+          final meta =
+              jsonDecode(msg.messageContent) as Map<String, dynamic>;
+          final diff = meta['difficulty']?.toString();
+          if (diff != null) {
+            difficulty = _parseDifficultyName(diff);
+          }
+          final fromMeta = meta['aiSessionId']?.toString();
+          if (fromMeta != null && fromMeta.isNotEmpty) {
+            sessionId = fromMeta;
+          }
+        } catch (_) {}
+        continue;
+      }
+
+      final restored = _messageFromTimeline(msg);
+      if (restored != null) {
+        messages.add(restored);
+      }
+    }
+
+    if (sessionId != null) {
+      step = ChatStep.freeInteraction;
+    } else if (uploadedPdfName != null && uploadedPdfName!.isNotEmpty) {
+      step = ChatStep.waitingForDifficulty;
+    } else {
+      step = ChatStep.idle;
+    }
+
+    if (messages.isEmpty) {
+      _addGreeting();
+    }
+  }
+
+  ChatMessage? _messageFromTimeline(ChatTimelineMessage msg) {
+    final isFromMishka = msg.senderType != 'user';
+    final time = DateTime.tryParse(msg.createdAt ?? '') ?? DateTime.now();
+
+    switch (msg.inputType) {
+      case 'explanation':
+        return ChatMessage(
+          isFromMishka: true,
+          type: MessageType.explanation,
+          text: msg.messageContent,
+          time: time,
+        );
+      case 'file':
+        return ChatMessage(
+          isFromMishka: false,
+          type: MessageType.file,
+          fileName: msg.messageContent,
+          time: time,
+        );
+      case 'options':
+        try {
+          final list = (jsonDecode(msg.messageContent) as List)
+              .map((e) => e.toString())
+              .toList();
+          return ChatMessage(
+            isFromMishka: true,
+            type: MessageType.options,
+            options: list,
+            time: time,
+          );
+        } catch (_) {
+          return null;
+        }
+      case 'selection':
+        return ChatMessage(
+          isFromMishka: false,
+          type: MessageType.selection,
+          selectedOption: msg.messageContent,
+          time: time,
+        );
+      case 'tool_preview':
+        try {
+          final data = Map<String, dynamic>.from(
+            jsonDecode(msg.messageContent) as Map,
+          );
+          return ChatMessage(
+            isFromMishka: true,
+            type: MessageType.toolPreview,
+            toolData: data,
+            time: time,
+          );
+        } catch (_) {
+          return null;
+        }
+      case 'system':
+        return ChatMessage(
+          isFromMishka: true,
+          type: MessageType.system,
+          text: msg.messageContent,
+          time: time,
+        );
+      default:
+        return ChatMessage(
+          isFromMishka: isFromMishka,
+          type: MessageType.text,
+          text: msg.messageContent,
+          time: time,
+        );
+    }
+  }
+
+  DifficultyLevel? _parseDifficultyName(String raw) {
+    return _strings?.difficultyForLabel(raw) ??
+        switch (raw.toLowerCase()) {
+          'simple' => DifficultyLevel.simple,
+          'advanced' || 'hard' => DifficultyLevel.advanced,
+          'intermediate' => DifficultyLevel.intermediate,
+          _ => null,
+        };
+  }
+
   void onPdfUploaded({required String fileName}) {
     uploadedPdfName = fileName;
     step = ChatStep.waitingForDifficulty;
@@ -102,15 +251,13 @@ class ChatFlowController {
       ChatMessage(
         isFromMishka: true,
         type: MessageType.options,
-        options: ["Simple", "Intermediate", "Advanced"],
+        options: _strings?.difficultyOptions ??
+            const ['Simple', 'Intermediate', 'Advanced'],
         time: DateTime.now(),
       ),
     );
   }
 
-  // =========================
-  // DIFFICULTY
-  // =========================
   void onDifficultySelected(DifficultyLevel level) {
     difficulty = level;
     step = ChatStep.explaining;
@@ -128,15 +275,12 @@ class ChatFlowController {
       ChatMessage(
         isFromMishka: true,
         type: MessageType.system,
-        text: "Analyzing PDF...",
+        text: _strings?.analyzingPdf ?? 'Analyzing PDF...',
         time: DateTime.now(),
       ),
     );
   }
 
-  // =========================
-  // EXPLANATION READY
-  // =========================
   void onExplanationReady({
     required String explanationText,
     required String sessionId,
@@ -157,15 +301,13 @@ class ChatFlowController {
       ChatMessage(
         isFromMishka: true,
         type: MessageType.options,
-        options: ["Quiz", "Flashcards", "Mind Map"],
+        options: _strings?.toolOptions ??
+            const ['Quiz', 'Flashcards', 'Mind Map', 'Summarize'],
         time: DateTime.now(),
       ),
     );
   }
 
-  // =========================
-  // TOOL SELECT
-  // =========================
   StudyAction onActionSelected(String label) {
     messages.add(
       ChatMessage(
@@ -176,55 +318,36 @@ class ChatFlowController {
       ),
     );
 
-    // Show what was chosen
+    final action =
+        _strings?.toolActionForLabel(label) ?? _legacyToolAction(label);
+
     messages.add(
       ChatMessage(
         isFromMishka: true,
         type: MessageType.text,
-        text: "Great! You selected: $label. Generating it for you...",
+        text: _strings?.toolSelected(label) ??
+            'Great! You selected: $label. Generating it for you...',
         time: DateTime.now(),
       ),
     );
 
-    StudyAction action;
-    switch (label) {
-      case "Quiz":
-        action = StudyAction.quiz;
-        break;
-      case "Flashcards":
-        action = StudyAction.flashcards;
-        break;
-      case "Mind Map":
-        action = StudyAction.mindmap;
-        break;
-      default:
-        action = StudyAction.quiz;
-    }
-    
-    lastSelectedTool = action; // Store for regenerate
+    lastSelectedTool = action;
     return action;
   }
 
-  // =========================
-  // TOOL GENERATED - SHOW OPTIONS
-  // =========================
   void onToolGenerated(StudyAction toolType) {
     lastSelectedTool = toolType;
-    
-    // Add options for regenerate or another tool
+
     messages.add(
       ChatMessage(
         isFromMishka: true,
         type: MessageType.options,
-        options: ["Regenerate", "Another Tool"],
+        options: _strings?.postToolOptions ?? const ['Regenerate', 'Another Tool'],
         time: DateTime.now(),
       ),
     );
   }
 
-  // =========================
-  // REGENERATE OR ANOTHER TOOL
-  // =========================
   StudyAction? onRegenerateOrAnotherTool(String choice) {
     messages.add(
       ChatMessage(
@@ -235,25 +358,28 @@ class ChatFlowController {
       ),
     );
 
-    if (choice == "Regenerate") {
+    final isRegenerate = _strings?.isRegenerate(choice) ?? choice == 'Regenerate';
+    final isAnother = _strings?.isAnotherTool(choice) ?? choice == 'Another Tool';
+
+    if (isRegenerate) {
       if (lastSelectedTool != null) {
         messages.add(
           ChatMessage(
             isFromMishka: true,
             type: MessageType.text,
-            text: "Regenerating ${_toolName(lastSelectedTool!)}...",
+            text: _strings?.regenerating(_toolName(lastSelectedTool!)) ??
+                'Regenerating ${_toolName(lastSelectedTool!)}...',
             time: DateTime.now(),
           ),
         );
         return lastSelectedTool;
       }
-    } else if (choice == "Another Tool") {
-      // Show tool options again
+    } else if (isAnother) {
       messages.add(
         ChatMessage(
           isFromMishka: true,
           type: MessageType.text,
-          text: "Which tool would you like to use?",
+          text: _strings?.whichTool ?? 'Which tool would you like to use?',
           time: DateTime.now(),
         ),
       );
@@ -261,7 +387,8 @@ class ChatFlowController {
         ChatMessage(
           isFromMishka: true,
           type: MessageType.options,
-          options: ["Quiz", "Flashcards", "Mind Map"],
+          options: _strings?.toolOptions ??
+              const ['Quiz', 'Flashcards', 'Mind Map', 'Summarize'],
           time: DateTime.now(),
         ),
       );
@@ -270,21 +397,24 @@ class ChatFlowController {
   }
 
   String _toolName(StudyAction action) {
-    switch (action) {
-      case StudyAction.quiz:
-        return "Quiz";
-      case StudyAction.flashcards:
-        return "Flashcards";
-      case StudyAction.mindmap:
-        return "Mind Map";
-      case StudyAction.summarize:
-        return "Summarize";
-    }
+    if (_strings != null) return _strings!.toolName(action);
+    return switch (action) {
+      StudyAction.quiz => 'Quiz',
+      StudyAction.flashcards => 'Flashcards',
+      StudyAction.mindmap => 'Mind Map',
+      StudyAction.summarize => 'Summarize',
+    };
   }
 
-  // =========================
-  // CHAT MESSAGES
-  // =========================
+  StudyAction _legacyToolAction(String label) {
+    return switch (label) {
+      'Flashcards' => StudyAction.flashcards,
+      'Mind Map' => StudyAction.mindmap,
+      'Summarize' => StudyAction.summarize,
+      _ => StudyAction.quiz,
+    };
+  }
+
   void onUserChatMessage(String text) {
     messages.add(
       ChatMessage(
@@ -320,17 +450,18 @@ class ChatFlowController {
     );
   }
 
-  // =========================
-  // HELPERS
-  // =========================
   String _difficultyLabel(DifficultyLevel level) {
-    switch (level) {
-      case DifficultyLevel.simple:
-        return "Simple";
-      case DifficultyLevel.intermediate:
-        return "Intermediate";
-      case DifficultyLevel.advanced:
-        return "Advanced";
+    if (_strings != null) {
+      return switch (level) {
+        DifficultyLevel.simple => _strings!.difficultySimple,
+        DifficultyLevel.intermediate => _strings!.difficultyIntermediate,
+        DifficultyLevel.advanced => _strings!.difficultyAdvanced,
+      };
     }
+    return switch (level) {
+      DifficultyLevel.simple => 'Simple',
+      DifficultyLevel.intermediate => 'Intermediate',
+      DifficultyLevel.advanced => 'Advanced',
+    };
   }
 }

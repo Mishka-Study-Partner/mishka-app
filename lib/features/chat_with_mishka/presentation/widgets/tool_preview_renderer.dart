@@ -32,8 +32,61 @@ class _ToolPreviewRendererState extends State<ToolPreviewRenderer> {
         'quizzes' => _buildQuizPreview(), // Also support plural for compatibility
         'mind_maps' => _buildMindmapPreview(),
         'mindmap' => _buildMindmapPreview(), // Also support singular
-        _ => const SizedBox.shrink(),
+        'summary' => _buildSummaryPreview(),
+        'summarize' => _buildSummaryPreview(),
+        _ => _buildSummaryFallbackPreview(),
       },
+    );
+  }
+
+  Widget _buildSummaryFallbackPreview() {
+    final text = (widget.toolData['summary'] ??
+            widget.toolData['text'] ??
+            widget.toolData['content'] ??
+            '')
+        .toString()
+        .trim();
+    if (text.isEmpty) return const SizedBox.shrink();
+    return _buildSummaryPreviewBody(text);
+  }
+
+  Widget _buildSummaryPreview() {
+    final text = (widget.toolData['summary'] ??
+            widget.toolData['text'] ??
+            widget.toolData['content'] ??
+            '')
+        .toString()
+        .trim();
+    if (text.isEmpty) return const SizedBox.shrink();
+    return _buildSummaryPreviewBody(text);
+  }
+
+  Widget _buildSummaryPreviewBody(String text) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          widget.toolData['title']?.toString().trim().isNotEmpty == true
+              ? widget.toolData['title'].toString()
+              : 'Summary',
+          style: TextStyle(
+            fontSize: 14.sp,
+            fontWeight: FontWeight.w600,
+            color: AppColors.mainDark,
+            fontFamily: 'Pridi',
+          ),
+        ),
+        SizedBox(height: 12.h),
+        Text(
+          text,
+          style: TextStyle(
+            fontSize: 13.sp,
+            height: 1.45,
+            color: AppColors.mainDark,
+            fontFamily: 'Pridi',
+          ),
+        ),
+      ],
     );
   }
 

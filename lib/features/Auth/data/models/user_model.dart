@@ -13,6 +13,11 @@ class UserModel {
     this.isVerified,
     this.profileImageUrl,
     this.gender,
+    this.educationStatus,
+    this.educationOtherDetail,
+    this.schoolTrack,
+    this.schoolGrade,
+    this.universityYear,
     this.createdAt,
     this.updatedAt,
   });
@@ -29,6 +34,11 @@ class UserModel {
   final bool? isVerified;
   final String? profileImageUrl;
   final String? gender;
+  final String? educationStatus;
+  final String? educationOtherDetail;
+  final String? schoolTrack;
+  final int? schoolGrade;
+  final int? universityYear;
   final String? createdAt;
   final String? updatedAt;
 
@@ -46,9 +56,21 @@ class UserModel {
       isVerified: json['isVerified'] as bool?,
       profileImageUrl: json['profileImageUrl'] as String?,
       gender: json['gender'] as String?,
+      educationStatus: json['educationStatus'] as String?,
+      educationOtherDetail: json['educationOtherDetail'] as String?,
+      schoolTrack: json['schoolTrack'] as String?,
+      schoolGrade: _parseIntOrNull(json['schoolGrade']),
+      universityYear: _parseIntOrNull(json['universityYear']),
       createdAt: json['createdAt'] as String?,
       updatedAt: json['updatedAt'] as String?,
     );
+  }
+
+  static int? _parseIntOrNull(dynamic value) {
+    if (value == null) return null;
+    if (value is int) return value;
+    if (value is double) return value.toInt();
+    return int.tryParse(value.toString());
   }
 
   Map<String, dynamic> toJson() => {
@@ -64,6 +86,11 @@ class UserModel {
         'isVerified': isVerified,
         'profileImageUrl': profileImageUrl,
         'gender': gender,
+        'educationStatus': educationStatus,
+        'educationOtherDetail': educationOtherDetail,
+        'schoolTrack': schoolTrack,
+        'schoolGrade': schoolGrade,
+        'universityYear': universityYear,
         'createdAt': createdAt,
         'updatedAt': updatedAt,
       };

@@ -5,8 +5,11 @@ import 'package:mishka_app/core/utils/app_colors.dart';
 import 'package:mishka_app/core/utils/app_sizes.dart';
 import 'package:mishka_app/core/widgets/custom_app_bar.dart';
 import 'package:mishka_app/features/Auth/data/data_sources/auth_remote_data_source.dart';
+import 'package:mishka_app/features/Auth/presentation/widgets/auth_success_dialog.dart';
 import 'package:mishka_app/features/Auth/presentation/widgets/custom_elevated_button.dart';
 import 'package:mishka_app/features/Auth/presentation/widgets/form_text.dart';
+import 'package:mishka_app/features/Auth/presentation/widgets/password_requirements_card.dart';
+import 'package:mishka_app/features/Auth/utils/auth_validators.dart';
 import 'package:mishka_app/l10n/app_localizations.dart';
 
 class NewPasswordView extends StatefulWidget {
@@ -28,6 +31,7 @@ class NewPasswordView extends StatefulWidget {
 }
 
 class _NewPasswordViewState extends State<NewPasswordView> {
+  final _formKey = GlobalKey<FormState>();
   final _newPasswordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
   bool _isSubmitting = false;
@@ -41,20 +45,20 @@ class _NewPasswordViewState extends State<NewPasswordView> {
 
   Future<void> _submit() async {
     final l10n = AppLocalizations.of(context)!;
-    final newPassword = _newPasswordController.text;
-    final confirm = _confirmPasswordController.text;
-    if (newPassword.isEmpty || confirm.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(l10n.pleaseEnterBothPasswordFields)),
-      );
+    FocusScope.of(context).unfocus();
+    if (!(_formKey.currentState?.validate() ?? false)) {
       return;
     }
+
+    final newPassword = _newPasswordController.text;
+    final confirm = _confirmPasswordController.text;
     if (newPassword != confirm) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(l10n.passwordsDoNotMatch)),
       );
       return;
     }
+
     setState(() => _isSubmitting = true);
     try {
       await AuthRemoteDataSource(ApiService()).resetPassword(
@@ -65,9 +69,8 @@ class _NewPasswordViewState extends State<NewPasswordView> {
         newPassword: newPassword,
       );
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(l10n.passwordSuccessfullySet)),
-      );
+      await AuthSuccessDialog.showPasswordSet(context);
+      if (!mounted) return;
       Navigator.popUntil(context, (route) => route.isFirst);
     } catch (e) {
       if (!mounted) return;
@@ -89,6 +92,7 @@ class _NewPasswordViewState extends State<NewPasswordView> {
       appBar: const MishkaAppBar(
         title: '',
         showBottomBar: false,
+        showBack: true,
       ),
       body: Padding(
         padding: EdgeInsetsDirectional.only(
@@ -96,38 +100,62 @@ class _NewPasswordViewState extends State<NewPasswordView> {
           end: AppSizes.paddingMedium,
           bottom: AppSizes.paddingMedium,
         ),
-        child: SingleChildScrollView(
-          child: Column(
-            children: [
-              Text(
-                l10n.enterNewPassword,
-                style: TextStyle(
-                  fontSize: AppSizes.fontSizeTitle,
-                  fontFamily: 'Pridi',
-                  fontWeight: FontWeight.w600,
+        child: Form(
+          key: _formKey,
+          child: SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                SizedBox(height: 8.h),
+                Text(
+                  l10n.enterNewPassword,
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: AppSizes.fontSizeTitle,
+                    fontFamily: 'Pridi',
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.mainDark,
+                  ),
                 ),
-              ),
-              SizedBox(height: 24.h),
-              CustomInputField(
-                label: l10n.newPassword,
-                hint: l10n.newPassword,
-                isPassword: true,
-                controller: _newPasswordController,
-              ),
-              SizedBox(height: 24.h),
-              CustomInputField(
-                label: l10n.confirmNewPassword,
-                hint: l10n.confirmNewPassword,
-                isPassword: true,
-                controller: _confirmPasswordController,
-              ),
-              SizedBox(height: 24.h),
-              AuthButton(
-                text: l10n.resetPassword,
-                isLoading: _isSubmitting,
-                onPressed: _submit,
-              ),
-            ],
+                SizedBox(height: CustomInputField.spacingBetweenFields),
+                CustomInputField(
+                  label: l10n.newPassword,
+                  hint: l10n.newPassword,
+                  isPassword: true,
+                  controller: _newPasswordController,
+                  validator: (v) => AuthValidators.validatePassword(v, l10n),
+                ),
+                SizedBox(height: CustomInputField.spacingBetweenFields),
+                CustomInputField(
+                  label: l10n.confirmNewPassword,
+                  hint: l10n.confirmNewPassword,
+                  isPassword: true,
+                  controller: _confirmPasswordController,
+                  validator: (v) {
+                    if (v == null || v.isEmpty) return l10n.fieldRequired;
+                    if (v != _newPasswordController.text) {
+                      return l10n.passwordsDoNotMatch;
+                    }
+                    return null;
+                  },
+                ),
+                SizedBox(height: 16.h),
+                ListenableBuilder(
+                  listenable: _newPasswordController,
+                  builder: (context, _) {
+                    return PasswordRequirementsCard(
+                      password: _newPasswordController.text,
+                    );
+                  },
+                ),
+                SizedBox(height: 24.h),
+                AuthButton(
+                  text: l10n.setPassword,
+                  isLoading: _isSubmitting,
+                  onPressed: _submit,
+                ),
+              ],
+            ),
           ),
         ),
       ),

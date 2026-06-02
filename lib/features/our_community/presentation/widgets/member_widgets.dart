@@ -3,7 +3,9 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import 'package:mishka_app/core/utils/app_colors.dart';
 import 'package:mishka_app/core/utils/app_sizes.dart';
+import 'package:mishka_app/l10n/app_localizations.dart';
 
+import '../../community_display_helper.dart';
 import '../../community_styles.dart';
 import '../../data/community_models.dart';
 
@@ -14,6 +16,7 @@ class MemberTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Container(
       margin: EdgeInsets.only(bottom: 6.h),
       padding: EdgeInsets.all(10.w),
@@ -30,9 +33,15 @@ class MemberTile extends StatelessWidget {
           ),
           SizedBox(width: 10.w),
           Expanded(
-            child: Text(member.name, style: CommunityStyles.body),
+            child: Text(
+              communityMemberDisplayName(member.name, l10n),
+              style: CommunityStyles.body,
+            ),
           ),
-          Text(member.role, style: CommunityStyles.roleLabel),
+          Text(
+            communityRoleDisplayLabel(member.role, l10n),
+            style: CommunityStyles.roleLabel,
+          ),
         ],
       ),
     );
@@ -69,6 +78,7 @@ class ManageMemberCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Card(
       margin: EdgeInsets.only(bottom: 10.h),
       color: AppColors.white,
@@ -79,8 +89,14 @@ class ManageMemberCard extends StatelessWidget {
               backgroundColor: AppColors.mainDark.withValues(alpha: 0.08),
               child: Icon(Icons.person, size: 20.w, color: AppColors.mainDark),
             ),
-            title: Text(member.name, style: CommunityStyles.body),
-            subtitle: Text(member.role, style: CommunityStyles.caption),
+            title: Text(
+              communityMemberDisplayName(member.name, l10n),
+              style: CommunityStyles.body,
+            ),
+            subtitle: Text(
+              communityRoleDisplayLabel(member.role, l10n),
+              style: CommunityStyles.caption,
+            ),
             trailing: IconButton(
               icon: Icon(
                 expanded ? Icons.keyboard_arrow_up : Icons.keyboard_arrow_down,
@@ -99,7 +115,7 @@ class ManageMemberCard extends StatelessWidget {
                     Expanded(child: Text(group, style: CommunityStyles.body)),
                     TextButton(
                       onPressed: () => onRemoveFromGroup(group),
-                      child: Text('Remove', style: CommunityStyles.body.copyWith(color: AppColors.red)),
+                      child: Text(l10n.remove, style: CommunityStyles.body.copyWith(color: AppColors.red)),
                     ),
                   ],
                 ),
@@ -121,7 +137,7 @@ class ManageMemberCard extends StatelessWidget {
                           foregroundColor: AppColors.mainGold,
                           side: const BorderSide(color: AppColors.mainGold),
                         ),
-                        child: Text(promoteLabel ?? 'Make Admin'),
+                        child: Text(promoteLabel ?? l10n.communityMemberPromoteAdmin),
                       ),
                     ),
                     SizedBox(height: 8.h),
@@ -133,7 +149,7 @@ class ManageMemberCard extends StatelessWidget {
                       width: double.infinity,
                       child: OutlinedButton(
                         onPressed: onDemoteToMember,
-                        child: Text(demoteLabel ?? 'Make Member'),
+                        child: Text(demoteLabel ?? l10n.communityMemberDemoteMember),
                       ),
                     ),
                     SizedBox(height: 8.h),
@@ -143,7 +159,7 @@ class ManageMemberCard extends StatelessWidget {
                     child: ElevatedButton(
                       style: CommunityStyles.goldButtonStyle(),
                       onPressed: onAddToGroup,
-                      child: const Text('Add To Group'),
+                      child: Text(l10n.communityMemberAddToGroup),
                     ),
                   ),
                   SizedBox(height: 8.h),
@@ -156,7 +172,7 @@ class ManageMemberCard extends StatelessWidget {
                         side: const BorderSide(color: AppColors.red),
                         textStyle: CommunityStyles.body,
                       ),
-                      child: const Text('Remove From Community'),
+                      child: Text(l10n.communityMemberRemoveFromCommunity),
                     ),
                   ),
                 ],

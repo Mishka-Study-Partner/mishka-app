@@ -213,29 +213,28 @@ class _CallStudySessionState extends State<_CallStudySession> {
   DateTime? _breakStartedAt;
 
   void _takeBreak() {
-    if (!_manager.hasActiveSession) return;
-    _controller.pause();
+    if (!_manager.hasActiveSession || _isOnBreak) return;
+    _breakStartedAt = DateTime.now();
+    _manager.startCallBreak();
     _controller.setMode(
       _controller.completedCycles % 4 == 3
           ? TimerMode.longBreak
           : TimerMode.shortBreak,
     );
     _controller.start();
-    _breakStartedAt = DateTime.now();
-    _manager.startCallBreak();
+    setState(() => _isOnBreak = true);
   }
 
   void _backToCall() {
-    if (!_manager.hasActiveSession) return;
-    // Report break duration to backend
+    if (!_manager.hasActiveSession || !_isOnBreak) return;
     if (_breakStartedAt != null) {
       final seconds = DateTime.now().difference(_breakStartedAt!).inSeconds;
-      _manager.endCallBreak(durationSeconds: seconds);
+      _manager.endCallBreak(durationSeconds: seconds.clamp(0, 86400));
       _breakStartedAt = null;
     }
-    _controller.pause();
     _controller.setMode(TimerMode.study);
     _controller.start();
+    setState(() => _isOnBreak = false);
   }
 
   void _endCall() {

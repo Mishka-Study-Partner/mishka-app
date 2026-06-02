@@ -39,6 +39,9 @@ class DioClient {
       InterceptorsWrapper(
         onRequest: (options, handler) {
           options.headers['Accept-Language'] = AppNetworkConfig.acceptLanguage;
+          if (ApiEndpoints.baseUrl.contains('ngrok')) {
+            options.headers['ngrok-skip-browser-warning'] = 'true';
+          }
           final t = TokenStorage.token;
           if (t != null && t.isNotEmpty) {
             options.headers['Authorization'] = 'Bearer $t';

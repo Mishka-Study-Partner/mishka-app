@@ -547,13 +547,10 @@
   ,"linkCopied": "Link copied!"
   ,"linkCopiedAndReady": "Link copied and ready to share!"
   ,"copyAndShare": "Copy & Share"
-  ,"password": "Password"
   ,"enterPassword": "Enter password"
   ,"noPreviousCustomTimers": "No previous custom timers."
   ,"howIsYourModeWhileStudying": "How is your mode while studying?"
   ,"makingGoodProgressToday": "Making good progress today?"
-  ,"yes": "Yes"
-  ,"no": "No"
   ,"takeBreak": "Take Break"
   ,"endCall": "End Call"
   ,"backToCall": "Back to Call"
@@ -706,4 +703,130 @@
   ,"communityMemberDemoteMember": "Make Member"
   ,"communityMemberRoleUpdated": "Member role updated."
   ,"communityChatSenderMe": "Me"
+  ,"communityShareMenuTitle": "Share Community"
+  ,"communityShareSendLink": "Send Link"
+  ,"communityShareCreateCode": "Create code"
+  ,"communityShareInsertEmail": "Insert Email"
+  ,"communityShareInsertUsername": "Insert User Name"
+  ,"communityShareDialogTitle": "Share Community:"
+  ,"communitySharePublicLinkHint": "Anyone with this link can find and join your public community."
+  ,"communitySharePrivateCodeHint": "Share this invite code so others can join your private community."
+  ,"communitySharePublicCodeHint": "Public communities share by link. This ID helps others join in the app."
+  ,"communityShareYourCode": "Your code"
+  ,"communityShareGenerateNewCode": "Generate new code"
+  ,"communityEditCommunity": "Edit Community"
+  ,"communityDeleteCommunity": "Delete Community"
+  ,"communityHubRecommendedEmpty": "You're all caught up — explore Discover for more communities."
+  ,"communityInviteRequiresAccount": "The person must already have a Mishka account (signed up in the app)."
+  ,"communityInviteUserNotFound": "No Mishka account found for that email or username."
+  ,"communityInviteCannotInviteSelf": "You cannot invite yourself. Use another member's email or username."
+  ,"communityInviteUsernameHint": "Mishka username (no @)"
+  ,"communityInviteSend": "Send invite"
+  ,"communityInviteEmailSent": "Invitation sent to {email}"
+  ,"@communityInviteEmailSent": {
+    "placeholders": {
+      "email": {"type": "String"}
+    }
+  }
+  ,"communityJoinPrivateTitle": "Join Private Community"
+  ,"communityJoinPrivateCodePrompt": "Enter your community invite code:"
+  ,"communityJoinPrivateCodeHint": "Community code"
+  ,"communityJoinPrivateButton": "Join community"
+  ,"communityJoinPrivateSuccess": "You have joined the community!"
+  ,"communityDeleteConfirm": "Are you sure you want to delete this community?"
+  ,"communityDeletedSuccess": "Community deleted successfully!"
+  ,"communityConfirmJoinGroup": "Are you sure you want to join this group?"
+  ,"communityJoinedGroupSuccess": "You joined the group."
+  ,"communityConfirmDeleteGroup": "Are you sure you want to delete this group?"
+  ,"communityExitConfirm": "Are you sure you want to leave this community?"
+  ,"communityExitAndDeleteConfirm": "Leave and remove this community from your list?"
+  ,"communityRemoveMemberConfirm": "Remove this member from the community?"
+  ,"communityMemberRemovedSuccess": "Member removed from the community."
+  ,"communityRemoveFromGroupConfirm": "Remove this member from the group?"
+  ,"communityMemberRemovedFromGroupSuccess": "Member removed from the group."
+  ,"communityInviteUsernameSent": "Invitation sent to @{username}"
+  ,"@communityInviteUsernameSent": {
+    "placeholders": {
+      "username": {"type": "String"}
+    }
+  }
+  ,"communityHubJoinFailedOpenAnyway": "Could not join community. Opening anyway…"
+  ,"communityHubNoneYet": "None yet."
+  ,"communityHomeTypeLabel": "Community"
+  ,"communityHomeAnnouncements": "Announcements"
+  ,"communityHomeWelcomeDefault": "Welcome to your community"
+  ,"communityHomeNoGroups": "No groups yet. Add your first group."
+  ,"communityHomeAddGroup": "Add Group"
+  ,"communityDetailStats": "Community: {groupCount} groups • {memberCount} members"
+  ,"@communityDetailStats": {
+    "placeholders": {
+      "groupCount": {"type": "int"},
+      "memberCount": {"type": "int"}
+    }
+  }
+  ,"communityDetailViewGroups": "View Groups"
+  ,"communityDetailViewMembers": "View Members:"
+  ,"communityDetailManageMembers": "Manage Members"
+  ,"communityDetailExitCommunity": "Leave community"
+  ,"communityDetailExitAndDelete": "Leave and remove from your list"
+  ,"communityGroupsTitle": "{communityName} Groups"
+  ,"@communityGroupsTitle": {
+    "placeholders": {
+      "communityName": {"type": "String"}
+    }
+  }
+  ,"communityMembersTitle": "{communityName} Members"
+  ,"@communityMembersTitle": {
+    "placeholders": {
+      "communityName": {"type": "String"}
+    }
+  }
+  ,"communityGroupJoin": "Join Group"
+  ,"communityGroupDelete": "Delete Group"
+  ,"communityGroupAddNew": "+ Add new Group"
+  ,"communityAddGroupTitle": "Add Group"
+  ,"communityAddGroupSuccess": "Your group was added to the community!"
+  ,"communityAddGroupHeader": "Add New Group To Your Community"
+  ,"communityAddGroupProfileLabel": "Add your group's profile:"
+  ,"communityAddGroupNameLabel": "Group name:"
+  ,"communityAddGroupNameHint": "Group name"
+  ,"communityAddGroupDescLabel": "Group description"
+  ,"communityAddGroupDescHint": "Group description"
+  ,"communityAddButton": "Add"
+  ,"communityLabelOptional": "(optional):"
+  ,"communityEditProfileHeader": "Edit your community profile:"
+  ,"communityEditNameLabel": "Community name:"
+  ,"communityEditDescHint": "Community description"
+  ,"communityEditGroupsLabel": "Community groups:"
+  ,"communityEditSaving": "Saving…"
+  ,"communityChatEmpty": "No messages yet. Say hello!"
+  ,"communityChatTypeHint": "Type a message…"
+  ,"communityChatMemberFallback": "Member"
+  ,"communityChatSharedFromMishka": "Shared from Mishka"
+  ,"communityMemberAddToGroup": "Add to group"
+  ,"communityMemberRemoveFromCommunity": "Remove from community"
+  ,"communitySelectGroupPrompt": "Select a group for {memberName}"
+  ,"@communitySelectGroupPrompt": {
+    "placeholders": {
+      "memberName": {"type": "String"}
+    }
+  }
+  ,"communityMemberAddedToGroupSuccess": "Member added to the group."
+  ,"communityShareChooseMaterial": "Choose saved AI material to share with this group."
+  ,"communityShareNoSavedInCategory": "No saved items in this category yet."
+  ,"communityDiscoverySubjectsOptional": "Subjects (optional)"
+  ,"communityDiscoveryPurposeOptional": "Purpose (optional)"
+  ,"communityInviteEmailHint": "Email address"
+  ,"communityErrorServerUnreachable": "Could not reach the server. Check that the backend is running."
+  ,"communityRoleOwner": "Owner"
+  ,"communityRoleAdmin": "Admin"
+  ,"communityRoleMember": "Member"
+  ,"communityFallbackName": "Community"
+  ,"communityFallbackGroupName": "Group"
+  ,"communityFallbackMemberName": "Member"
+  ,"communityBrandMishka": "Mishka"
+  ,"reportCommunitySection": "Our Community"
+  ,"reportCommunityMessages": "Messages posted"
+  ,"reportCommunityMaterialShares": "Materials shared"
+  ,"reportCommunityChannelJoins": "Channel joins"
 }

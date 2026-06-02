@@ -3,7 +3,9 @@ import 'package:mishka_app/core/network/api_service.dart';
 import 'community_chat_bundle.dart';
 import 'community_create_params.dart';
 import 'community_discover_models.dart';
+import 'community_invite_resolver.dart';
 import 'community_models.dart';
+import 'community_pinned_store.dart';
 import 'community_remote_data_source.dart';
 
 class CommunityRepository {
@@ -15,8 +17,18 @@ class CommunityRepository {
   RecommendedFeed? _recommendedCache;
   DateTime? _recommendedCachedAt;
   String? _recommendedCacheKey;
+  final Map<String, _CommunityDetailCacheEntry> _communityDetailCache = {};
+  static const _communityDetailCacheTtl = Duration(seconds: 45);
 
   void _invalidateMembershipsCache() => _membershipsCache = null;
+
+  void _invalidateCommunityDetailCache([String? id]) {
+    if (id == null) {
+      _communityDetailCache.clear();
+    } else {
+      _communityDetailCache.remove(id);
+    }
+  }
 
   void _invalidateRecommendedCache() {
     _recommendedCache = null;
@@ -79,6 +91,7 @@ class CommunityRepository {
       );
 
   Future<CommunityHubData> loadHub() async {
+    await CommunityPinnedStore.ensureLoaded();
     _invalidateMembershipsCache();
     final memberships = await _fetchMembershipsCached();
     final communities = await _remote.fetchCommunities();
@@ -110,7 +123,11 @@ class CommunityRepository {
       );
     }
 
-    final all = merged.values.toList()
+    var all = merged.values.toList();
+    await CommunityPinnedStore.reconcileWithMemberships(
+      all.where((c) => c.isMember),
+    );
+    all = all.map(_applyPinnedState).toList()
       ..sort((a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()));
 
     final saved = <CommunityModel>[];
@@ -141,25 +158,58 @@ class CommunityRepository {
   Future<CommunityModel?> refreshCommunity(
     String id, {
     CommunityModel? seed,
+    bool forceRefresh = false,
   }) async {
+    if (!forceRefresh) {
+      final cached = _communityDetailCache[id];
+      if (cached != null &&
+          DateTime.now().difference(cached.loadedAt) < _communityDetailCacheTtl) {
+        return _mergeCommunityDetail(cached.model, id: id, seed: seed);
+      }
+    }
+
     final community = await _remote.fetchCommunityById(id);
     if (community == null) return seed;
+
+    final merged = await _mergeCommunityDetail(community, id: id, seed: seed);
+    if (merged != null) {
+      _communityDetailCache[id] = _CommunityDetailCacheEntry(
+        merged,
+        DateTime.now(),
+      );
+    }
+    return merged;
+  }
+
+  Future<CommunityModel?> _mergeCommunityDetail(
+    CommunityModel community, {
+    required String id,
+    CommunityModel? seed,
+  }) async {
+    await CommunityPinnedStore.ensureLoaded();
 
     for (final membership in await _fetchMembershipsCached()) {
       if (_communityIdFromMembership(membership) != id) continue;
       final role = (membership['role'] ?? '').toString();
-      final pinned = membership['isPinned'] == true || membership['pinned'] == true;
-      return community.copyWith(
-        isMember: true,
-        myRole: role.isEmpty ? (seed?.myRole ?? community.myRole) : role,
-        isPinned: community.isPinned || pinned,
-        ownerUserId: community.ownerUserId ?? seed?.ownerUserId,
+      final fromMembership = CommunityModel.fromJson(
+        membership,
+        membership: membership,
+      );
+      return _applyPinnedState(
+        community.copyWith(
+          isMember: true,
+          myRole: role.isEmpty ? (seed?.myRole ?? community.myRole) : role,
+          isPinned: community.isPinned || fromMembership.isPinned,
+          ownerUserId: community.ownerUserId ?? seed?.ownerUserId,
+        ),
       );
     }
 
-    return community.copyWith(
-      myRole: community.myRole ?? seed?.myRole,
-      ownerUserId: community.ownerUserId ?? seed?.ownerUserId,
+    return _applyPinnedState(
+      community.copyWith(
+        myRole: community.myRole ?? seed?.myRole,
+        ownerUserId: community.ownerUserId ?? seed?.ownerUserId,
+      ),
     );
   }
 
@@ -171,6 +221,7 @@ class CommunityRepository {
   }) async {
     _invalidateMembershipsCache();
     _invalidateRecommendedCache();
+    _invalidateCommunityDetailCache();
     final d = discovery;
     return _remote.createCommunity(
       name: name,
@@ -195,12 +246,14 @@ class CommunityRepository {
 
   Future<CommunityModel> joinByInviteCode(String code) async {
     _invalidateMembershipsCache();
+    _invalidateCommunityDetailCache();
     return _remote.joinCommunity(inviteCode: code.trim());
   }
 
   Future<CommunityModel> joinPublicCommunity(String communityId) async {
     _invalidateMembershipsCache();
     _invalidateRecommendedCache();
+    _invalidateCommunityDetailCache(communityId);
     return _remote.joinCommunity(communityId: communityId);
   }
 
@@ -244,7 +297,7 @@ class CommunityRepository {
     String? ownerUserId,
   }) async {
     final ownerId = ownerUserId ??
-        (await _remote.fetchCommunityById(communityId))?.ownerUserId;
+        (await refreshCommunity(communityId))?.ownerUserId;
     return _remote.fetchMembers(communityId, ownerUserId: ownerId);
   }
 
@@ -254,40 +307,77 @@ class CommunityRepository {
   Future<void> leaveCommunity(String id, {bool keepSaved = false}) async {
     await _remote.leaveCommunity(id, keepSaved: keepSaved);
     _invalidateMembershipsCache();
+    _invalidateCommunityDetailCache(id);
   }
 
   Future<void> deleteCommunity(String id) async {
     await _remote.deleteCommunity(id);
     _invalidateMembershipsCache();
+    _invalidateCommunityDetailCache(id);
   }
 
   Future<void> pinCommunity(String id) async {
     await _remote.pinCommunity(id);
+    await CommunityPinnedStore.pin(id);
     _invalidateMembershipsCache();
     _invalidateRecommendedCache();
+    _invalidateCommunityDetailCache(id);
   }
 
   Future<void> unpinCommunity(String id) async {
     await _remote.unpinCommunity(id);
+    await CommunityPinnedStore.unpin(id);
     _invalidateMembershipsCache();
     _invalidateRecommendedCache();
+    _invalidateCommunityDetailCache(id);
   }
 
-  Future<CommunityInviteInfo> getInvite(String id) => _remote.fetchInvite(id);
+  Future<void> inviteMemberByEmail(String communityId, String email) =>
+      _remote.inviteMember(communityId, email: email);
 
-  Future<CommunityInviteInfo> regenerateInvite(String id) =>
-      _remote.regenerateInvite(id);
+  Future<void> inviteMemberByUsername(String communityId, String username) =>
+      _remote.inviteMember(communityId, username: username);
+
+  Future<CommunityInviteInfo> getInvite(
+    String id, {
+    CommunityModel? community,
+  }) async {
+    final hint = community;
+    try {
+      final api = await _remote.fetchInvite(id);
+      if (hint != null) return CommunityInviteResolver.merge(api, hint);
+      return api;
+    } catch (_) {
+      final model = hint ?? await refreshCommunity(id);
+      if (model != null) return CommunityInviteResolver.fromCommunity(model);
+      rethrow;
+    }
+  }
+
+  Future<CommunityInviteInfo> regenerateInvite(
+    String id, {
+    CommunityModel? community,
+  }) async {
+    if (community?.isPublic == true) {
+      return CommunityInviteResolver.fromCommunity(community!);
+    }
+    final api = await _remote.regenerateInvite(id);
+    if (community != null) return CommunityInviteResolver.merge(api, community);
+    return api;
+  }
 
   Future<CommunityModel> updateCommunity(
     String id, {
     String? name,
     String? description,
-  }) =>
-      _remote.updateCommunity(
-        id,
-        name: name,
-        description: description,
-      );
+  }) async {
+    _invalidateCommunityDetailCache(id);
+    return _remote.updateCommunity(
+      id,
+      name: name,
+      description: description,
+    );
+  }
 
   /// One round-trip set for group chat: community, members, messages with roles.
   Future<CommunityChatBundle> loadChatBundle(
@@ -383,4 +473,18 @@ class CommunityRepository {
     }
     return '';
   }
+
+  CommunityModel _applyPinnedState(CommunityModel community) {
+    final pinned =
+        community.isPinned || CommunityPinnedStore.isPinned(community.id);
+    if (pinned == community.isPinned) return community;
+    return community.copyWith(isPinned: pinned);
+  }
+}
+
+class _CommunityDetailCacheEntry {
+  const _CommunityDetailCacheEntry(this.model, this.loadedAt);
+
+  final CommunityModel model;
+  final DateTime loadedAt;
 }

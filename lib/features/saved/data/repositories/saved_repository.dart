@@ -72,4 +72,15 @@ class SavedRepository {
 
   Future<SavedLibraryDetail> getSavedMindMapDetail(String savedListRowId) =>
       _remote.getSavedMindMapDetail(savedListRowId);
+
+  Future<void> renameTutorEntity({
+    required SavedContentKind kind,
+    required String entityId,
+    required String title,
+  }) =>
+      _remote.renameTutorEntity(
+        kind: kind,
+        entityId: entityId,
+        title: title,
+      );
 }

@@ -54,7 +54,7 @@ class PhoneVerification extends StatelessWidget {
                     ),
                     SizedBox(height: 8.h),
                     Text(
-                      l10n.enter5DigitsCodePhone,
+                      l10n.enter6DigitsCodePhone('+20 1010101010'),
                       textAlign: TextAlign.center,
                       style: TextStyle(
                         fontSize: AppSizes.fontSizeLarge,

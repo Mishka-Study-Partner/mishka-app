@@ -3,6 +3,9 @@ import 'package:mishka_app/core/network/api_exception.dart';
 import 'package:mishka_app/core/network/api_service.dart';
 import 'package:mishka_app/core/network/token_storage.dart';
 
+import 'package:mishka_app/features/settings/data/models/user_preferences_model.dart';
+
+import '../models/auth_me_data.dart';
 import '../models/auth_response_model.dart';
 import '../models/user_model.dart';
 
@@ -59,10 +62,6 @@ class AuthRemoteDataSource {
     String? educationOtherDetail,
     String? signupOtp,
   }) async {
-    final normalizedEducationStatus =
-        (educationStatus == null || educationStatus.isEmpty)
-            ? 'other'
-            : educationStatus;
     final env = await _api.post<AuthResponseModel>(
       ApiEndpoints.authRegister,
       data: {
@@ -73,13 +72,12 @@ class AuthRemoteDataSource {
         'agreeTerms': agreeTerms,
         if (phoneNumber != null) 'phoneNumber': phoneNumber,
         if (countryCode != null) 'countryCode': countryCode,
-        // Temporary fallback until education status UI is ready.
-        'educationStatus': normalizedEducationStatus,
-        if (normalizedEducationStatus == 'other')
-          'educationOtherDetail':
-              (educationOtherDetail == null || educationOtherDetail.trim().isEmpty)
-                  ? 'Not specified yet'
-                  : educationOtherDetail.trim(),
+        if (educationStatus != null && educationStatus.isNotEmpty)
+          'educationStatus': educationStatus,
+        if (educationStatus == 'other' &&
+            educationOtherDetail != null &&
+            educationOtherDetail.trim().isNotEmpty)
+          'educationOtherDetail': educationOtherDetail.trim(),
         if (signupOtp != null && signupOtp.trim().isNotEmpty)
           'signupOtp': signupOtp.trim(),
       },
@@ -185,6 +183,37 @@ class AuthRemoteDataSource {
     );
   }
 
+  /// `PATCH /auth/me` — education fields after onboarding.
+  Future<UserModel> patchEducationProfile({
+    required String educationStatus,
+    String? educationOtherDetail,
+    String? schoolTrack,
+    int? schoolGrade,
+    int? universityYear,
+  }) async {
+    final payload = <String, dynamic>{
+      'educationStatus': educationStatus,
+      if (educationStatus == 'other' &&
+          educationOtherDetail != null &&
+          educationOtherDetail.trim().isNotEmpty)
+        'educationOtherDetail': educationOtherDetail.trim(),
+      if (educationStatus == 'school') ...{
+        if (schoolTrack != null) 'schoolTrack': schoolTrack,
+        if (schoolGrade != null) 'schoolGrade': schoolGrade,
+      },
+      if (educationStatus == 'university' && universityYear != null)
+        'universityYear': universityYear,
+    };
+
+    try {
+      await _api.patch<void>(ApiEndpoints.authMe, data: payload);
+    } on ApiException catch (e) {
+      if (_isAuthFailure(e)) await TokenStorage.clearToken();
+      rethrow;
+    }
+    return (await getCurrentUser()).user;
+  }
+
   /// `PATCH /auth/me` — update the signed-in user's profile fields.
   /// [gender]: `female`, `male`, `other`. Omit a key to skip updating it.
   Future<UserModel> patchCurrentUserProfile({
@@ -222,7 +251,7 @@ class AuthRemoteDataSource {
       }
       rethrow;
     }
-    return getCurrentUser();
+    return (await getCurrentUser()).user;
   }
 
   /// `POST /auth/me/avatar` (multipart) — upload profile photo.
@@ -232,13 +261,13 @@ class AuthRemoteDataSource {
       await _api.postMultipart(
         ApiEndpoints.authMeAvatar,
         filePath: filePath,
-        fileField: 'file',
+        fileField: 'avatar',
       );
     } on ApiException catch (e) {
       if (_isAuthFailure(e)) await TokenStorage.clearToken();
       rethrow;
     }
-    return getCurrentUser();
+    return (await getCurrentUser()).user;
   }
 
   /// `DELETE /auth/me/avatar` — remove profile photo.
@@ -249,27 +278,37 @@ class AuthRemoteDataSource {
       if (_isAuthFailure(e)) await TokenStorage.clearToken();
       rethrow;
     }
-    return getCurrentUser();
+    return (await getCurrentUser()).user;
   }
 
-  Future<UserModel> getCurrentUser() async {
+  Future<AuthMeData> getCurrentUser() async {
     try {
-      final env = await _api.get<UserModel>(
+      final env = await _api.get<AuthMeData>(
         ApiEndpoints.authMe,
         dataFromJson: (raw) {
           final map = raw! as Map<String, dynamic>;
-          final user = map['user'];
-          if (user is! Map<String, dynamic>) {
+          final userJson = map['user'];
+          if (userJson is! Map<String, dynamic>) {
             throw const FormatException('Missing user in /auth/me data');
           }
-          return UserModel.fromJson(user);
+          final prefRaw = map['preference'];
+          UserPreferencesModel? preference;
+          if (prefRaw is Map) {
+            preference = UserPreferencesModel.fromJson(
+              Map<String, dynamic>.from(prefRaw),
+            );
+          }
+          return AuthMeData(
+            user: UserModel.fromJson(userJson),
+            preference: preference,
+          );
         },
       );
-      final user = env.data;
-      if (user == null) {
+      final data = env.data;
+      if (data == null) {
         throw ApiException(message: 'Empty user data', error: 'INVALID_RESPONSE');
       }
-      return user;
+      return data;
     } on ApiException catch (e) {
       if (_isAuthFailure(e)) {
         await TokenStorage.clearToken();
@@ -287,6 +326,7 @@ class AuthRemoteDataSource {
     final code = e.error;
     return e.statusCode == 401 ||
         code == 'AUTH_INVALID_TOKEN' ||
-        code == 'AUTH_MISSING_TOKEN';
+        code == 'AUTH_MISSING_TOKEN' ||
+        code == 'USER_NOT_FOUND';
   }
 }

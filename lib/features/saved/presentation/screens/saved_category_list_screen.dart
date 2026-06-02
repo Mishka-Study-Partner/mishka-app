@@ -8,6 +8,7 @@ import 'package:mishka_app/features/ctegory/presentation/widgets/search_bar.dart
 import 'package:mishka_app/features/saved/data/models/saved_list_models.dart';
 import 'package:mishka_app/features/saved/data/repositories/saved_repository.dart';
 import 'package:mishka_app/features/saved/domain/saved_content_kind.dart';
+import 'package:mishka_app/features/saved/presentation/saved_rename_actions.dart';
 import 'package:mishka_app/features/saved/presentation/saved_share_delete_actions.dart';
 import 'package:mishka_app/features/saved/presentation/screens/saved_item_detail_screen.dart';
 import 'package:mishka_app/features/saved/presentation/widgets/saved_library_mishka_card.dart';
@@ -120,6 +121,7 @@ class _SavedCategoryListScreenState extends State<SavedCategoryListScreen> {
           final row = e.value;
           return _SavedRow(
             savedListItemId: row.savedRowId,
+            tutorEntityId: row.flashcardSetId,
             title: row.title,
             imageFallbackAsset: _assetForIndex(i),
             imageOnLeft: i % 2 == 0,
@@ -130,6 +132,7 @@ class _SavedCategoryListScreenState extends State<SavedCategoryListScreen> {
           final row = e.value;
           return _SavedRow(
             savedListItemId: row.savedRowId,
+            tutorEntityId: row.quizId,
             title: row.title,
             imageFallbackAsset: _assetForIndex(i),
             imageOnLeft: i % 2 == 0,
@@ -140,6 +143,7 @@ class _SavedCategoryListScreenState extends State<SavedCategoryListScreen> {
           final row = e.value;
           return _SavedRow(
             savedListItemId: row.savedRowId,
+            tutorEntityId: row.summaryId,
             title: row.title,
             imageFallbackAsset: _assetForIndex(i),
             imageOnLeft: i % 2 == 0,
@@ -150,6 +154,7 @@ class _SavedCategoryListScreenState extends State<SavedCategoryListScreen> {
           final row = e.value;
           return _SavedRow(
             savedListItemId: row.savedRowId,
+            tutorEntityId: row.mindMapId,
             title: row.title,
             imageFallbackAsset: _assetForIndex(i),
             imageOnLeft: i % 2 == 0,
@@ -271,6 +276,16 @@ class _SavedCategoryListScreenState extends State<SavedCategoryListScreen> {
               _load();
             }
           },
+          onRename: () async {
+            final renamed = await showRenameSavedItemDialog(
+              context: context,
+              repository: _repository,
+              kind: widget.kind,
+              entityId: item.tutorEntityId,
+              currentTitle: item.title,
+            );
+            if (renamed) _load();
+          },
           onView: () async {
             if (item.savedListItemId.isEmpty) {
               final loc = AppLocalizations.of(context)!;
@@ -306,12 +321,14 @@ class _SavedCategoryListScreenState extends State<SavedCategoryListScreen> {
 class _SavedRow {
   const _SavedRow({
     required this.savedListItemId,
+    required this.tutorEntityId,
     required this.title,
     required this.imageFallbackAsset,
     required this.imageOnLeft,
   });
 
   final String savedListItemId;
+  final String tutorEntityId;
   final String title;
   final String imageFallbackAsset;
   final bool imageOnLeft;

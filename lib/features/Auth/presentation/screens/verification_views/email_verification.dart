@@ -54,7 +54,7 @@ class EmailVerification extends StatelessWidget {
                     ),
                     SizedBox(height: 8.h),
                     Text(
-                      l10n.enter5DigitsCodeEmail,
+                      l10n.enter6DigitsCodeEmail(l10n.exampleEmail),
                       textAlign: TextAlign.center,
                       style: TextStyle(
                         fontSize: AppSizes.fontSizeLarge,

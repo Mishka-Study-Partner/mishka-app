@@ -46,12 +46,14 @@ class _ResetEmailViewState extends State<ResetEmailView> {
         MaterialPageRoute(
           builder: (context) => OtpVerificationScreen(
             title: l10n.verifyByEmail,
-            subtitle: l10n.enter5DigitsCodeEmail,
-            allowEmptyCode: false,
-            onVerify: (otpCode) async {
-              Navigator.push(
+            subtitle: l10n.enter6DigitsCodeEmail(email),
+            showVerifiedDialog: true,
+            onVerify: (_) async {},
+            afterVerified: (otpCode) async {
+              if (!context.mounted) return;
+              await Navigator.pushReplacement<void, void>(
                 context,
-                MaterialPageRoute(
+                MaterialPageRoute<void>(
                   builder: (context) => NewPasswordView(
                     resetCode: otpCode,
                     email: email,
@@ -81,7 +83,7 @@ class _ResetEmailViewState extends State<ResetEmailView> {
     return Center(
       child: Column(
         children: [
-          SizedBox(height: 48.h),
+          SizedBox(height: 16.h),
           Text(
             l10n.forgetPassword,
             style: TextStyle(
@@ -102,13 +104,13 @@ class _ResetEmailViewState extends State<ResetEmailView> {
               color: AppColors.mainDark,
             ),
           ),
-          SizedBox(height: 24.h),
+          SizedBox(height: CustomInputField.spacingBetweenFields),
           CustomInputField(
             label: l10n.emailAddress,
             hint: l10n.exampleEmail,
             controller: emailController,
           ),
-          SizedBox(height: 24.h),
+          SizedBox(height: CustomInputField.spacingBetweenFields),
           AuthButton(
             text: l10n.getCode,
             isLoading: _isLoading,

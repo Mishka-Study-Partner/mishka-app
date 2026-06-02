@@ -20,6 +20,7 @@ class SavedLibraryMishkaCard extends StatelessWidget {
     this.onSurfaceTap,
     this.onShare,
     this.onDelete,
+    this.onRename,
   });
 
   final String title;
@@ -31,6 +32,7 @@ class SavedLibraryMishkaCard extends StatelessWidget {
   final VoidCallback? onSurfaceTap;
   final VoidCallback? onShare;
   final VoidCallback? onDelete;
+  final VoidCallback? onRename;
 
   /// Mishka.md theme (do not substitute app colors — preserves prototype look).
   static const Color kNavy = Color(0xFF1A2A3A);
@@ -138,8 +140,23 @@ class SavedLibraryMishkaCard extends StatelessWidget {
                           ),
                         ),
                       ),
-                      if (onShare != null || onDelete != null) ...[
+                      if (onShare != null || onDelete != null || onRename != null) ...[
                         SizedBox(width: 4.w),
+                        if (onRename != null)
+                          IconButton(
+                            visualDensity: VisualDensity.compact,
+                            padding: EdgeInsets.zero,
+                            constraints: BoxConstraints(
+                              minWidth: 40.w,
+                              minHeight: 40.h,
+                            ),
+                            icon: Icon(
+                              Icons.drive_file_rename_outline,
+                              color: kNavy,
+                              size: 22.sp,
+                            ),
+                            onPressed: onRename,
+                          ),
                         if (onShare != null)
                           IconButton(
                             visualDensity: VisualDensity.compact,

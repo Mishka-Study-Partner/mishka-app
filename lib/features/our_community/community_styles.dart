@@ -149,11 +149,23 @@ abstract final class CommunityStyles {
         color: color,
       );
 
+  /// Text on [showSnackBar] — dark on gold for readable contrast in all themes.
   static TextStyle get snackBar => TextStyle(
         fontFamily: _fontFamily,
         fontSize: AppSizes.fontSizeMedium,
+        fontWeight: FontWeight.w500,
         color: AppColors.mainDark,
       );
+
+  static void showSnackBar(BuildContext context, String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message, style: snackBar),
+        backgroundColor: AppColors.mainGold,
+        behavior: SnackBarBehavior.floating,
+      ),
+    );
+  }
 
   static InputDecoration inputDecoration(String hint) => InputDecoration(
         hintText: hint,

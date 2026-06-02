@@ -2,6 +2,17 @@
 
 Run after backend is up (`localhost:3000` or ngrok) and you are signed in.
 
+## API smoke test (before manual UI)
+
+From repo root (use your real password, not `…`):
+
+```bash
+chmod +x tool/verify_community_backend_fixes.sh
+TEST_EMAIL=you@example.com TEST_PASSWORD=yourpassword ./tool/verify_community_backend_fixes.sh
+```
+
+Do **not** use `dart run tool/verify_community_backend_fixes.dart` from the Flutter project root — it fails with a `native_assets` / `objective_c` error. The shell script runs a standalone package under `tool/api_verify/`.
+
 ## 1. Home → Discover
 
 - [ ] Home → **Explore communities** card opens **Discover Communities**

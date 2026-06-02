@@ -122,6 +122,20 @@ class SavedRemoteDataSource {
     return SavedLibraryDetail(data);
   }
 
+  Future<void> renameTutorEntity({
+    required SavedContentKind kind,
+    required String entityId,
+    required String title,
+  }) async {
+    final path = switch (kind) {
+      SavedContentKind.quiz => ApiEndpoints.quizById(entityId),
+      SavedContentKind.flashcards => ApiEndpoints.flashcardSetById(entityId),
+      SavedContentKind.summary => ApiEndpoints.summaryById(entityId),
+      SavedContentKind.mindmap => ApiEndpoints.mindMapById(entityId),
+    };
+    await _api.put<void>(path, data: {'title': title.trim()});
+  }
+
   /// `DELETE /saved-*/{id}` — [savedListRowId] is the list row `id`.
   Future<void> deleteSavedLibraryRow(
     SavedContentKind kind,

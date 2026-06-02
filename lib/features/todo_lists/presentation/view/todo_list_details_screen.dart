@@ -7,6 +7,7 @@ import 'package:mishka_app/core/utils/app_sizes.dart';
 import 'package:mishka_app/core/widgets/custom_app_bar.dart';
 import 'package:mishka_app/features/ctegory/presentation/widgets/search_bar.dart';
 import 'package:mishka_app/features/todo_lists/data/models/list_item_model.dart';
+import 'package:mishka_app/features/todo_lists/utils/todo_icon_catalog.dart';
 import 'package:mishka_app/features/todo_lists/data/models/task_api_model.dart';
 import 'package:mishka_app/features/todo_lists/data/repositories/todo_repository.dart';
 import 'package:mishka_app/features/todo_lists/presentation/view/add_task_sheet.dart';
@@ -85,8 +86,7 @@ class _TodoListDetailsScreenState extends State<TodoListDetailsScreen> {
           TodoListItemModel(
             id: widget.listId,
             title: widget.listName,
-            icon: Icons.list_alt,
-            iconColor: AppColors.mainGold,
+            icon: TodoIconOption.defaultOption,
           ),
         ],
         preselectedListId: widget.listId,

@@ -1,15 +1,23 @@
 import 'package:mishka_app/core/network/api_service.dart';
+import 'package:mishka_app/features/todo_lists/data/data_sources/icons_remote_data_source.dart';
 import 'package:mishka_app/features/todo_lists/data/data_sources/todo_remote_data_source.dart';
+import 'package:mishka_app/features/todo_lists/data/models/icon_api_model.dart';
 import 'package:mishka_app/features/todo_lists/data/models/task_api_model.dart';
 import 'package:mishka_app/features/todo_lists/data/models/todo_list_api_model.dart';
 
 class TodoRepository {
-  TodoRepository({TodoRemoteDataSource? remote})
-      : _remote = remote ?? TodoRemoteDataSource(ApiService());
+  TodoRepository({
+    TodoRemoteDataSource? remote,
+    IconsRemoteDataSource? iconsRemote,
+  })  : _remote = remote ?? TodoRemoteDataSource(ApiService()),
+        _iconsRemote = iconsRemote ?? IconsRemoteDataSource(ApiService());
 
   final TodoRemoteDataSource _remote;
+  final IconsRemoteDataSource _iconsRemote;
 
   Future<List<TodoListApiModel>> getTodoLists() => _remote.getTodoLists();
+
+  Future<List<IconApiModel>> getIcons() => _iconsRemote.getIcons();
 
   Future<TodoListApiModel> createTodoList({
     required String listName,

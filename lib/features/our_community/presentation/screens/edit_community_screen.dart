@@ -3,6 +3,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import 'package:mishka_app/core/utils/app_colors.dart';
 import 'package:mishka_app/core/widgets/custom_app_bar.dart';
+import 'package:mishka_app/l10n/app_localizations.dart';
 
 import '../../community_styles.dart';
 import '../../data/community_models.dart';
@@ -75,9 +76,7 @@ class _EditCommunityScreenState extends State<EditCommunityScreen> {
       Navigator.pop(context);
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('$e', style: CommunityStyles.snackBar)),
-      );
+      CommunityStyles.showSnackBar(context, '$e');
     } finally {
       if (mounted) setState(() => _saving = false);
     }
@@ -89,25 +88,24 @@ class _EditCommunityScreenState extends State<EditCommunityScreen> {
       await _load();
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('$e', style: CommunityStyles.snackBar)),
-      );
+      CommunityStyles.showSnackBar(context, '$e');
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       backgroundColor: AppColors.screenBackground,
       appBar: MishkaAppBar(
-        title: 'Edit Community',
-        topTitle: 'Edit Community',
+        title: l10n.communityEditCommunity,
+        topTitle: l10n.communityEditCommunity,
         showBack: true,
         showBottomBar: false,
         topTrailingAction: TextButton(
           onPressed: _saving ? null : _save,
           child: Text(
-            _saving ? 'Saving…' : 'Save',
+            _saving ? l10n.communityEditSaving : l10n.save,
             style: CommunityStyles.appBarAction,
           ),
         ),
@@ -121,7 +119,7 @@ class _EditCommunityScreenState extends State<EditCommunityScreen> {
                 children: [
                   SizedBox(height: 8.h),
                   Text(
-                    "Edit Your Community's Profile:",
+                    l10n.communityEditProfileHeader,
                     style: CommunityStyles.dialogTitle,
                   ),
                   SizedBox(height: 16.h),
@@ -164,7 +162,7 @@ class _EditCommunityScreenState extends State<EditCommunityScreen> {
                             ),
                           ),
                           SizedBox(height: 20.h),
-                          Text("Community's Name:", style: CommunityStyles.sectionLabel),
+                          Text(l10n.communityEditNameLabel, style: CommunityStyles.sectionLabel),
                           SizedBox(height: 6.h),
                           TextField(
                             controller: _nameController,
@@ -179,9 +177,9 @@ class _EditCommunityScreenState extends State<EditCommunityScreen> {
                           SizedBox(height: 18.h),
                           Row(
                             children: [
-                              Text("Community's Description ", style: CommunityStyles.sectionLabel),
+                              Text(l10n.communityAddGroupDescLabel, style: CommunityStyles.sectionLabel),
                               Text(
-                                '(optional):',
+                                l10n.communityLabelOptional,
                                 style: CommunityStyles.optionalLabel,
                               ),
                             ],
@@ -190,10 +188,10 @@ class _EditCommunityScreenState extends State<EditCommunityScreen> {
                           TextField(
                             controller: _descriptionController,
                             maxLines: 3,
-                            decoration: CommunityStyles.inputDecoration('Community description'),
+                            decoration: CommunityStyles.inputDecoration(l10n.communityEditDescHint),
                           ),
                           SizedBox(height: 20.h),
-                          Text("Community's Groups:", style: CommunityStyles.sectionLabel),
+                          Text(l10n.communityEditGroupsLabel, style: CommunityStyles.sectionLabel),
                           SizedBox(height: 8.h),
                           ..._groups.map(
                             (group) => EditableGroupCard(

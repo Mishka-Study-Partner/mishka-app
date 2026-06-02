@@ -543,13 +543,10 @@
   ,"linkCopied": "تم نسخ الرابط!"
   ,"linkCopiedAndReady": "تم نسخ الرابط وجاهز للمشاركة!"
   ,"copyAndShare": "نسخ ومشاركة"
-  ,"password": "كلمة المرور"
   ,"enterPassword": "أدخل كلمة المرور"
   ,"noPreviousCustomTimers": "لا توجد مؤقتات مخصصة سابقة."
   ,"howIsYourModeWhileStudying": "كيف حالك أثناء الدراسة؟"
   ,"makingGoodProgressToday": "هل تحرز تقدماً جيداً اليوم؟"
-  ,"yes": "نعم"
-  ,"no": "لا"
   ,"takeBreak": "خذ استراحة"
   ,"endCall": "إنهاء المكالمة"
   ,"backToCall": "العودة للمكالمة"
@@ -673,6 +670,7 @@
   ,"communityHubSeeAll": "عرض الكل"
   ,"communityHubDiscoverButton": "اكتشف المجتمعات"
   ,"communityHubEmpty": "لا توجد مجتمعات بعد. أنشئ واحداً أو انضم برمز."
+  ,"communityHubSavedEmpty": "لا توجد مجتمعات محفوظة بعد. افتح مجتمعاً واضغط ⋮ → حفظ المجتمع."
   ,"communityHubSavedEmptySnack": "لا توجد مجتمعات محفوظة. افتح مجتمعاً واستخدم ⋮ → حفظ المجتمع."
   ,"communitySave": "حفظ المجتمع"
   ,"communityUnsave": "إلغاء الحفظ"
@@ -692,4 +690,130 @@
   ,"communityMemberDemoteMember": "تعيين عضو"
   ,"communityMemberRoleUpdated": "تم تحديث دور العضو."
   ,"communityChatSenderMe": "أنا"
+  ,"communityShareMenuTitle": "مشاركة المجتمع"
+  ,"communityShareSendLink": "إرسال الرابط"
+  ,"communityShareCreateCode": "إنشاء رمز"
+  ,"communityShareInsertEmail": "إدخال البريد"
+  ,"communityShareInsertUsername": "إدخال اسم المستخدم"
+  ,"communityShareDialogTitle": "مشاركة المجتمع:"
+  ,"communitySharePublicLinkHint": "يمكن لأي شخص لديه هذا الرابط العثور على مجتمعك العام والانضمام إليه."
+  ,"communitySharePrivateCodeHint": "شارك رمز الدعوة هذا لينضم الآخرون إلى مجتمعك الخاص."
+  ,"communitySharePublicCodeHint": "المجتمعات العامة تُشارك بالرابط. هذا المعرّف يساعد الآخرين على الانضمام في التطبيق."
+  ,"communityShareYourCode": "رمزك"
+  ,"communityShareGenerateNewCode": "إنشاء رمز جديد"
+  ,"communityEditCommunity": "تعديل المجتمع"
+  ,"communityDeleteCommunity": "حذف المجتمع"
+  ,"communityHubRecommendedEmpty": "لقد اطلعت على كل التوصيات — استكشف «اكتشف» لمزيد من المجتمعات."
+  ,"communityInviteRequiresAccount": "يجب أن يكون لدى الشخص حساب في ميشكا (مسجّل في التطبيق)."
+  ,"communityInviteUserNotFound": "لا يوجد حساب ميشكا بهذا البريد أو اسم المستخدم."
+  ,"communityInviteCannotInviteSelf": "لا يمكنك دعوة نفسك. استخدم بريدًا أو اسم مستخدم لعضو آخر."
+  ,"communityInviteUsernameHint": "اسم مستخدم ميشكا (بدون @)"
+  ,"communityInviteSend": "إرسال الدعوة"
+  ,"communityInviteEmailSent": "تم إرسال الدعوة إلى {email}"
+  ,"@communityInviteEmailSent": {
+    "placeholders": {
+      "email": {"type": "String"}
+    }
+  }
+  ,"communityJoinPrivateTitle": "انضم إلى مجتمع خاص"
+  ,"communityJoinPrivateCodePrompt": "أدخل رمز دعوة المجتمع:"
+  ,"communityJoinPrivateCodeHint": "رمز المجتمع"
+  ,"communityJoinPrivateButton": "انضم إلى المجتمع"
+  ,"communityJoinPrivateSuccess": "لقد انضممت إلى المجتمع!"
+  ,"communityDeleteConfirm": "هل أنت متأكد أنك تريد حذف هذا المجتمع؟"
+  ,"communityDeletedSuccess": "تم حذف المجتمع بنجاح!"
+  ,"communityConfirmJoinGroup": "هل أنت متأكد أنك تريد الانضمام إلى هذه المجموعة؟"
+  ,"communityJoinedGroupSuccess": "لقد انضممت إلى المجموعة."
+  ,"communityConfirmDeleteGroup": "هل أنت متأكد أنك تريد حذف هذه المجموعة؟"
+  ,"communityExitConfirm": "هل أنت متأكد أنك تريد مغادرة هذا المجتمع؟"
+  ,"communityExitAndDeleteConfirm": "مغادرة المجتمع وإزالته من قائمتك؟"
+  ,"communityRemoveMemberConfirm": "إزالة هذا العضو من المجتمع؟"
+  ,"communityMemberRemovedSuccess": "تمت إزالة العضو من المجتمع."
+  ,"communityRemoveFromGroupConfirm": "إزالة هذا العضو من المجموعة؟"
+  ,"communityMemberRemovedFromGroupSuccess": "تمت إزالة العضو من المجموعة."
+  ,"communityInviteUsernameSent": "تم إرسال الدعوة إلى @{username}"
+  ,"@communityInviteUsernameSent": {
+    "placeholders": {
+      "username": {"type": "String"}
+    }
+  }
+  ,"communityHubJoinFailedOpenAnyway": "تعذّر الانضمام. سيتم فتح المجتمع على أي حال…"
+  ,"communityHubNoneYet": "لا يوجد بعد."
+  ,"communityHomeTypeLabel": "مجتمع"
+  ,"communityHomeAnnouncements": "الإعلانات"
+  ,"communityHomeWelcomeDefault": "مرحبًا بك في مجتمعك"
+  ,"communityHomeNoGroups": "لا توجد مجموعات بعد. أضف مجموعتك الأولى."
+  ,"communityHomeAddGroup": "إضافة مجموعة"
+  ,"communityDetailStats": "المجتمع: {groupCount} مجموعات • {memberCount} أعضاء"
+  ,"@communityDetailStats": {
+    "placeholders": {
+      "groupCount": {"type": "int"},
+      "memberCount": {"type": "int"}
+    }
+  }
+  ,"communityDetailViewGroups": "عرض المجموعات"
+  ,"communityDetailViewMembers": "عرض الأعضاء:"
+  ,"communityDetailManageMembers": "إدارة الأعضاء"
+  ,"communityDetailExitCommunity": "مغادرة المجتمع"
+  ,"communityDetailExitAndDelete": "المغادرة والإزالة من قائمتك"
+  ,"communityGroupsTitle": "مجموعات {communityName}"
+  ,"@communityGroupsTitle": {
+    "placeholders": {
+      "communityName": {"type": "String"}
+    }
+  }
+  ,"communityMembersTitle": "أعضاء {communityName}"
+  ,"@communityMembersTitle": {
+    "placeholders": {
+      "communityName": {"type": "String"}
+    }
+  }
+  ,"communityGroupJoin": "انضم إلى المجموعة"
+  ,"communityGroupDelete": "حذف المجموعة"
+  ,"communityGroupAddNew": "+ إضافة مجموعة جديدة"
+  ,"communityAddGroupTitle": "إضافة مجموعة"
+  ,"communityAddGroupSuccess": "تمت إضافة مجموعتك إلى المجتمع!"
+  ,"communityAddGroupHeader": "إضافة مجموعة جديدة إلى مجتمعك"
+  ,"communityAddGroupProfileLabel": "أضف ملف مجموعتك:"
+  ,"communityAddGroupNameLabel": "اسم المجموعة:"
+  ,"communityAddGroupNameHint": "اسم المجموعة"
+  ,"communityAddGroupDescLabel": "وصف المجموعة"
+  ,"communityAddGroupDescHint": "وصف المجموعة"
+  ,"communityAddButton": "إضافة"
+  ,"communityLabelOptional": "(اختياري):"
+  ,"communityEditProfileHeader": "تعديل ملف مجتمعك:"
+  ,"communityEditNameLabel": "اسم المجتمع:"
+  ,"communityEditDescHint": "وصف المجتمع"
+  ,"communityEditGroupsLabel": "مجموعات المجتمع:"
+  ,"communityEditSaving": "جارٍ الحفظ…"
+  ,"communityChatEmpty": "لا توجد رسائل بعد. قل مرحبًا!"
+  ,"communityChatTypeHint": "اكتب رسالة…"
+  ,"communityChatMemberFallback": "عضو"
+  ,"communityChatSharedFromMishka": "مشارَك من Mishka"
+  ,"communityMemberAddToGroup": "إضافة إلى مجموعة"
+  ,"communityMemberRemoveFromCommunity": "إزالة من المجتمع"
+  ,"communitySelectGroupPrompt": "اختر مجموعة لـ {memberName}"
+  ,"@communitySelectGroupPrompt": {
+    "placeholders": {
+      "memberName": {"type": "String"}
+    }
+  }
+  ,"communityMemberAddedToGroupSuccess": "تمت إضافة العضو إلى المجموعة."
+  ,"communityShareChooseMaterial": "اختر مادة ذكاء اصطناعي محفوظة لمشاركتها مع هذه المجموعة."
+  ,"communityShareNoSavedInCategory": "لا توجد عناصر محفوظة في هذه الفئة بعد."
+  ,"communityDiscoverySubjectsOptional": "المواد (اختياري)"
+  ,"communityDiscoveryPurposeOptional": "الغرض (اختياري)"
+  ,"communityInviteEmailHint": "عنوان البريد الإلكتروني"
+  ,"communityErrorServerUnreachable": "تعذّر الاتصال بالخادم. تحقق من أن الخادم يعمل."
+  ,"communityRoleOwner": "المالك"
+  ,"communityRoleAdmin": "مسؤول"
+  ,"communityRoleMember": "عضو"
+  ,"communityFallbackName": "مجتمع"
+  ,"communityFallbackGroupName": "مجموعة"
+  ,"communityFallbackMemberName": "عضو"
+  ,"communityBrandMishka": "Mishka"
+  ,"reportCommunitySection": "مجتمعنا"
+  ,"reportCommunityMessages": "الرسائل المنشورة"
+  ,"reportCommunityMaterialShares": "المواد المشاركة"
+  ,"reportCommunityChannelJoins": "انضمامات القنوات"
 }

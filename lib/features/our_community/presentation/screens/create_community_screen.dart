@@ -101,14 +101,7 @@ class _CreateCommunityScreenState extends State<CreateCommunityScreen> {
     final l10n = AppLocalizations.of(context)!;
     final name = _nameController.text.trim();
     if (name.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            l10n.communityCreateNameRequired,
-            style: CommunityStyles.snackBar,
-          ),
-        ),
-      );
+      CommunityStyles.showSnackBar(context, l10n.communityCreateNameRequired);
       return;
     }
 
@@ -139,13 +132,9 @@ class _CreateCommunityScreenState extends State<CreateCommunityScreen> {
       );
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            communityErrorMessage(e),
-            style: CommunityStyles.snackBar,
-          ),
-        ),
+      CommunityStyles.showSnackBar(
+        context,
+        communityErrorMessage(e, l10n: AppLocalizations.of(context)!),
       );
     } finally {
       if (mounted) setState(() => _submitting = false);

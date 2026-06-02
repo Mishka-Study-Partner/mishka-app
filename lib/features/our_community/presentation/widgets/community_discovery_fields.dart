@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import 'package:mishka_app/core/utils/app_colors.dart';
+import 'package:mishka_app/l10n/app_localizations.dart';
 
 import '../../community_styles.dart';
 import '../../data/community_discover_models.dart';
@@ -26,6 +27,7 @@ class CommunityDiscoveryFields extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final subjects = (categories?.subjects ?? [])
         .where((c) => c.communityCount > 0 || c.key == 'general')
         .toList();
@@ -39,7 +41,7 @@ class CommunityDiscoveryFields extends StatelessWidget {
           SizedBox(height: 10.h),
         ],
         if (subjects.isNotEmpty) ...[
-          Text('Subjects (optional)', style: CommunityStyles.sectionLabel),
+          Text(l10n.communityDiscoverySubjectsOptional, style: CommunityStyles.sectionLabel),
           SizedBox(height: 6.h),
           Wrap(
             spacing: 6.w,
@@ -65,7 +67,7 @@ class CommunityDiscoveryFields extends StatelessWidget {
           SizedBox(height: 14.h),
         ],
         if (purposes.isNotEmpty) ...[
-          Text('Purpose (optional)', style: CommunityStyles.sectionLabel),
+          Text(l10n.communityDiscoveryPurposeOptional, style: CommunityStyles.sectionLabel),
           SizedBox(height: 6.h),
           Wrap(
             spacing: 6.w,

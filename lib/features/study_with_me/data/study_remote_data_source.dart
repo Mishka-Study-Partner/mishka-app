@@ -1,6 +1,8 @@
 import 'dart:io' show Platform;
 
+import 'package:flutter/foundation.dart';
 import 'package:mishka_app/core/network/api_endpoints.dart';
+import 'package:mishka_app/core/network/api_exception.dart';
 import 'package:mishka_app/core/network/api_service.dart';
 
 import 'timer_model.dart';
@@ -78,33 +80,109 @@ class StudyRemoteDataSource {
     int? longBreakMinutes,
   }) async {
     try {
-      final data = <String, dynamic>{
-        'topLevelMode': topLevelMode,
-        if (concentrationPreset != null) 'concentrationPreset': concentrationPreset,
-        if (customPresetId != null) 'customPresetId': customPresetId,
-        'platform': Platform.isIOS ? 'ios' : 'android',
-      };
-      // Add custom overrides for custom preset without a saved ID
-      if (concentrationPreset == 'custom' &&
-          customPresetId == null &&
-          focusMinutes != null) {
-        data['customOverrides'] = {
-          'focusMinutes': focusMinutes,
-          'shortBreakMinutes': shortBreakMinutes,
-          'longBreakMinutes': longBreakMinutes,
-        };
-      }
-      final env = await _api.post<String?>(
-        ApiEndpoints.studyWithMishkaSessionStart,
-        data: data,
-        dataFromJson: (raw) {
-          if (raw is Map) return (raw['id'] ?? raw['sessionId'] ?? '').toString();
-          return null;
-        },
+      return await _postStartSession(
+        topLevelMode: topLevelMode,
+        concentrationPreset: concentrationPreset,
+        customPresetId: customPresetId,
+        focusMinutes: focusMinutes,
+        shortBreakMinutes: shortBreakMinutes,
+        longBreakMinutes: longBreakMinutes,
       );
-      return env.data;
-    } catch (_) {
+    } on ApiException catch (e) {
+      if (kDebugMode) {
+        debugPrint(
+          '📚 StudySession start failed: ${e.statusCode} ${e.error} ${e.message}',
+        );
+      }
+      // Active session blocks a new start — end stuck sessions and retry once.
+      if (e.statusCode == 400 && _isActiveSessionConflict(e)) {
+        await _abandonActiveSessions();
+        try {
+          return await _postStartSession(
+            topLevelMode: topLevelMode,
+            concentrationPreset: concentrationPreset,
+            customPresetId: customPresetId,
+            focusMinutes: focusMinutes,
+            shortBreakMinutes: shortBreakMinutes,
+            longBreakMinutes: longBreakMinutes,
+          );
+        } on ApiException catch (retryError) {
+          if (kDebugMode) {
+            debugPrint(
+              '📚 StudySession start retry failed: ${retryError.message}',
+            );
+          }
+        }
+      }
       return null;
+    } catch (e) {
+      if (kDebugMode) debugPrint('📚 StudySession start error: $e');
+      return null;
+    }
+  }
+
+  Future<String?> _postStartSession({
+    required String topLevelMode,
+    String? concentrationPreset,
+    String? customPresetId,
+    int? focusMinutes,
+    int? shortBreakMinutes,
+    int? longBreakMinutes,
+  }) async {
+    final data = <String, dynamic>{
+      'topLevelMode': topLevelMode,
+      if (concentrationPreset != null) 'concentrationPreset': concentrationPreset,
+      if (customPresetId != null && customPresetId.isNotEmpty)
+        'customPresetId': customPresetId,
+      'platform': Platform.isIOS ? 'ios' : 'android',
+    };
+    if (concentrationPreset == 'custom' &&
+        (customPresetId == null || customPresetId.isEmpty) &&
+        focusMinutes != null) {
+      data['customOverrides'] = {
+        'focusMinutes': focusMinutes,
+        'shortBreakMinutes': shortBreakMinutes,
+        'longBreakMinutes': longBreakMinutes,
+      };
+    }
+    final env = await _api.post<String?>(
+      ApiEndpoints.studyWithMishkaSessionStart,
+      data: data,
+      dataFromJson: (raw) {
+        if (raw is Map) {
+          final id = raw['id'] ?? raw['sessionId'];
+          if (id != null && id.toString().isNotEmpty) return id.toString();
+        }
+        return null;
+      },
+    );
+    final id = env.data;
+    if (kDebugMode && id != null) {
+      debugPrint('📚 StudySession started: $id');
+    }
+    return id;
+  }
+
+  bool _isActiveSessionConflict(ApiException e) {
+    final msg = e.message.toLowerCase();
+    return msg.contains('current session') ||
+        msg.contains('active') && msg.contains('session');
+  }
+
+  Future<void> _abandonActiveSessions() async {
+    final env = await _api.get<List<dynamic>>(
+      ApiEndpoints.studyWithMishkaSessions,
+      dataFromJson: (raw) => (raw as List?) ?? const [],
+    );
+    final sessions = env.data ?? const [];
+    for (final item in sessions) {
+      if (item is! Map) continue;
+      final map = Map<String, dynamic>.from(item);
+      final status = (map['status'] ?? '').toString().toLowerCase();
+      if (status != 'active' && status != 'paused') continue;
+      final id = (map['id'] ?? map['sessionId'] ?? '').toString();
+      if (id.isEmpty) continue;
+      await endSession(id, outcome: 'abandoned');
     }
   }
 
@@ -379,7 +457,8 @@ class CustomTimerPreset {
         studyMinutes,
         shortBreakMinutes,
         longBreakMinutes,
-        modeId: 'custom_timer',
+        modeId: 'custom',
+        customPresetId: id.isNotEmpty ? id : null,
       );
 
   factory CustomTimerPreset.fromJson(Map<String, dynamic> json) {

@@ -9,6 +9,8 @@ class Assets {
   static const String fontsPridiRegular = 'assets/fonts/Pridi-Regular.ttf';
   static const String fontsPridiSemiBold = 'assets/fonts/Pridi-SemiBold.ttf';
   static const String imagesAiTools = 'assets/images/ai_tools.png';
+  static const String imagesAppLauncher = 'assets/images/app-launcher.png';
+  static const String imagesArrowBackground = 'assets/images/arrow_background.png';
   static const String imagesChatWithMishkaAiTools = 'assets/images/chat_with_mishka_ai_tools.png';
   static const String imagesFlashcardItem1 = 'assets/images/flashcard_item1.png';
   static const String imagesFlashcardItem2 = 'assets/images/flashcard_item2.png';
@@ -23,11 +25,14 @@ class Assets {
   static const String imagesLongBreakMishka = 'assets/images/long_break_mishka.png';
   static const String imagesMishkaHappy = 'assets/images/mishka_happy.png';
   static const String imagesMishkaSad = 'assets/images/mishka_sad.png';
+  static const String imagesMishkaSchool = 'assets/images/mishka_school.png';
   static const String imagesMishkaStudyPartnerQR = 'assets/images/mishka_study_partner_QR.png';
   static const String imagesMishkaSupport2 = 'assets/images/mishka_support2.png';
   static const String imagesMiskaSupport1 = 'assets/images/miska_support1.png';
+  static const String imagesOnboarding1 = 'assets/images/onboarding1.png';
   static const String imagesOurCommunity = 'assets/images/our_community.png';
   static const String imagesPerfectScore = 'assets/images/perfect_score.png';
+  static const String imagesPics = 'assets/images/pics.png';
   static const String imagesSavedCard1 = 'assets/images/saved_card_1.png';
   static const String imagesSavedCard2 = 'assets/images/saved_card_2.png';
   static const String imagesSavedCard3 = 'assets/images/saved_card_3.png';

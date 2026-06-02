@@ -3,8 +3,11 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import 'package:mishka_app/core/utils/app_colors.dart';
 import 'package:mishka_app/core/widgets/custom_app_bar.dart';
+import 'package:mishka_app/l10n/app_localizations.dart';
 
+import '../../community_display_helper.dart';
 import '../../community_styles.dart';
+import '../../data/community_error_helpers.dart';
 import '../../data/community_current_user.dart';
 import '../../data/community_models.dart';
 import '../../data/community_repository.dart';
@@ -58,28 +61,34 @@ class _CommunityGroupsScreenState extends State<CommunityGroupsScreen> {
   }
 
   Future<void> _joinGroup(CommunityGroupModel group) async {
+    final l10n = AppLocalizations.of(context)!;
     final confirmed = await showCommunityConfirmDialog(
       context,
-      message: 'Are you sure you want to Join this group?',
+      message: l10n.communityConfirmJoinGroup,
     );
     if (confirmed != true) return;
     try {
       await widget.repository.joinChannel(widget.community.id, group.id);
       if (!mounted) return;
-      await showCommunitySuccessDialog(context, message: 'You joined the group.');
+      await showCommunitySuccessDialog(
+        context,
+        message: l10n.communityJoinedGroupSuccess,
+      );
       await _load();
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('$e', style: CommunityStyles.snackBar)),
+      CommunityStyles.showSnackBar(
+        context,
+        communityErrorMessage(e, l10n: AppLocalizations.of(context)!),
       );
     }
   }
 
   Future<void> _deleteGroup(CommunityGroupModel group) async {
+    final l10n = AppLocalizations.of(context)!;
     final confirmed = await showCommunityConfirmDialog(
       context,
-      message: 'Are you sure you want to delete this group?',
+      message: l10n.communityConfirmDeleteGroup,
     );
     if (confirmed != true) return;
     try {
@@ -88,19 +97,24 @@ class _CommunityGroupsScreenState extends State<CommunityGroupsScreen> {
       await _load();
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('$e', style: CommunityStyles.snackBar)),
+      CommunityStyles.showSnackBar(
+        context,
+        communityErrorMessage(e, l10n: AppLocalizations.of(context)!),
       );
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final communityTitle =
+        communityDisplayName(widget.community.name, l10n);
+    final groupsTitle = l10n.communityGroupsTitle(communityTitle);
     return Scaffold(
       backgroundColor: AppColors.screenBackground,
       appBar: MishkaAppBar(
-        title: "${widget.community.name} Groups",
-        topTitle: "${widget.community.name} Groups",
+        title: groupsTitle,
+        topTitle: groupsTitle,
         showBack: true,
         showBottomBar: false,
       ),
@@ -142,7 +156,13 @@ class _CommunityGroupsScreenState extends State<CommunityGroupsScreen> {
                                                   crossAxisAlignment:
                                                       CrossAxisAlignment.start,
                                                   children: [
-                                                    Text(group.name, style: CommunityStyles.body),
+                                                    Text(
+                                                      communityGroupDisplayName(
+                                                        group.name,
+                                                        l10n,
+                                                      ),
+                                                      style: CommunityStyles.body,
+                                                    ),
                                                     Text(group.memberLabel, style: CommunityStyles.caption),
                                                   ],
                                                 ),
@@ -168,14 +188,14 @@ class _CommunityGroupsScreenState extends State<CommunityGroupsScreen> {
                                             children: [
                                               if (!group.joined)
                                                 _OutlineActionButton(
-                                                  label: 'Join Group',
+                                                  label: l10n.communityGroupJoin,
                                                   color: AppColors.green,
                                                   onTap: () => _joinGroup(group),
                                                 ),
                                               if (!group.joined) SizedBox(height: 8.h),
                                               if (_canManage)
                                                 _OutlineActionButton(
-                                                  label: 'Delete Group',
+                                                  label: l10n.communityGroupDelete,
                                                   color: AppColors.red,
                                                   onTap: () => _deleteGroup(group),
                                                 ),
@@ -205,7 +225,7 @@ class _CommunityGroupsScreenState extends State<CommunityGroupsScreen> {
                           );
                           if (mounted) await _load();
                         },
-                        child: const Text('+ Add new Group'),
+                        child: Text(l10n.communityGroupAddNew),
                       ),
                     ),
                 ],

@@ -9,7 +9,9 @@ import 'package:mishka_app/core/utils/app_sizes.dart';
 import 'package:mishka_app/features/Auth/data/data_sources/auth_remote_data_source.dart';
 import 'package:mishka_app/features/Auth/data/models/user_model.dart';
 import 'package:mishka_app/features/Auth/view/bloc/auth_bloc.dart';
-import 'package:mishka_app/core/widgets/app_settings_scope.dart';
+import 'package:mishka_app/features/settings/presentation/screens/help_support_screen.dart';
+import 'package:mishka_app/features/settings/presentation/screens/privacy_policy_screen.dart';
+import 'package:mishka_app/features/settings/presentation/screens/settings_screen.dart';
 import 'package:mishka_app/l10n/app_localizations.dart';
 import 'package:mishka_app/generated/assets.dart';
 import '../../../../core/widgets/custom_app_bar.dart';
@@ -18,6 +20,10 @@ import '../widgets/profile_avatar.dart';
 import '../widgets/profile_info_row.dart';
 import '../widgets/profile_section_card.dart';
 import '../widgets/profile_text_field.dart';
+import 'package:mishka_app/features/education/education_display_helper.dart';
+import 'package:mishka_app/features/education/education_flow_config.dart';
+import 'package:mishka_app/features/education/presentation/screens/education_status_screen.dart';
+
 import 'edit_profile_screen.dart';
 
 class ProfileScreen extends StatefulWidget {
@@ -37,9 +43,28 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   bool _genderBusy = false;
 
+  Future<void> _openEditEducation(UserModel user) async {
+    final updated = await Navigator.of(context).push<UserModel>(
+      MaterialPageRoute(
+        builder: (ctx) => BlocProvider.value(
+          value: context.read<AuthBloc>(),
+          child: EducationStatusScreen(
+            config: EducationFlowConfig(
+              isProfileEdit: true,
+              initialUser: user,
+            ),
+          ),
+        ),
+      ),
+    );
+    if (updated != null && mounted) {
+      context.read<AuthBloc>().add(AuthReplaceUser(updated));
+    }
+  }
+
   Future<void> _refreshProfile() async {
     try {
-      final user = await _authRemote.getCurrentUser();
+      final user = (await _authRemote.getCurrentUser()).user;
       if (!mounted) return;
       context.read<AuthBloc>().add(AuthReplaceUser(user));
     } on ApiException catch (e) {
@@ -203,172 +228,29 @@ class _ProfileScreenState extends State<ProfileScreen> {
     }
   }
 
-  /// Gold accent for profile preference [Switch] / [SegmentedButton] visuals.
-  ThemeData _preferenceControlsTheme(BuildContext context) {
-    final brightness = Theme.of(context).brightness;
-    final iconOnGold =
-        brightness == Brightness.dark ? AppColors.white : AppColors.mainDark;
-
-    return Theme.of(context).copyWith(
-      switchTheme: SwitchThemeData(
-        thumbColor: WidgetStateProperty.resolveWith((states) {
-          if (states.contains(WidgetState.selected)) return AppColors.mainGold;
-          return null;
-        }),
-        trackColor: WidgetStateProperty.resolveWith((states) {
-          if (states.contains(WidgetState.selected)) {
-            return AppColors.mainGold.withValues(alpha: 0.42);
-          }
-          return null;
-        }),
-      ),
-      segmentedButtonTheme: SegmentedButtonThemeData(
-        style: ButtonStyle(
-          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-          visualDensity: VisualDensity.compact,
-          foregroundColor: WidgetStateProperty.resolveWith((states) {
-            if (states.contains(WidgetState.selected)) return iconOnGold;
-            return null;
-          }),
-          backgroundColor: WidgetStateProperty.resolveWith((states) {
-            if (states.contains(WidgetState.selected)) return AppColors.mainGold;
-            return null;
-          }),
+  void _openSettings(UserModel user) {
+    Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (_) => SettingsScreen(
+          userId: user.id,
+          accountEmail: user.email,
         ),
       ),
     );
   }
 
-  Widget _languageToggle(
-    BuildContext context,
-    AppLocalizations l10n,
-    AppSettingsScope scope,
-  ) {
-    final isArabic = scope.locale.languageCode == 'ar';
-    final onSurface = Theme.of(context).colorScheme.onSurface;
-
-    const labelFont = 9.0;
-
-    return FittedBox(
-      fit: BoxFit.scaleDown,
-      alignment: AlignmentDirectional.centerEnd,
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Text(
-            l10n.english,
-            style: TextStyle(
-              fontFamily: 'Pridi',
-              fontSize: labelFont.sp,
-              fontWeight: isArabic ? FontWeight.w500 : FontWeight.w700,
-              color: onSurface.withValues(alpha: isArabic ? 0.55 : 0.92),
-            ),
-          ),
-          Transform.scale(
-            scale: .82,
-            child: Switch.adaptive(
-              materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-              value: isArabic,
-              onChanged: (v) {
-                scope.onLocaleChanged(Locale(v ? 'ar' : 'en'));
-              },
-            ),
-          ),
-          Text(
-            l10n.arabic,
-            style: TextStyle(
-              fontFamily: 'Pridi',
-              fontSize: labelFont.sp,
-              fontWeight: isArabic ? FontWeight.w700 : FontWeight.w500,
-              color: onSurface.withValues(alpha: isArabic ? 0.92 : 0.55),
-            ),
-          ),
-        ],
+  void _openPrivacyPolicy() {
+    Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (_) => const PrivacyPolicyScreen(),
       ),
     );
   }
 
-  Widget _themeSegmented(
-    BuildContext context,
-    AppLocalizations l10n,
-    AppSettingsScope scope,
-  ) {
-    return FittedBox(
-      fit: BoxFit.scaleDown,
-      alignment: AlignmentDirectional.centerEnd,
-      child: SegmentedButton<ThemeMode>(
-        showSelectedIcon: false,
-        multiSelectionEnabled: false,
-        emptySelectionAllowed: false,
-        segments: [
-          ButtonSegment<ThemeMode>(
-            value: ThemeMode.light,
-            tooltip: l10n.lightMode,
-            icon: const Icon(Icons.light_mode_outlined, size: 20),
-          ),
-          ButtonSegment<ThemeMode>(
-            value: ThemeMode.dark,
-            tooltip: l10n.darkMode,
-            icon: const Icon(Icons.dark_mode_outlined, size: 20),
-          ),
-          ButtonSegment<ThemeMode>(
-            value: ThemeMode.system,
-            tooltip: l10n.themeSystem,
-            icon: const Icon(Icons.brightness_auto_outlined, size: 20),
-          ),
-        ],
-        selected: {scope.themeMode},
-        onSelectionChanged: (next) {
-          if (next.isEmpty) return;
-          scope.onThemeModeChanged(next.first);
-        },
-      ),
-    );
-  }
-
-  Widget _notificationToggle(
-    BuildContext context,
-    AppLocalizations l10n,
-    AppSettingsScope scope,
-  ) {
-    final enabled = scope.notificationsEnabled;
-    final onSurface = Theme.of(context).colorScheme.onSurface;
-
-    const labelFont = 9.0;
-
-    return FittedBox(
-      fit: BoxFit.scaleDown,
-      alignment: AlignmentDirectional.centerEnd,
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Text(
-            l10n.disabled,
-            style: TextStyle(
-              fontFamily: 'Pridi',
-              fontSize: labelFont.sp,
-              fontWeight: enabled ? FontWeight.w500 : FontWeight.w700,
-              color: onSurface.withValues(alpha: enabled ? 0.55 : 0.92),
-            ),
-          ),
-          Transform.scale(
-            scale: .82,
-            child: Switch.adaptive(
-              materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-              value: enabled,
-              onChanged: (v) => scope.onNotificationsChanged(v),
-            ),
-          ),
-          Text(
-            l10n.enabled,
-            style: TextStyle(
-              fontFamily: 'Pridi',
-              fontSize: labelFont.sp,
-              fontWeight: enabled ? FontWeight.w700 : FontWeight.w500,
-              color: onSurface.withValues(alpha: enabled ? 0.92 : 0.55),
-            ),
-          ),
-        ],
+  void _openHelpSupport() {
+    Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (_) => const HelpSupportScreen(),
       ),
     );
   }
@@ -467,7 +349,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
     final male = _isMale(user);
     final preferNot = _isPreferNot(user);
     final scheme = Theme.of(context).colorScheme;
-    final scope = AppSettingsScope.of(context);
 
     return Scaffold(
       appBar: MishkaAppBar(
@@ -586,6 +467,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               ),
                             ],
                           ),
+                          SizedBox(height: 12.h),
+                          ProfileInfoRow(
+                            icon: Icons.school_outlined,
+                            title: l10n.educationLevel,
+                            value: formatEducationSummary(user, l10n),
+                            onTap: () => _openEditEducation(user),
+                          ),
                         ],
                       ),
                     ),
@@ -609,41 +497,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     ),
                     SizedBox(height: 16.h),
                     ProfileSectionCard(
-                      child: Theme(
-                        data: _preferenceControlsTheme(context),
-                        child: Column(
-                          children: [
-                            ProfileInfoRow(
-                              icon: Icons.language,
-                              title: l10n.language,
-                              trailing: _languageToggle(
-                                context,
-                                l10n,
-                                scope,
-                              ),
-                            ),
-                            SizedBox(height: 12.h),
-                            ProfileInfoRow(
-                              icon: Icons.dark_mode,
-                              title: l10n.theme,
-                              trailing: _themeSegmented(
-                                context,
-                                l10n,
-                                scope,
-                              ),
-                            ),
-                            SizedBox(height: 12.h),
-                            ProfileInfoRow(
-                              icon: Icons.notifications,
-                              title: l10n.notification,
-                              trailing: _notificationToggle(
-                                context,
-                                l10n,
-                                scope,
-                              ),
-                            ),
-                          ],
-                        ),
+                      child: ProfileInfoRow(
+                        icon: Icons.settings_outlined,
+                        title: l10n.settings,
+                        value: l10n.settingsSubtitle,
+                        onTap: () => _openSettings(user),
                       ),
                     ),
                     SizedBox(height: 16.h),
@@ -652,21 +510,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         icon: Icons.shield,
                         title: l10n.privacyPolicy,
                         value: "",
-                        onTap: () {
-                          showDialog<void>(
-                            context: context,
-                            builder: (context) => AlertDialog(
-                              title: Text(l10n.privacyPolicy),
-                              content: Text(l10n.privacyPolicyComingSoon),
-                              actions: [
-                                TextButton(
-                                  onPressed: () => Navigator.pop(context),
-                                  child: Text(l10n.ok),
-                                ),
-                              ],
-                            ),
-                          );
-                        },
+                        onTap: _openPrivacyPolicy,
                       ),
                     ),
                     SizedBox(height: 16.h),
@@ -675,21 +519,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         icon: Icons.contact_support,
                         title: l10n.helpSupport,
                         value: "",
-                        onTap: () {
-                          showDialog<void>(
-                            context: context,
-                            builder: (context) => AlertDialog(
-                              title: Text(l10n.helpSupport),
-                              content: Text(l10n.helpSupportComingSoon),
-                              actions: [
-                                TextButton(
-                                  onPressed: () => Navigator.pop(context),
-                                  child: Text(l10n.ok),
-                                ),
-                              ],
-                            ),
-                          );
-                        },
+                        onTap: _openHelpSupport,
                       ),
                     ),
                     SizedBox(height: 16.h),

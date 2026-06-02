@@ -104,7 +104,10 @@ class _CommunityDiscoverScreenState extends State<CommunityDiscoverScreen> {
     } catch (e) {
       if (!mounted) return;
       setState(() {
-        _error = communityErrorMessage(e);
+        _error = communityErrorMessage(
+          e,
+          l10n: AppLocalizations.of(context)!,
+        );
         _loading = false;
       });
     }
@@ -150,7 +153,10 @@ class _CommunityDiscoverScreenState extends State<CommunityDiscoverScreen> {
     } catch (e) {
       if (!mounted) return;
       setState(() {
-        _error = communityErrorMessage(e);
+        _error = communityErrorMessage(
+          e,
+          l10n: AppLocalizations.of(context)!,
+        );
         _loading = false;
         _loadingMore = false;
       });
@@ -172,10 +178,9 @@ class _CommunityDiscoverScreenState extends State<CommunityDiscoverScreen> {
       );
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(communityErrorMessage(e), style: CommunityStyles.snackBar),
-        ),
+      CommunityStyles.showSnackBar(
+        context,
+        communityErrorMessage(e, l10n: AppLocalizations.of(context)!),
       );
     }
   }
@@ -317,7 +322,7 @@ class _CommunityDiscoverScreenState extends State<CommunityDiscoverScreen> {
                     if (_error != null) ...[
                       SizedBox(height: 12.h),
                       Text(_error!, style: CommunityStyles.error),
-                      TextButton(onPressed: _load, child: const Text('Retry')),
+                      TextButton(onPressed: _load, child: Text(l10n.retry)),
                     ],
                     if (_recommended?.needsProfileEducation == true) ...[
                       SizedBox(height: 12.h),

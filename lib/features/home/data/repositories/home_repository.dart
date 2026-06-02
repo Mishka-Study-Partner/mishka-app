@@ -12,6 +12,11 @@ class HomeRepository {
 
   Future<DailyStreakModel> getDailyStreak() => _remote.getDailyStreak();
 
+  Future<DailyStreakModel?> pingDailyStreak() => _remote.pingDailyStreak();
+
+  Future<DailyStreakModel> freezeStreakDay({required String date}) =>
+      _remote.freezeStreakDay(date: date);
+
   Future<List<HomeTipModel>> getTips() => _remote.getTips();
 
   Future<List<TaskApiModel>> getUpcomingTasks() => _remote.getUpcomingTasks();

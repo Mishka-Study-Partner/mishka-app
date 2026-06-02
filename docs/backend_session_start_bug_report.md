@@ -1,8 +1,10 @@
 # Backend Bug Report: POST /study-with-mishka/sessions/start returns 500
 
+> **Status (May 14, 2026): RESOLVED on backend** — see [`STUDY_WITH_MISHKA_FIX_REPORT.md`](./STUDY_WITH_MISHKA_FIX_REPORT.md) and [`FLUTTER_BACKEND_CHANGELOG.md`](./FLUTTER_BACKEND_CHANGELOG.md). Session start should return **201 Created** after migrate + redeploy.
+
 ## Summary
 
-All attempts to start a study session via `POST /study-with-mishka/sessions/start` return **500 Internal Server Error** despite valid request bodies that pass schema validation.
+All attempts to start a study session via `POST /study-with-mishka/sessions/start` returned **500 Internal Server Error** despite valid request bodies that pass schema validation. Root cause was a failed DB migration (missing `platform` column).
 
 ---
 

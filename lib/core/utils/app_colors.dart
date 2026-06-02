@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 class AppColors {
   static const mainGold = Color(0xFFCFAE62);
   static const mainDark = Color(0xFF1B2734);
+  /// Splash / dark brand background (same as app bar).
+  static const darkMain = mainDark;
 
   static const greyText = Color(0xFFC1C1C1);
   static const stroke = Color(0xFFEBEBEB);
@@ -11,6 +13,8 @@ class AppColors {
   static const lightText = Color(0xFF4E5660);
   static const appBarBackground = Color(0xFF1B2734);
   static const lightFrameBackground = Color(0xFFF9F9F9);
+  /// Selected education option background (cream/beige).
+  static const educationSelected = Color(0xFFF7F1E3);
 
   static const green = Color(0xFF4CAF50);
   static const blue = Color(0xFF4E7DBA);

@@ -9,6 +9,7 @@ import 'package:mishka_app/features/saved/data/models/saved_detail_model.dart';
 import 'package:mishka_app/features/saved/data/repositories/saved_repository.dart';
 import 'package:mishka_app/features/saved/data/saved_detail_cache.dart';
 import 'package:mishka_app/features/saved/domain/saved_content_kind.dart';
+import 'package:mishka_app/features/saved/presentation/saved_rename_actions.dart';
 import 'package:mishka_app/features/saved/presentation/saved_share_delete_actions.dart';
 import 'package:mishka_app/l10n/app_localizations.dart';
 
@@ -35,10 +36,12 @@ class _SavedItemDetailScreenState extends State<SavedItemDetailScreen> {
   bool _loading = true;
   SavedLibraryDetail? _detail;
   Object? _error;
+  String? _displayTitle;
 
   @override
   void initState() {
     super.initState();
+    _displayTitle = widget.title;
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) {
         _load();
@@ -125,6 +128,7 @@ class _SavedItemDetailScreenState extends State<SavedItemDetailScreen> {
       if (!mounted) return;
       setState(() {
         _detail = detail;
+        _displayTitle = detail.resolvedTitle(widget.title);
         _error = null;
         _loading = false;
       });
@@ -163,7 +167,9 @@ class _SavedItemDetailScreenState extends State<SavedItemDetailScreen> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final resolvedTitle = _detail?.resolvedTitle(widget.title) ?? widget.title;
+    final resolvedTitle =
+        _displayTitle ?? _detail?.resolvedTitle(widget.title) ?? widget.title;
+    final entityId = _detail?.tutorEntityId(widget.kind) ?? '';
 
     return Scaffold(
       backgroundColor: AppColors.screenBackground,
@@ -202,6 +208,35 @@ class _SavedItemDetailScreenState extends State<SavedItemDetailScreen> {
                 spacing: 4,
                 runSpacing: 4,
                 children: [
+                  TextButton.icon(
+                    onPressed: entityId.isEmpty
+                        ? null
+                        : () async {
+                            final renamed = await showRenameSavedItemDialog(
+                              context: context,
+                              repository: _repository,
+                              kind: widget.kind,
+                              entityId: entityId,
+                              currentTitle: resolvedTitle,
+                            );
+                            if (!context.mounted || !renamed) return;
+                            setState(() => _loading = true);
+                            await _load();
+                          },
+                    icon: Icon(
+                      Icons.drive_file_rename_outline,
+                      size: 18.sp,
+                      color: AppColors.mainGold,
+                    ),
+                    label: Text(
+                      l10n.renameSavedItem,
+                      style: TextStyle(
+                        fontFamily: 'Pridi',
+                        color: AppColors.mainDark,
+                        fontSize: AppSizes.fontSizeSmall,
+                      ),
+                    ),
+                  ),
                   TextButton.icon(
                     onPressed: () {
                       shareSavedLibraryItem(

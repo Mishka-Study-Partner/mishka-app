@@ -2,7 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../../../core/utils/app_colors.dart';
+import '../../data/chat_flow_strings.dart';
 import '../../data/controller/chat_flow_controller.dart';
+import 'package:mishka_app/features/chat_with_mishka/data/data_sources/saved_library_remote_data_source.dart';
+import 'package:mishka_app/features/chat_with_mishka/presentation/widgets/tool_preview_chat_bubble.dart';
 import 'tool_preview_renderer.dart';
 
 typedef OptionTap = void Function(String value);
@@ -10,11 +13,15 @@ typedef OptionTap = void Function(String value);
 class ChatMessageRenderer extends StatelessWidget {
   final ChatMessage message;
   final OptionTap? onOptionSelected;
+  final SavedLibraryRemoteDataSource? savedLibrary;
+  final ChatFlowStrings? flowStrings;
 
   const ChatMessageRenderer({
     super.key,
     required this.message,
     this.onOptionSelected,
+    this.savedLibrary,
+    this.flowStrings,
   });
 
   @override
@@ -35,15 +42,27 @@ class ChatMessageRenderer extends StatelessWidget {
 
       case MessageType.options:
         return _OptionsBubble(
-          options: message.options!,
+          options: message.options!
+              .map((o) => flowStrings?.localizeOptionLabel(o) ?? o)
+              .toList(),
+          rawOptions: message.options!,
           onSelect: onOptionSelected,
         );
 
       case MessageType.selection:
-        return _SelectionBubble(value: message.selectedOption!);
+        return _SelectionBubble(
+          value: flowStrings?.localizeOptionLabel(message.selectedOption!) ??
+              message.selectedOption!,
+        );
 
       case MessageType.toolPreview:
-        return ToolPreviewRenderer(toolData: message.toolData!);
+        if (savedLibrary == null) {
+          return ToolPreviewRenderer(toolData: message.toolData!);
+        }
+        return ToolPreviewChatBubble(
+          toolData: message.toolData!,
+          savedLibrary: savedLibrary!,
+        );
     }
   }
 }
@@ -145,10 +164,12 @@ class _FileBubble extends StatelessWidget {
 }
 class _OptionsBubble extends StatelessWidget {
   final List<String> options;
+  final List<String> rawOptions;
   final OptionTap? onSelect;
 
   const _OptionsBubble({
     required this.options,
+    required this.rawOptions,
     this.onSelect,
   });
 
@@ -158,9 +179,11 @@ class _OptionsBubble extends StatelessWidget {
       padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: options.map((option) {
+        children: List.generate(options.length, (index) {
+          final option = options[index];
+          final raw = rawOptions[index];
           return GestureDetector(
-            onTap: () => onSelect?.call(option),
+            onTap: () => onSelect?.call(raw),
             child: Container(
               margin: EdgeInsets.only(bottom: 8.h),
               padding: EdgeInsets.symmetric(vertical: 12.h),
@@ -182,7 +205,7 @@ class _OptionsBubble extends StatelessWidget {
               ),
             ),
           );
-        }).toList(),
+        }),
       ),
     );
   }

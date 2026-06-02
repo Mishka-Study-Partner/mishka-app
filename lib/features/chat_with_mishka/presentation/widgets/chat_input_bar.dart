@@ -17,6 +17,9 @@ class ChatInputBar extends StatefulWidget {
   final void Function(UploadedItem item) onRemoveUpload;
   final VoidCallback onPickFile;
   final void Function(String text) onSend;
+  final String uploadHint;
+  final String chooseDifficultyHint;
+  final String askHint;
 
   const ChatInputBar({
     super.key,
@@ -26,6 +29,9 @@ class ChatInputBar extends StatefulWidget {
     required this.onPickFile,
     required this.onRemoveUpload,
     required this.onSend,
+    required this.uploadHint,
+    required this.chooseDifficultyHint,
+    required this.askHint,
   });
 
   @override
@@ -138,8 +144,8 @@ class _ChatInputBarState extends State<ChatInputBar>
   }
 
   String _hintText() {
-    if (!hasMaterial) return "Upload PDF to start";
-    if (!widget.typingEnabled) return "Choose difficulty above";
-    return "Ask MISHKA ...";
+    if (!hasMaterial) return widget.uploadHint;
+    if (!widget.typingEnabled) return widget.chooseDifficultyHint;
+    return widget.askHint;
   }
 }

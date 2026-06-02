@@ -95,7 +95,7 @@ BEGIN
             VALUE "InternalName", "mishka_app" "\0"
             VALUE "LegalCopyright", "Copyright (C) 2025 com.example. All rights reserved." "\0"
             VALUE "OriginalFilename", "mishka_app.exe" "\0"
-            VALUE "ProductName", "mishka_app" "\0"
+            VALUE "ProductName", "Mishka" "\0"
             VALUE "ProductVersion", VERSION_AS_STRING "\0"
         END
     END

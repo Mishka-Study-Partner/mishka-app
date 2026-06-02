@@ -3,8 +3,11 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import 'package:mishka_app/core/utils/app_colors.dart';
 import 'package:mishka_app/core/widgets/custom_app_bar.dart';
+import 'package:mishka_app/l10n/app_localizations.dart';
 
+import '../../community_display_helper.dart';
 import '../../community_styles.dart';
+import '../../data/community_error_helpers.dart';
 import '../../data/community_current_user.dart';
 import '../../data/community_models.dart';
 import '../../data/community_repository.dart';
@@ -67,11 +70,12 @@ class _CommunityDetailScreenState extends State<CommunityDetailScreen> {
   }
 
   Future<void> _leave({required bool deleteForYou}) async {
+    final l10n = AppLocalizations.of(context)!;
     final confirmed = await showCommunityConfirmDialog(
       context,
       message: deleteForYou
-          ? 'Are you sure you want to Exit and delete this community?'
-          : 'Are you sure you want to Exit this community?',
+          ? l10n.communityExitAndDeleteConfirm
+          : l10n.communityExitConfirm,
     );
     if (confirmed != true || !mounted) return;
 
@@ -92,21 +96,24 @@ class _CommunityDetailScreenState extends State<CommunityDetailScreen> {
       Navigator.pop(context);
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('$e', style: CommunityStyles.snackBar)),
+      CommunityStyles.showSnackBar(
+        context,
+        communityErrorMessage(e, l10n: AppLocalizations.of(context)!),
       );
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final communityTitle = communityDisplayName(_community.name, l10n);
     final description = _community.description ?? '';
 
     return Scaffold(
       backgroundColor: AppColors.screenBackground,
       appBar: MishkaAppBar(
-        title: _community.name,
-        topTitle: _community.name,
+        title: communityTitle,
+        topTitle: communityTitle,
         showBack: true,
         showBottomBar: false,
       ),
@@ -126,11 +133,14 @@ class _CommunityDetailScreenState extends State<CommunityDetailScreen> {
                                   CommunityAvatar(community: _community, radius: 30),
                                   SizedBox(height: 8.h),
                                   Text(
-                                    _community.name,
+                                    communityTitle,
                                     style: CommunityStyles.bodySemiBold,
                                   ),
                                   Text(
-                                    'Community : ${_community.groupCount} groups • ${_community.memberCount} Members',
+                                    l10n.communityDetailStats(
+                                      _community.groupCount,
+                                      _community.memberCount,
+                                    ),
                                     style: CommunityStyles.caption,
                                   ),
                                 ],
@@ -148,7 +158,7 @@ class _CommunityDetailScreenState extends State<CommunityDetailScreen> {
                               ),
                             SizedBox(height: 10.h),
                             _ArrowTile(
-                              label: 'View Groups',
+                              label: l10n.communityDetailViewGroups,
                               onTap: () => Navigator.push(
                                 context,
                                 MaterialPageRoute<void>(
@@ -160,12 +170,12 @@ class _CommunityDetailScreenState extends State<CommunityDetailScreen> {
                               ),
                             ),
                             SizedBox(height: 10.h),
-                            Text('View Members:', style: CommunityStyles.sectionLabel),
+                            Text(l10n.communityDetailViewMembers, style: CommunityStyles.sectionLabel),
                             SizedBox(height: 8.h),
                             ..._members.map((m) => MemberTile(member: m)),
                             SizedBox(height: 10.h),
                             _ArrowTile(
-                              label: 'Manage Members',
+                              label: l10n.communityDetailManageMembers,
                               onTap: () => Navigator.push(
                                 context,
                                 MaterialPageRoute<void>(
@@ -180,7 +190,7 @@ class _CommunityDetailScreenState extends State<CommunityDetailScreen> {
                             GestureDetector(
                               onTap: () => _leave(deleteForYou: false),
                               child: Text(
-                                'Exit Community',
+                                l10n.communityDetailExitCommunity,
                                 style: CommunityStyles.destructiveAction,
                               ),
                             ),
@@ -188,7 +198,7 @@ class _CommunityDetailScreenState extends State<CommunityDetailScreen> {
                             GestureDetector(
                               onTap: () => _leave(deleteForYou: true),
                               child: Text(
-                                'Exit And Delete Community (for you)',
+                                l10n.communityDetailExitAndDelete,
                                 style: CommunityStyles.destructiveAction,
                               ),
                             ),

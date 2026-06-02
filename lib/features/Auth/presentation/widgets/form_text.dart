@@ -4,6 +4,9 @@ import 'package:mishka_app/core/utils/app_colors.dart';
 import 'package:mishka_app/core/utils/app_sizes.dart';
 
 class CustomInputField extends StatefulWidget {
+  /// Vertical gap between stacked auth fields.
+  static double get spacingBetweenFields => 16.h;
+
   final String label;
   final String hint;
   final TextEditingController controller;
@@ -43,17 +46,20 @@ class _CustomInputFieldState extends State<CustomInputField> {
             color: AppColors.mainDark,
           ),
         ),
-        SizedBox(height: 8.h),
+        SizedBox(height: 6.h),
 
         // ---------------- TEXT FIELD ----------------
-        SizedBox(
-          height: 44.h,
-          width: double.infinity,
-          child: TextFormField(
+        TextFormField(
             controller: widget.controller,
             obscureText: widget.isPassword ? _obscure : false,
             validator: widget.validator,
+            style: TextStyle(
+              fontSize: AppSizes.fontSizeMedium,
+              fontFamily: 'Pridi',
+              height: 1.2,
+            ),
             decoration: InputDecoration(
+              isDense: true,
               hintText: widget.hint,
               hintStyle: TextStyle(
                 color: AppColors.greyText,
@@ -89,7 +95,7 @@ class _CustomInputFieldState extends State<CustomInputField> {
 
               contentPadding: EdgeInsets.symmetric(
                 horizontal: AppSizes.paddingMedium,
-                vertical: 14.h,
+                vertical: 9.h,
               ),
 
               enabledBorder: OutlineInputBorder(
@@ -106,9 +112,9 @@ class _CustomInputFieldState extends State<CustomInputField> {
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(AppSizes.radiusSmall),
               ),
+              errorMaxLines: 2,
             ),
           ),
-        ),
       ],
     );
   }

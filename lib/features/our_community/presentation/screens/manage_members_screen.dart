@@ -5,6 +5,7 @@ import 'package:mishka_app/core/utils/app_colors.dart';
 import 'package:mishka_app/core/widgets/custom_app_bar.dart';
 import 'package:mishka_app/l10n/app_localizations.dart';
 
+import '../../community_display_helper.dart';
 import '../../community_styles.dart';
 import '../../data/community_current_user.dart';
 import '../../data/community_error_helpers.dart';
@@ -75,10 +76,9 @@ class _ManageMembersScreenState extends State<ManageMembersScreen> {
       await _load();
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(communityErrorMessage(e), style: CommunityStyles.snackBar),
-        ),
+      CommunityStyles.showSnackBar(
+        context,
+        communityErrorMessage(e, l10n: AppLocalizations.of(context)!),
       );
     }
   }
@@ -94,12 +94,15 @@ class _ManageMembersScreenState extends State<ManageMembersScreen> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    final membersTitle = l10n.communityMembersTitle(
+      communityDisplayName(widget.community.name, l10n),
+    );
 
     return Scaffold(
       backgroundColor: AppColors.screenBackground,
       appBar: MishkaAppBar(
-        title: "${widget.community.name} Members",
-        topTitle: "${widget.community.name} Members",
+        title: membersTitle,
+        topTitle: membersTitle,
         showBack: true,
         showBottomBar: false,
       ),
@@ -155,8 +158,7 @@ class _ManageMembersScreenState extends State<ManageMembersScreen> {
                           onRemoveFromCommunity: () async {
                             final confirmed = await showCommunityConfirmDialog(
                               context,
-                              message:
-                                  'Are you sure you want to remove this member from the community?',
+                              message: l10n.communityRemoveMemberConfirm,
                             );
                             if (!context.mounted || confirmed != true) return;
                             try {
@@ -167,30 +169,26 @@ class _ManageMembersScreenState extends State<ManageMembersScreen> {
                               if (!context.mounted) return;
                               await showCommunitySuccessDialog(
                                 context,
-                                message: 'Member removed from community.',
+                                message: l10n.communityMemberRemovedSuccess,
                               );
                               await _load();
                             } catch (e) {
                               if (!context.mounted) return;
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content: Text(
-                                    communityErrorMessage(e),
-                                    style: CommunityStyles.snackBar,
-                                  ),
-                                ),
+                              CommunityStyles.showSnackBar(
+                                context,
+                                communityErrorMessage(e, l10n: l10n),
                               );
                             }
                           },
                           onRemoveFromGroup: (_) async {
                             final confirmed = await showCommunityConfirmDialog(
                               context,
-                              message: 'Remove member from group?',
+                              message: l10n.communityRemoveFromGroupConfirm,
                             );
                             if (!context.mounted || confirmed != true) return;
                             await showCommunitySuccessDialog(
                               context,
-                              message: 'Member removed from group.',
+                              message: l10n.communityMemberRemovedFromGroupSuccess,
                             );
                           },
                         );

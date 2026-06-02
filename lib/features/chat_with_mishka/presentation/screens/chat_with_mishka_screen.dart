@@ -1,15 +1,23 @@
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:mishka_app/core/network/api_service.dart';
+import 'package:mishka_app/core/preferences/app_preferences.dart';
+import 'package:mishka_app/core/utils/app_colors.dart';
+import 'package:mishka_app/core/widgets/custom_app_bar.dart';
+import 'package:mishka_app/l10n/app_localizations.dart';
 
-import '../../../../core/utils/app_colors.dart';
-import '../../../../core/widgets/custom_app_bar.dart';
-import '../../../../l10n/app_localizations.dart';
-
+import '../../data/chat_flow_strings.dart';
+import '../../data/chat_pdf_cache.dart';
 import '../../data/controller/chat_flow_controller.dart';
+import '../../data/data_sources/saved_library_remote_data_source.dart';
 import '../../data/model/uploaded_item.dart';
+import 'package:mishka_app/features/chat_with_mishka/data/models/chat_history_item.dart';
+import 'package:mishka_app/features/chat_with_mishka/data/repositories/chat_history_repository.dart';
+import 'package:mishka_app/features/chat_with_mishka/data/repositories/chat_session_repository.dart';
 import '../../data/service/mishka_ai_service.dart' as ai_service;
 
+import '../widgets/chat_history_drawer.dart';
 import '../widgets/chat_input_bar.dart';
 import '../widgets/chat_message_render.dart';
 
@@ -26,20 +34,43 @@ class ChatWithMishkaScreen extends StatefulWidget {
 }
 
 class _ChatWithMishkaScreenState extends State<ChatWithMishkaScreen> {
-  late final ChatFlowController controller;
   late final ai_service.MishkaAiService ai;
+  late final ChatSessionRepository _sessionRepo;
+  late final ChatHistoryRepository _historyRepo;
+  late final SavedLibraryRemoteDataSource _savedLibrary;
+  late ChatFlowController controller;
+  ChatFlowStrings? _strings;
 
   final ScrollController _scrollController = ScrollController();
   final TextEditingController _inputController = TextEditingController();
 
   String? _pickedPdfPath;
+  String? _backendSessionId;
   bool _isLoading = false;
+  bool _isRestoring = true;
+  bool _historyOpen = false;
+  bool _historyLoading = false;
+  ChatHistoryData _historyData = const ChatHistoryData();
+  int _persistedMessageCount = 0;
 
   @override
   void initState() {
     super.initState();
     controller = ChatFlowController();
     ai = ai_service.MishkaAiService();
+    _sessionRepo = ChatSessionRepository();
+    _historyRepo = ChatHistoryRepository();
+    _savedLibrary = SavedLibraryRemoteDataSource(ApiService());
+    ChatPdfCache.purgeExpired();
+    _restoreActiveSession();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final strings = ChatFlowStrings(AppLocalizations.of(context)!);
+    _strings = strings;
+    controller.updateStrings(strings);
   }
 
   @override
@@ -47,6 +78,131 @@ class _ChatWithMishkaScreenState extends State<ChatWithMishkaScreen> {
     _scrollController.dispose();
     _inputController.dispose();
     super.dispose();
+  }
+
+  Future<void> _restoreActiveSession() async {
+    try {
+      final loaded = await _sessionRepo.loadActiveSession();
+      if (!mounted) return;
+      if (loaded != null) {
+        controller.restoreFromTimeline(loaded.timeline, loaded.aiSessionId);
+        _backendSessionId = loaded.timeline.session.id;
+        _persistedMessageCount = controller.messages.length;
+        await _restorePdfFromCache(_backendSessionId!);
+      }
+    } catch (_) {
+      // Keep fresh chat when restore fails.
+    } finally {
+      if (mounted) {
+        setState(() => _isRestoring = false);
+        _scrollToBottom();
+      }
+    }
+  }
+
+  void _persistNewMessages() {
+    final sessionId = _backendSessionId;
+    if (sessionId == null || sessionId.isEmpty) return;
+
+    while (_persistedMessageCount < controller.messages.length) {
+      final message = controller.messages[_persistedMessageCount];
+      _persistedMessageCount++;
+      _sessionRepo
+          .persistMessage(backendSessionId: sessionId, message: message)
+          .catchError((_) {});
+    }
+  }
+
+  Future<void> _openHistory() async {
+    setState(() {
+      _historyOpen = true;
+      _historyLoading = true;
+    });
+    try {
+      final data = await _historyRepo.loadHistory();
+      if (!mounted) return;
+      setState(() {
+        _historyData = data;
+        _historyLoading = false;
+      });
+    } catch (_) {
+      if (!mounted) return;
+      setState(() => _historyLoading = false);
+    }
+  }
+
+  void _closeHistory() {
+    setState(() => _historyOpen = false);
+  }
+
+  Future<void> _onHistorySessionSelected(ChatHistoryItem item) async {
+    final sessionId = item.chatSessionId;
+    if (sessionId == null || sessionId.isEmpty) return;
+
+    _closeHistory();
+    setState(() => _isRestoring = true);
+    try {
+      final loaded = await _sessionRepo.loadSession(sessionId);
+      if (!mounted) return;
+      controller.restoreFromTimeline(loaded.timeline, loaded.aiSessionId);
+      setState(() {
+        _backendSessionId = loaded.timeline.session.id;
+        _persistedMessageCount = controller.messages.length;
+        _isRestoring = false;
+      });
+      await _restorePdfFromCache(_backendSessionId!);
+      _scrollToBottom();
+    } catch (_) {
+      if (!mounted) return;
+      setState(() => _isRestoring = false);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(AppLocalizations.of(context)!.historyLoadFailed),
+        ),
+      );
+    }
+  }
+
+  Future<void> _restorePdfFromCache(String sessionId) async {
+    final cached = await ChatPdfCache.pathForSession(sessionId);
+    if (!mounted) return;
+    if (cached != null) {
+      setState(() => _pickedPdfPath = cached);
+    }
+  }
+
+  Future<void> _startNewChat() async {
+    final strings = _strings ?? ChatFlowStrings(AppLocalizations.of(context)!);
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: Text(strings.newChatTitle),
+        content: Text(strings.newChatMessage),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext, false),
+            child: Text(AppLocalizations.of(context)!.cancel),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext, true),
+            child: Text(strings.newChatConfirm),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true || !mounted) return;
+
+    await AppPreferences.clearActiveChatSession();
+    _inputController.clear();
+    setState(() {
+      _pickedPdfPath = null;
+      _backendSessionId = null;
+      _persistedMessageCount = 0;
+      _isLoading = false;
+      controller.reset();
+      controller.updateStrings(strings);
+    });
+    _scrollToBottom();
   }
 
   // ================= SCROLL =================
@@ -83,25 +239,57 @@ class _ChatWithMishkaScreenState extends State<ChatWithMishkaScreen> {
       return;
     }
 
-    setState(() {
+    try {
+      final session = await _sessionRepo.startSession(
+        title: file.name,
+        uploadOriginalFilename: file.name,
+      );
+      await AppPreferences.setChatBackendSessionId(session.id);
+      _backendSessionId = session.id;
+      _persistedMessageCount = controller.messages.length;
+    } catch (e) {
+      if (!mounted) return;
+      final strings = _strings ?? ChatFlowStrings(AppLocalizations.of(context)!);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(strings.errorSessionStartFailed(e))),
+      );
+      return;
+    }
+
+    try {
+      _pickedPdfPath = await ChatPdfCache.persistForSession(
+        sessionId: _backendSessionId!,
+        sourcePath: path,
+      );
+    } catch (_) {
       _pickedPdfPath = path;
+    }
+
+    setState(() {
       controller.onPdfUploaded(fileName: file.name);
     });
 
+    _persistNewMessages();
     _scrollToBottom();
   }
 
-  void removePdf(UploadedItem item) {
+  Future<void> removePdf(UploadedItem item) async {
+    await AppPreferences.clearActiveChatSession();
     setState(() {
       _pickedPdfPath = null;
+      _backendSessionId = null;
+      _persistedMessageCount = 0;
       controller.uploadedPdfName = null;
       controller.difficulty = null;
+      controller.sessionId = null;
+      controller.step = ChatStep.idle;
 
       controller.messages.removeWhere((m) =>
-      m.type == MessageType.file ||
+          m.type == MessageType.file ||
           m.type == MessageType.options ||
           m.type == MessageType.selection ||
-          m.type == MessageType.explanation);
+          m.type == MessageType.explanation ||
+          m.type == MessageType.toolPreview);
     });
 
     _scrollToBottom();
@@ -115,13 +303,14 @@ class _ChatWithMishkaScreenState extends State<ChatWithMishkaScreen> {
 
   // ================= OPTIONS =================
   Future<void> _handleOptionTap(String value) async {
-    /// REGENERATE
-    if (value == "Regenerate") {
+    final strings = _strings ?? ChatFlowStrings(AppLocalizations.of(context)!);
+
+  if (strings.isRegenerate(value)) {
       final regenerateAction = controller.onRegenerateOrAnotherTool(value);
+      _persistNewMessages();
       _scrollToBottom();
-      
+
       if (regenerateAction != null) {
-        // Regenerate same tool type
         try {
           final sid = controller.sessionId;
           if (sid == null) throw Exception('Missing sessionId');
@@ -134,10 +323,10 @@ class _ChatWithMishkaScreenState extends State<ChatWithMishkaScreen> {
           );
 
           setState(() {
-            // Don't show "regenerated" message - just show the tool directly
             controller.onToolPreviewGenerated(toolData: toolJson);
             controller.onToolGenerated(regenerateAction);
           });
+          _persistNewMessages();
         } catch (e) {
           setState(() {
             controller.messages.add(
@@ -145,10 +334,11 @@ class _ChatWithMishkaScreenState extends State<ChatWithMishkaScreen> {
                 isFromMishka: true,
                 type: MessageType.system,
                 time: DateTime.now(),
-                text: "⚠️ Regeneration failed.\n$e",
+                text: strings.errorRegenerationFailed(e),
               ),
             );
           });
+          _persistNewMessages();
         }
         _scrollToBottom();
       }
@@ -156,24 +346,25 @@ class _ChatWithMishkaScreenState extends State<ChatWithMishkaScreen> {
     }
 
     /// ANOTHER TOOL
-    if (value == "Another Tool") {
-      // Show tool options again
+    if (strings.isAnotherTool(value)) {
       controller.onRegenerateOrAnotherTool(value);
-      // Make sure we're in freeInteraction state so tool selection works
       controller.step = ChatStep.freeInteraction;
       setState(() {});
+      _persistNewMessages();
       _scrollToBottom();
       return;
     }
 
     /// DIFFICULTY
     if (controller.step == ChatStep.waitingForDifficulty) {
-      final level = _mapDifficulty(value);
+      final level = strings.difficultyForLabel(value);
+      if (level == null) return;
 
       setState(() {
         controller.onDifficultySelected(level);
         _isLoading = true;
       });
+      _persistNewMessages();
       _scrollToBottom();
 
       try {
@@ -182,12 +373,20 @@ class _ChatWithMishkaScreenState extends State<ChatWithMishkaScreen> {
         }
 
         final summaryLevel =
-        (level == DifficultyLevel.simple) ? 'simple' : 'detailed';
+            (level == DifficultyLevel.simple) ? 'simple' : 'detailed';
 
         final result = await ai.explainPdf(
           pdfPath: _pickedPdfPath!,
           summaryLevel: summaryLevel,
         );
+
+        if (_backendSessionId != null) {
+          await _sessionRepo.bindAiSession(
+            backendSessionId: _backendSessionId!,
+            aiSessionId: result.sessionId,
+            difficulty: level,
+          );
+        }
 
         setState(() {
           controller.onExplanationReady(
@@ -196,6 +395,7 @@ class _ChatWithMishkaScreenState extends State<ChatWithMishkaScreen> {
           );
           _isLoading = false;
         });
+        _persistNewMessages();
       } catch (e) {
         setState(() {
           controller.messages.add(
@@ -203,10 +403,11 @@ class _ChatWithMishkaScreenState extends State<ChatWithMishkaScreen> {
               isFromMishka: true,
               type: MessageType.system,
               time: DateTime.now(),
-              text: "⚠️ Failed to analyze PDF.\n$e",
+              text: strings.errorAnalyzePdfFailed(e),
             ),
           );
         });
+        _persistNewMessages();
       } finally {
         setState(() => _isLoading = false);
         _scrollToBottom();
@@ -216,8 +417,8 @@ class _ChatWithMishkaScreenState extends State<ChatWithMishkaScreen> {
 
     /// TOOLS
     if (controller.step == ChatStep.freeInteraction) {
-      // onActionSelected expects String label, not StudyAction
       final action = controller.onActionSelected(value);
+      _persistNewMessages();
       _scrollToBottom();
 
       try {
@@ -233,17 +434,10 @@ class _ChatWithMishkaScreenState extends State<ChatWithMishkaScreen> {
         );
 
         setState(() {
-          // Don't show "generated" message - just show the tool directly
-          // Add tool preview to chat
           controller.onToolPreviewGenerated(toolData: toolJson);
-          // Show regenerate/another tool options
           controller.onToolGenerated(action);
         });
-
-        // Don't navigate - show in chat instead
-        // if (effect.navigateTo != null && mounted) {
-        //   _navigateToToolScreen(effect.navigateTo!, toolJson);
-        // }
+        _persistNewMessages();
       } catch (e) {
         setState(() {
           controller.messages.add(
@@ -251,10 +445,11 @@ class _ChatWithMishkaScreenState extends State<ChatWithMishkaScreen> {
               isFromMishka: true,
               type: MessageType.system,
               time: DateTime.now(),
-              text: "⚠️ Tool generation failed.\n$e",
+              text: strings.errorToolGenerationFailed(e),
             ),
           );
         });
+        _persistNewMessages();
       }
 
       _scrollToBottom();
@@ -263,7 +458,8 @@ class _ChatWithMishkaScreenState extends State<ChatWithMishkaScreen> {
 
   // ================= CHAT =================
   Future<void> _handleSend(String text) async {
-    // Only allow chat after explanation exists (sessionId is set)
+    final strings = _strings ?? ChatFlowStrings(AppLocalizations.of(context)!);
+
     if (controller.sessionId == null) {
       setState(() {
         controller.messages.add(
@@ -271,15 +467,17 @@ class _ChatWithMishkaScreenState extends State<ChatWithMishkaScreen> {
             isFromMishka: true,
             type: MessageType.system,
             time: DateTime.now(),
-            text: "⚠️ Please wait for the explanation to complete first.",
+            text: strings.waitForExplanation,
           ),
         );
       });
+      _persistNewMessages();
       _scrollToBottom();
       return;
     }
 
     controller.onUserChatMessage(text);
+    _persistNewMessages();
     _scrollToBottom();
 
     try {
@@ -291,6 +489,7 @@ class _ChatWithMishkaScreenState extends State<ChatWithMishkaScreen> {
       setState(() {
         controller.onMishkaChatReply(reply);
       });
+      _persistNewMessages();
     } catch (e) {
       setState(() {
         controller.messages.add(
@@ -298,28 +497,17 @@ class _ChatWithMishkaScreenState extends State<ChatWithMishkaScreen> {
             isFromMishka: true,
             type: MessageType.system,
             time: DateTime.now(),
-            text: "⚠️ Chat failed.\n$e",
+            text: strings.errorChatFailed(e),
           ),
         );
       });
+      _persistNewMessages();
     }
 
     _scrollToBottom();
   }
 
   // ================= HELPERS =================
-  DifficultyLevel _mapDifficulty(String value) {
-    switch (value.toLowerCase()) {
-      case 'simple':
-        return DifficultyLevel.simple;
-      case 'hard':
-        return DifficultyLevel.advanced;
-      case 'intermediate':
-      default:
-        return DifficultyLevel.intermediate;
-    }
-  }
-
   String _difficultyForTools(DifficultyLevel? level) {
     switch (level) {
       case DifficultyLevel.simple:
@@ -335,52 +523,73 @@ class _ChatWithMishkaScreenState extends State<ChatWithMishkaScreen> {
   // ================= UI =================
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.screenBackground,
-      appBar: MishkaAppBar(
-        title: 'Chat with Mishka',
-        showBack: true,
-        showBottomBar: false,
-        onBackTap: widget.onBack ?? () => Navigator.pop(context),
-      ),
-      body: Column(
-        children: [
-          /// CHAT
-          Expanded(
-            child: ListView.builder(
-              controller: _scrollController,
-              padding: EdgeInsets.only(bottom: 12.h),
-              itemCount: controller.messages.length,
-              itemBuilder: (context, index) {
-                final message = controller.messages[index];
-                return ChatMessageRenderer(
-                  message: message,
-                  onOptionSelected: _handleOptionTap,
-                );
-              },
-            ),
+    final l10n = AppLocalizations.of(context)!;
+    return Stack(
+      children: [
+        Scaffold(
+          backgroundColor: AppColors.screenBackground,
+          appBar: MishkaAppBar(
+            title: l10n.chatWithMishka,
+            showBack: true,
+            showBottomBar: true,
+            onMenuTap: _openHistory,
+            onBackTap: widget.onBack ?? () => Navigator.pop(context),
           ),
-
-          if (_isLoading)
-            Padding(
-              padding: EdgeInsets.only(bottom: 8.h),
-              child: const CircularProgressIndicator(strokeWidth: 2),
-            ),
-
-          /// INPUT
-          Padding(
-            padding: EdgeInsets.only(bottom: 20.h),
-            child: ChatInputBar(
-              typingEnabled: controller.isTypingEnabled,
-              controller: _inputController,
-              uploads: uploadedItems,
-              onPickFile: pickPdf,
-              onRemoveUpload: removePdf,
-              onSend: _handleSend,
-            ),
-          ),
-        ],
-      ),
+          body: _isRestoring
+              ? const Center(child: CircularProgressIndicator(strokeWidth: 2))
+              : Column(
+                  children: [
+                    Expanded(
+                      child: ListView.builder(
+                        controller: _scrollController,
+                        padding: EdgeInsets.only(bottom: 12.h),
+                        itemCount: controller.messages.length,
+                        itemBuilder: (context, index) {
+                          final message = controller.messages[index];
+                      return ChatMessageRenderer(
+                        message: message,
+                        onOptionSelected: _handleOptionTap,
+                        savedLibrary: _savedLibrary,
+                        flowStrings: _strings,
+                      );
+                        },
+                      ),
+                    ),
+                    if (_isLoading)
+                      Padding(
+                        padding: EdgeInsets.only(bottom: 8.h),
+                        child: const CircularProgressIndicator(strokeWidth: 2),
+                      ),
+                    Padding(
+                      padding: EdgeInsets.only(bottom: 20.h),
+                  child: ChatInputBar(
+                    typingEnabled: controller.isTypingEnabled,
+                    controller: _inputController,
+                    uploads: uploadedItems,
+                    onPickFile: pickPdf,
+                    onRemoveUpload: removePdf,
+                    onSend: _handleSend,
+                    uploadHint: l10n.chatUploadPdfHint,
+                    chooseDifficultyHint: l10n.chatChooseDifficultyHint,
+                    askHint: l10n.askMishka,
+                  ),
+                    ),
+                  ],
+                ),
+        ),
+        ChatHistoryDrawer(
+          isOpen: _historyOpen,
+          onClose: _closeHistory,
+          data: _historyData,
+          isLoading: _historyLoading,
+          onChatSelected: _onHistorySessionSelected,
+          onSessionSelected: _onHistorySessionSelected,
+          onNewChat: () {
+            _closeHistory();
+            _startNewChat();
+          },
+        ),
+      ],
     );
   }
 }

@@ -46,9 +46,12 @@ dependencies:
   flutter_bloc: ^9.1.1
   equatable: ^2.0.7
   shared_preferences: ^2.5.3
+  path_provider: ^2.1.5
+  share_plus: ^10.1.4
   syncfusion_flutter_pdf: ^32.1.24
   uuid: ^4.5.1
   camera: ^0.12.0+1
+  url_launcher: ^6.3.2
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -59,6 +62,21 @@ dev_dependencies:
   # package. See that file for information about deactivating specific lint
   # rules and activating additional ones.
   flutter_lints: ^5.0.0
+  flutter_launcher_icons: ^0.14.4
+
+# Phone app icon (iOS/Android launcher) — app-launcher.png (from app-launcher.pdf).
+# App bar uses logo_no_name.png. Splash uses logo.png.
+# Run: dart run flutter_launcher_icons
+flutter_launcher_icons:
+  android: true
+  ios: true
+  image_path: assets/images/app-launcher.png
+  min_sdk_android: 21
+  adaptive_icon_background: "#1B2734"
+  adaptive_icon_foreground: assets/images/app-launcher.png
+  # App Store requires opaque icons; matches splash / app bar darkMain
+  remove_alpha_ios: true
+  background_color_ios: "#1B2734"
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
@@ -74,6 +92,9 @@ flutter:
   # To add assets to your application, add an assets section, like this:
   assets:
     - assets/images/
+    - assets/images/logo.png
+    - assets/images/logo_no_name.png
+    - assets/images/app-launcher.png
 
   #   - images/a_dot_ham.jpeg
 

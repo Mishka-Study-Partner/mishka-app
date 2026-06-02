@@ -3,7 +3,9 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import 'package:mishka_app/core/utils/app_colors.dart';
 import 'package:mishka_app/core/widgets/custom_app_bar.dart';
+import 'package:mishka_app/l10n/app_localizations.dart';
 
+import '../../community_display_helper.dart';
 import '../../community_styles.dart';
 import '../../data/community_models.dart';
 import '../../data/community_repository.dart';
@@ -41,7 +43,7 @@ class _CommunityHomeScreenState extends State<CommunityHomeScreen> {
     _loadChannels();
   }
 
-  Future<void> _loadChannels() async {
+  Future<void> _loadChannels({bool forceRefresh = false}) async {
     setState(() {
       _loading = true;
       _error = null;
@@ -50,6 +52,7 @@ class _CommunityHomeScreenState extends State<CommunityHomeScreen> {
       final refreshed = await widget.repository.refreshCommunity(
         _community.id,
         seed: _community,
+        forceRefresh: forceRefresh,
       );
       final groups = await widget.repository.loadChannels(_community.id);
       if (!mounted) return;
@@ -75,11 +78,13 @@ class _CommunityHomeScreenState extends State<CommunityHomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final communityTitle = communityDisplayName(_community.name, l10n);
     return Scaffold(
       backgroundColor: AppColors.screenBackground,
       appBar: MishkaAppBar(
-        title: _community.name,
-        topTitle: _community.name,
+        title: communityTitle,
+        topTitle: communityTitle,
         showBack: true,
         showBottomBar: false,
       ),
@@ -103,10 +108,10 @@ class _CommunityHomeScreenState extends State<CommunityHomeScreen> {
                     ).then((_) => _loadChannels()),
                     leading: CommunityAvatar(community: _community, radius: 28),
                     title: Text(
-                      _community.name,
+                      communityTitle,
                       style: CommunityStyles.headline,
                     ),
-                    subtitle: Text('Community', style: CommunityStyles.caption),
+                    subtitle: Text(l10n.communityHomeTypeLabel, style: CommunityStyles.caption),
                     trailing: IconButton(
                       icon: Icon(
                         Icons.list,
@@ -117,7 +122,7 @@ class _CommunityHomeScreenState extends State<CommunityHomeScreen> {
                         context,
                         community: _community,
                         repository: widget.repository,
-                        onChanged: () => _loadChannels(),
+                        onChanged: () => _loadChannels(forceRefresh: true),
                       ),
                     ),
                   ),
@@ -130,11 +135,11 @@ class _CommunityHomeScreenState extends State<CommunityHomeScreen> {
                       child: Icon(Icons.campaign, color: AppColors.white, size: 24.w),
                     ),
                     title: Text(
-                      'Announcements',
+                      l10n.communityHomeAnnouncements,
                       style: CommunityStyles.bodyBold,
                     ),
                     subtitle: Text(
-                      _community.description ?? 'Welcome to your community',
+                      _community.description ?? l10n.communityHomeWelcomeDefault,
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                       style: CommunityStyles.caption,
@@ -159,7 +164,7 @@ class _CommunityHomeScreenState extends State<CommunityHomeScreen> {
                                 SizedBox(height: 40.h),
                                 Center(
                                   child: Text(
-                                    'No groups yet. Add your first group.',
+                                    l10n.communityHomeNoGroups,
                                     style: CommunityStyles.caption,
                                   ),
                                 ),
@@ -210,7 +215,7 @@ class _CommunityHomeScreenState extends State<CommunityHomeScreen> {
                     if (mounted) await _loadChannels();
                   },
                   icon: const Icon(Icons.add, size: 24),
-                  label: const Text('Add Group'),
+                  label: Text(l10n.communityHomeAddGroup),
                 ),
               ),
             ),

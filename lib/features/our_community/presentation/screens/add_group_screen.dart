@@ -3,8 +3,10 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import 'package:mishka_app/core/utils/app_colors.dart';
 import 'package:mishka_app/core/widgets/custom_app_bar.dart';
+import 'package:mishka_app/l10n/app_localizations.dart';
 
 import '../../community_styles.dart';
+import '../../data/community_error_helpers.dart';
 import '../../data/community_models.dart';
 import '../../data/community_repository.dart';
 import '../widgets/community_dialogs.dart';
@@ -47,15 +49,17 @@ class _AddGroupScreenState extends State<AddGroupScreen> {
         description: _descController.text.trim(),
       );
       if (!mounted) return;
+      final l10n = AppLocalizations.of(context)!;
       await showCommunitySuccessDialog(
         context,
-        message: 'Your group is successfully added to the community!',
+        message: l10n.communityAddGroupSuccess,
         onDismiss: () => Navigator.pop(context, true),
       );
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('$e', style: CommunityStyles.snackBar)),
+      CommunityStyles.showSnackBar(
+        context,
+        communityErrorMessage(e, l10n: AppLocalizations.of(context)!),
       );
     } finally {
       if (mounted) setState(() => _submitting = false);
@@ -64,11 +68,12 @@ class _AddGroupScreenState extends State<AddGroupScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       backgroundColor: AppColors.screenBackground,
-      appBar: const MishkaAppBar(
-        title: 'Add Group',
-        topTitle: 'Add Group',
+      appBar: MishkaAppBar(
+        title: l10n.communityAddGroupTitle,
+        topTitle: l10n.communityAddGroupTitle,
         showBack: true,
         showBottomBar: false,
       ),
@@ -82,13 +87,13 @@ class _AddGroupScreenState extends State<AddGroupScreen> {
                 children: [
                     Center(
                       child: Text(
-                        'Add New Group To Your Community',
+                        l10n.communityAddGroupHeader,
                         textAlign: TextAlign.center,
                         style: CommunityStyles.headline,
                       ),
                     ),
                     SizedBox(height: 28.h),
-                    Text("Add Your Group's Profile:", style: CommunityStyles.sectionLabel),
+                    Text(l10n.communityAddGroupProfileLabel, style: CommunityStyles.sectionLabel),
                     SizedBox(height: 16.h),
                     Center(
                       child: Container(
@@ -107,18 +112,18 @@ class _AddGroupScreenState extends State<AddGroupScreen> {
                       ),
                     ),
                     SizedBox(height: 28.h),
-                    Text("Group's Name:", style: CommunityStyles.sectionLabel),
+                    Text(l10n.communityAddGroupNameLabel, style: CommunityStyles.sectionLabel),
                     SizedBox(height: 8.h),
                     TextField(
                       controller: _nameController,
-                      decoration: CommunityStyles.inputDecoration("Group's name"),
+                      decoration: CommunityStyles.inputDecoration(l10n.communityAddGroupNameHint),
                     ),
                     SizedBox(height: 24.h),
                     Row(
                       children: [
-                        Text("Group's Description ", style: CommunityStyles.sectionLabel),
+                        Text(l10n.communityAddGroupDescLabel, style: CommunityStyles.sectionLabel),
                         Text(
-                          '(optional):',
+                          l10n.communityLabelOptional,
                           style: CommunityStyles.optionalLabel,
                         ),
                       ],
@@ -127,7 +132,7 @@ class _AddGroupScreenState extends State<AddGroupScreen> {
                     TextField(
                       controller: _descController,
                       maxLines: 4,
-                      decoration: CommunityStyles.inputDecoration("Group's description"),
+                      decoration: CommunityStyles.inputDecoration(l10n.communityAddGroupDescHint),
                     ),
                 ],
               ),
@@ -147,7 +152,7 @@ class _AddGroupScreenState extends State<AddGroupScreen> {
                         height: 20.w,
                         child: const CircularProgressIndicator(strokeWidth: 2),
                       )
-                    : const Text('Add'),
+                    : Text(l10n.communityAddButton),
               ),
             ),
           ),

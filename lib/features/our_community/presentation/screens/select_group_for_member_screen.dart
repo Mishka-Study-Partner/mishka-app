@@ -3,7 +3,9 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import 'package:mishka_app/core/utils/app_colors.dart';
 import 'package:mishka_app/core/widgets/custom_app_bar.dart';
+import 'package:mishka_app/l10n/app_localizations.dart';
 
+import '../../community_display_helper.dart';
 import '../../community_styles.dart';
 import '../../data/community_models.dart';
 import '../../data/community_repository.dart';
@@ -52,11 +54,15 @@ class _SelectGroupForMemberScreenState extends State<SelectGroupForMemberScreen>
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final communityTitle =
+        communityDisplayName(widget.community.name, l10n);
+    final groupsTitle = l10n.communityGroupsTitle(communityTitle);
     return Scaffold(
       backgroundColor: AppColors.screenBackground,
       appBar: MishkaAppBar(
-        title: '${widget.community.name} Groups',
-        topTitle: '${widget.community.name} Groups',
+        title: groupsTitle,
+        topTitle: groupsTitle,
         showBack: true,
         showBottomBar: false,
       ),
@@ -65,7 +71,7 @@ class _SelectGroupForMemberScreenState extends State<SelectGroupForMemberScreen>
           Padding(
             padding: EdgeInsets.all(16.w),
             child: Text(
-              'Select a group for ${widget.memberName}',
+              l10n.communitySelectGroupPrompt(widget.memberName),
               style: CommunityStyles.sectionLabel,
             ),
           ),
@@ -83,7 +89,7 @@ class _SelectGroupForMemberScreenState extends State<SelectGroupForMemberScreen>
                             Navigator.pop(context);
                             await showCommunitySuccessDialog(
                               context,
-                              message: 'Member successfully added to the group.',
+                              message: l10n.communityMemberAddedToGroupSuccess,
                             );
                           },
                         );

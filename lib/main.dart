@@ -12,27 +12,23 @@ import 'package:mishka_app/core/utils/app_theme.dart';
 import 'package:mishka_app/core/widgets/app_settings_scope.dart';
 import 'package:mishka_app/features/Auth/data/data_sources/auth_remote_data_source.dart';
 import 'package:mishka_app/features/Auth/view/bloc/auth_bloc.dart';
-import 'package:mishka_app/features/study_with_me/presentation/widgets/floating_timer_bar.dart';
-import 'package:mishka_app/features/study_with_me/study_with.dart';
-import 'package:mishka_app/core/widgets/custom_nav_bar.dart';
-import 'package:mishka_app/features/chat_with_mishka/presentation/screens/chat_with_mishka_screen.dart';
-import 'package:mishka_app/features/ctegory/presentation/view/ai_tools_screen.dart';
-import 'package:mishka_app/features/ctegory/presentation/view/category_screen.dart';
-import 'package:mishka_app/features/gamification/gamification.dart';
-import 'package:mishka_app/features/our_community/our_community.dart';
-import 'package:mishka_app/features/Auth/presentation/screens/login_screen.dart';
-import 'package:mishka_app/features/profile/presentation/screens/profile_screen.dart';
-import 'package:mishka_app/features/home/presentation/screens/home_screen.dart';
-import 'package:mishka_app/features/saved/presentation/screens/saved_screen.dart';
-import 'package:mishka_app/features/todo_lists/presentation/view/todo_lists_screen.dart';
+import 'package:mishka_app/features/onboarding/presentation/app_launch_gate.dart';
+import 'package:mishka_app/features/settings/data/models/user_preferences_model.dart';
+import 'package:mishka_app/features/settings/data/user_preferences_applier.dart';
 
 import 'l10n/app_localizations.dart';
 
+export 'app/main_shell.dart';
+
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  debugPrint('🚀 Mishka: main() start');
   await TokenStorage.init();
+  debugPrint('🚀 Mishka: TokenStorage ready, token=${TokenStorage.token != null ? "present" : "null"}');
   await AppPreferences.init();
+  debugPrint('🚀 Mishka: AppPreferences ready');
   DioClient.instance.init();
+  debugPrint('🚀 Mishka: DioClient ready — launching app');
   runApp(const MishkaApp());
 }
 
@@ -66,13 +62,45 @@ class _MishkaAppState extends State<MishkaApp> {
     setState(() => _notificationsEnabled = enabled);
   }
 
+  Future<void> _applyServerPreferences(UserPreferencesModel prefs) async {
+    await UserPreferencesApplier.apply(prefs);
+    if (!mounted) return;
+    setState(() {
+      _locale = prefs.locale;
+      _themeMode = prefs.themeMode;
+      _notificationsEnabled = prefs.notificationsEnabled;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
       create: (_) => AuthBloc(
         AuthRemoteDataSource(ApiService()),
       )..add(const AuthLoadUserRequested()),
-      child: ScreenUtilInit(
+      child: BlocListener<AuthBloc, AuthState>(
+        listenWhen: (previous, current) {
+          if (current is! AuthSuccess || current.preference == null) {
+            return false;
+          }
+          if (previous is AuthSuccess) {
+            final prev = previous.preference;
+            final curr = current.preference;
+            if (prev != null &&
+                prev.languageCode == curr!.languageCode &&
+                prev.themeMode == curr.themeMode &&
+                prev.notificationsEnabled == curr.notificationsEnabled) {
+              return false;
+            }
+          }
+          return true;
+        },
+        listener: (context, state) {
+          if (state is AuthSuccess && state.preference != null) {
+            _applyServerPreferences(state.preference!);
+          }
+        },
+        child: ScreenUtilInit(
         designSize: const Size(375, 812),
         minTextAdapt: true,
         splitScreenMode: true,
@@ -84,8 +112,6 @@ class _MishkaAppState extends State<MishkaApp> {
             darkTheme: AppTheme.darkTheme,
             themeMode: _themeMode,
             locale: _locale,
-            // Scope must wrap the navigator subtree — an [InheritedWidget] above
-            // [MaterialApp] is not visible to route widgets on all Flutter versions.
             builder: (context, child) {
               AppNetworkConfig.syncFromContext(context);
               return AppSettingsScope(
@@ -108,171 +134,11 @@ class _MishkaAppState extends State<MishkaApp> {
               Locale('en'),
               Locale('ar'),
             ],
-            home: const AuthGate(),
+            home: const AppLaunchGate(),
           );
         },
       ),
-    );
-  }
-}
-
-class AuthGate extends StatelessWidget {
-  const AuthGate({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return BlocBuilder<AuthBloc, AuthState>(
-      builder: (context, state) {
-        if (state is AuthSuccess) {
-          return const MainScreen();
-        }
-        if (state is AuthLoading) {
-          return const Scaffold(
-            body: Center(child: CircularProgressIndicator()),
-          );
-        }
-        return const LoginScreen();
-      },
-    );
-  }
-}
-
-enum MainTab {
-  home,
-  todo,
-  category,
-  saved,
-  profile,
-}
-
-enum CategoryScreenType {
-  main,
-  aiTools,
-  studyWithMe,
-  ourCommunity,
-  gamefaction,
-  chatWithMishka,
-}
-class MainScreen extends StatefulWidget {
-  const MainScreen({super.key});
-
-  @override
-  State<MainScreen> createState() => _MainScreenState();
-}
-
-class _MainScreenState extends State<MainScreen> {
-  MainTab currentTab = MainTab.home;
-
-  CategoryScreenType categoryScreen = CategoryScreenType.main;
-
-  void switchTab(MainTab tab) {
-    setState(() {
-      currentTab = tab;
-      if (tab != MainTab.category) {
-        categoryScreen = CategoryScreenType.main;
-      }
-    });
-  }
-
-
-  void openCategoryScreen(CategoryScreenType screen) {
-    setState(() {
-      currentTab = MainTab.category;
-      categoryScreen = screen;
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    Widget body;
-
-    switch (currentTab) {
-      case MainTab.home:
-        body = HomeScreen(
-          onTabSwitch: switchTab,
-          onCategoryNavigate: openCategoryScreen,
-        );
-        break;
-      case MainTab.todo:
-        body = const TodoScreen();
-        break;
-      case MainTab.category:
-        body = CategoryContainer(
-          screen: categoryScreen,
-          onNavigate: openCategoryScreen,
-          onTabSwitch: switchTab,
-        );
-        break;
-      case MainTab.saved:
-        body = const SavedScreen();
-        break;
-      case MainTab.profile:
-        body = const ProfileScreen();
-        break;
-    }
-
-    return Scaffold(
-      body: Column(
-        children: [
-          Expanded(child: body),
-          const FloatingTimerBar(),
-        ],
-      ),
-      bottomNavigationBar: MishkaBottomNav(
-        currentIndex: currentTab.index,
-        onTap: (i) => switchTab(MainTab.values[i]),
       ),
     );
-  }
-}
-class CategoryContainer extends StatelessWidget {
-  final CategoryScreenType screen;
-  final void Function(CategoryScreenType) onNavigate;
-  final void Function(MainTab)? onTabSwitch;
-
-  const CategoryContainer({
-    super.key,
-    required this.screen,
-    required this.onNavigate,
-    this.onTabSwitch,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    switch (screen) {
-      case CategoryScreenType.main:
-        return CategoryScreen(
-          onNavigate: onNavigate,
-          onTabSwitch: onTabSwitch,
-        );
-
-      case CategoryScreenType.aiTools:
-        return AiToolsScreen(
-          onBack: () => onNavigate(CategoryScreenType.main),
-          onNavigate: onNavigate,
-        );
-
-      case CategoryScreenType.studyWithMe:
-        return StudyWithMishka(
-          onBack: () => onNavigate(CategoryScreenType.main),
-        );
-
-      case CategoryScreenType.ourCommunity:
-        return OurCommunity(
-          onBack: () => onNavigate(CategoryScreenType.main),
-        );
-
-      case CategoryScreenType.gamefaction:
-        return Gamification(
-          onBack: () => onNavigate(CategoryScreenType.main),
-        );
-
-      case CategoryScreenType.chatWithMishka:
-        return ChatWithMishkaScreen(
-          onBack: () => onNavigate(CategoryScreenType.main),
-        );
-
-
-    }
   }
 }

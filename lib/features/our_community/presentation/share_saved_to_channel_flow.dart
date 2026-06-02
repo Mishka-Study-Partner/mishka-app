@@ -39,23 +39,15 @@ Future<void> shareSavedMaterialToChannel({
       channelIds: [channelId],
     );
     if (!context.mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          '"${picked.title}" shared to the group.',
-          style: CommunityStyles.snackBar,
-        ),
-      ),
+    CommunityStyles.showSnackBar(
+      context,
+      '"${picked.title}" shared to the group.',
     );
     onShared?.call();
   } catch (e) {
     if (!context.mounted) return;
     final message = e is ApiException ? e.message : e.toString();
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('${l10n.errorPrefix}: $message', style: CommunityStyles.snackBar),
-      ),
-    );
+    CommunityStyles.showSnackBar(context, '${l10n.errorPrefix}: $message');
   }
 }
 
@@ -174,7 +166,7 @@ class _PickSavedMaterialSheetState extends State<_PickSavedMaterialSheet> {
             ),
             SizedBox(height: 4.h),
             Text(
-              'Choose saved AI material to share with this group.',
+              l10n.communityShareChooseMaterial,
               style: CommunityStyles.caption,
             ),
             SizedBox(height: 12.h),
@@ -221,7 +213,7 @@ class _PickSavedMaterialSheetState extends State<_PickSavedMaterialSheet> {
                 Text(_error!, style: CommunityStyles.error)
               else if (_items.isEmpty)
                 Text(
-                  'No saved items in this category yet.',
+                  l10n.communityShareNoSavedInCategory,
                   style: CommunityStyles.caption,
                 )
               else

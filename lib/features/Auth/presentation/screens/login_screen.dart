@@ -8,9 +8,11 @@ import 'package:mishka_app/features/Auth/presentation/screens/reset_password.dar
 import 'package:mishka_app/features/Auth/presentation/screens/signin_views/email_view.dart';
 import 'package:mishka_app/features/Auth/presentation/screens/signin_views/phone_view.dart';
 import 'package:mishka_app/features/Auth/presentation/screens/sign_up_screen.dart';
+import 'package:mishka_app/features/Auth/utils/auth_navigation.dart';
 import 'package:mishka_app/features/Auth/view/bloc/auth_bloc.dart';
 
 import '../../../../core/widgets/custom_app_bar.dart';
+import '../widgets/auth_checkbox_row.dart';
 import '../widgets/custom_elevated_button.dart';
 import '../widgets/custom_segmanted_button.dart';
 import '../widgets/social_media_total_buttons.dart';
@@ -79,7 +81,11 @@ class _LoginScreenState extends State<LoginScreen> {
       final l10n = AppLocalizations.of(context)!;
 
       return BlocConsumer<AuthBloc, AuthState>(
-        listener: (context, state) {
+        listener: (context, state) async {
+          if (state is AuthSuccess) {
+            await AuthNavigation.goAfterAuthentication(context, state.user);
+            return;
+          }
           if (state is AuthError) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(content: Text(state.message)),
@@ -138,32 +144,16 @@ class _LoginScreenState extends State<LoginScreen> {
 
                 SizedBox(height: 16.h),
                 Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      children: [
-                        Checkbox(
-                          value: isChecked1,
-                          activeColor: AppColors.mainGold,
-                          materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                          onChanged: (value) {
-                            setState(() {
-                              isChecked1 = value!;
-                            });
-                          },
-                        ),
-                        Text(
-                          l10n.rememberMe,
-                          style: TextStyle(
-                            fontSize: AppSizes.fontSizeSmall,
-                            fontFamily: "Pridi",
-                            fontWeight: FontWeight.w500,
-                            color: AppColors.mainDark,
-                          ),
-                        ),
-                      ],
+                    Expanded(
+                      child: AuthCheckboxRow(
+                        value: isChecked1,
+                        onChanged: (value) {
+                          setState(() => isChecked1 = value ?? false);
+                        },
+                        label: l10n.rememberMe,
+                      ),
                     ),
                     TextButton(
                       onPressed: () {
@@ -186,32 +176,12 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                   ],
                 ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Checkbox(
-                      value: isChecked2,
-                      materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                      activeColor: AppColors.mainGold,
-                      onChanged: (value) {
-                        setState(() {
-                          isChecked2 = value!;
-                        });
-                      },
-                    ),
-                    Expanded(
-                      child: Text(
-                        l10n.agreeToTerms,
-                        style: TextStyle(
-                          fontSize: AppSizes.fontSizeSmall,
-                          fontFamily: "Pridi",
-                          fontWeight: FontWeight.w500,
-                          color: AppColors.mainDark,
-                        ),
-                      ),
-                    ),
-                  ],
+                AuthCheckboxRow(
+                  value: isChecked2,
+                  onChanged: (value) {
+                    setState(() => isChecked2 = value ?? false);
+                  },
+                  label: l10n.agreeToTerms,
                 ),
                 SizedBox(height: 24.h),
                 AuthButton(

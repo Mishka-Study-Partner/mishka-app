@@ -89,6 +89,7 @@ class SmartTimerController extends ChangeNotifier {
   }
 
   void pause() {
+    if (!_isRunning && _wasPausedByUser) return;
     _timer?.cancel();
     _isRunning = false;
     _wasPausedByUser = true;

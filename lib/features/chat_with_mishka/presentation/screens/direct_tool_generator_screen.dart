@@ -9,6 +9,7 @@ import 'package:mishka_app/features/chat_with_mishka/data/controller/chat_flow_c
 import 'package:mishka_app/features/chat_with_mishka/data/data_sources/saved_library_remote_data_source.dart';
 import 'package:mishka_app/features/chat_with_mishka/data/service/mishka_ai_service.dart'
     as ai_service;
+import 'package:mishka_app/features/community/presentation/share_community_flow.dart';
 import 'package:mishka_app/features/chat_with_mishka/presentation/widgets/tool_preview_renderer.dart';
 import 'package:mishka_app/l10n/app_localizations.dart';
 
@@ -38,7 +39,6 @@ class _DirectToolGeneratorScreenState extends State<DirectToolGeneratorScreen> {
   String? _uploadedFileName;
   String? _summaryText;
   Map<String, dynamic>? _toolData;
-  String? _savedLibraryId;
   String? _sharedEntityId;
 
   @override
@@ -64,7 +64,6 @@ class _DirectToolGeneratorScreenState extends State<DirectToolGeneratorScreen> {
       _uploadedFileName = file.name;
       _summaryText = null;
       _toolData = null;
-      _savedLibraryId = null;
       _sharedEntityId = null;
     });
 
@@ -120,8 +119,8 @@ class _DirectToolGeneratorScreenState extends State<DirectToolGeneratorScreen> {
 
   Future<void> _copyGenerated() async {
     if (_isSharing) return;
-    final channels = await _selectShareChannels();
-    if (channels == null || channels.isEmpty) return;
+    final selection = await pickCommunityGroupsForShare(context);
+    if (selection == null || selection.groups.isEmpty) return;
     final data = _savePayload();
     if (data == null) return;
 
@@ -139,12 +138,12 @@ class _DirectToolGeneratorScreenState extends State<DirectToolGeneratorScreen> {
       await _savedLibrary.shareGeneratedMaterialToChannels(
         type: _savedType(),
         entityId: entityId,
-        channelIds: channels.map((e) => e.id).toList(),
+        channelIds: selection.channelIds,
       );
       if (!mounted) return;
-      final l10n = AppLocalizations.of(context)!;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(l10n.sharedToChannelsCount(channels.length))),
+      await showShareCompletedFeedback(
+        context: context,
+        selection: selection,
       );
     } catch (e) {
       if (!mounted) return;
@@ -165,11 +164,10 @@ class _DirectToolGeneratorScreenState extends State<DirectToolGeneratorScreen> {
 
     setState(() => _isSaving = true);
     try {
-      final ref = await _savedLibrary.saveGeneratedMaterial(
+      await _savedLibrary.saveGeneratedMaterial(
         type: _savedType(),
         toolData: data,
       );
-      _savedLibraryId = ref.savedId;
       if (!mounted) return;
       final l10n = AppLocalizations.of(context)!;
       ScaffoldMessenger.of(
@@ -205,179 +203,6 @@ class _DirectToolGeneratorScreenState extends State<DirectToolGeneratorScreen> {
       data.putIfAbsent('title', () => widget.title);
     }
     return data.isEmpty ? null : data;
-  }
-
-  Future<List<CommunityChannel>?> _selectShareChannels() async {
-    try {
-      final l10n = AppLocalizations.of(context)!;
-      final channels = await _savedLibrary.getShareChannels();
-      if (!mounted) return null;
-      if (channels.isEmpty) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(l10n.noCommunityChannelsFound)),
-        );
-        return null;
-      }
-
-      final selected = <String>{};
-      final picked = await showDialog<List<CommunityChannel>>(
-        context: context,
-        builder: (dialogContext) {
-          return StatefulBuilder(
-            builder: (context, setDialogState) {
-              return Dialog(
-                backgroundColor: Colors.transparent,
-                insetPadding: EdgeInsets.symmetric(
-                  horizontal: AppSizes.paddingLarge,
-                ),
-                child: Container(
-                  padding: EdgeInsets.all(AppSizes.paddingMedium),
-                  decoration: BoxDecoration(
-                    color: AppColors.white,
-                    borderRadius: BorderRadius.circular(AppSizes.radiusLarge),
-                    border: Border.all(color: AppColors.stroke),
-                  ),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        l10n.shareToCommunityChannels,
-                        style: TextStyle(
-                          fontFamily: 'Pridi',
-                          fontSize: AppSizes.fontSizeLarge,
-                          fontWeight: FontWeight.w600,
-                          color: AppColors.mainDark,
-                        ),
-                      ),
-                      SizedBox(height: 8.h),
-                      ConstrainedBox(
-                        constraints: BoxConstraints(maxHeight: 260.h),
-                        child: ListView(
-                          shrinkWrap: true,
-                          children: channels.map((channel) {
-                            final checked = selected.contains(channel.id);
-                            return InkWell(
-                              borderRadius: BorderRadius.circular(
-                                AppSizes.radiusSmall,
-                              ),
-                              onTap: () {
-                                setDialogState(() {
-                                  if (checked) {
-                                    selected.remove(channel.id);
-                                  } else {
-                                    selected.add(channel.id);
-                                  }
-                                });
-                              },
-                              child: Padding(
-                                padding: EdgeInsets.symmetric(vertical: 6.h),
-                                child: Row(
-                                  children: [
-                                    Icon(
-                                      checked
-                                          ? Icons.check_circle
-                                          : Icons.radio_button_unchecked,
-                                      color: checked
-                                          ? AppColors.mainGold
-                                          : AppColors.stroke,
-                                      size: 20.sp,
-                                    ),
-                                    SizedBox(width: 10.w),
-                                    Expanded(
-                                      child: Text(
-                                        channel.name,
-                                        style: TextStyle(
-                                          fontFamily: 'Pridi',
-                                          fontSize: AppSizes.fontSizeMedium,
-                                          color: AppColors.mainDark,
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            );
-                          }).toList(),
-                        ),
-                      ),
-                      SizedBox(height: 16.h),
-                      Row(
-                        children: [
-                          Expanded(
-                            child: OutlinedButton(
-                              onPressed: () => Navigator.pop(dialogContext),
-                              style: OutlinedButton.styleFrom(
-                                side: const BorderSide(color: AppColors.stroke),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(
-                                    AppSizes.radiusSmall,
-                                  ),
-                                ),
-                              ),
-                              child: Text(
-                                l10n.cancel,
-                                style: TextStyle(
-                                  fontFamily: 'Pridi',
-                                  color: AppColors.mainDark,
-                                ),
-                              ),
-                            ),
-                          ),
-                          SizedBox(width: 8.w),
-                          Expanded(
-                            child: ElevatedButton(
-                              onPressed: selected.isEmpty
-                                  ? null
-                                  : () {
-                                      Navigator.pop(
-                                        dialogContext,
-                                        channels
-                                            .where(
-                                              (channel) =>
-                                                  selected.contains(channel.id),
-                                            )
-                                            .toList(),
-                                      );
-                                    },
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: AppColors.mainGold,
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(
-                                    AppSizes.radiusSmall,
-                                  ),
-                                ),
-                              ),
-                              child: Text(
-                                l10n.share,
-                                style: TextStyle(
-                                  fontFamily: 'Pridi',
-                                  color: AppColors.white,
-                                ),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-              );
-            },
-          );
-        },
-      );
-      return picked;
-    } catch (e) {
-      if (!mounted) return null;
-      final l10n = AppLocalizations.of(context)!;
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(
-        SnackBar(content: Text(l10n.failedToLoadChannels(e.toString()))),
-      );
-      return null;
-    }
   }
 
   @override
@@ -427,22 +252,28 @@ class _DirectToolGeneratorScreenState extends State<DirectToolGeneratorScreen> {
                     ),
                   SizedBox(height: 12.h),
                   SizedBox(
-                    height: AppSizes.buttonHeightSmall,
+                    width: double.infinity,
+                    height: AppSizes.buttonHeight,
                     child: ElevatedButton.icon(
                       onPressed: _isLoading ? null : _pickAndGenerate,
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppColors.mainGold,
+                        foregroundColor: AppColors.white,
+                        elevation: 0,
+                        shape: RoundedRectangleBorder(
+                          borderRadius:
+                              BorderRadius.circular(AppSizes.radiusSmall),
+                        ),
                       ),
-                      icon: const Icon(
-                        Icons.upload_file,
-                        color: AppColors.white,
-                      ),
+                      icon: const Icon(Icons.upload_file),
                       label: Text(
                         _isLoading
                             ? AppLocalizations.of(context)!.generating
                             : AppLocalizations.of(context)!.uploadMaterial,
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontFamily: 'Pridi',
+                          fontSize: AppSizes.fontSizeMedium,
+                          fontWeight: FontWeight.w600,
                           color: AppColors.white,
                         ),
                       ),

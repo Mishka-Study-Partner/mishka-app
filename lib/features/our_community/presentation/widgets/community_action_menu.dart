@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import 'package:mishka_app/core/utils/app_colors.dart';
@@ -9,10 +8,12 @@ import 'package:mishka_app/l10n/app_localizations.dart';
 import '../../community_styles.dart';
 import '../../data/community_current_user.dart';
 import '../../data/community_error_helpers.dart';
+import '../../data/community_invite_helpers.dart';
 import '../../data/community_models.dart';
 import '../../data/community_repository.dart';
 import '../screens/edit_community_screen.dart';
 import 'community_dialogs.dart';
+import 'community_share_copy_field.dart';
 
 class CommunityActionMenu extends StatefulWidget {
   const CommunityActionMenu({
@@ -62,7 +63,10 @@ class _CommunityActionMenuState extends State<CommunityActionMenu> {
   }
 
   Future<CommunityInviteInfo> _loadInvite() async {
-    _invite ??= await widget.repository.getInvite(widget.community.id);
+    _invite ??= await widget.repository.getInvite(
+      widget.community.id,
+      community: widget.community,
+    );
     return _invite!;
   }
 
@@ -89,7 +93,7 @@ class _CommunityActionMenuState extends State<CommunityActionMenu> {
               _MenuRow(
                 decoration: boxDecoration,
                 icon: Icons.edit_calendar_outlined,
-                label: 'Edit Community',
+                label: l10n.communityEditCommunity,
                 onTap: () {
                   Navigator.pop(context);
                   Navigator.push(
@@ -119,7 +123,7 @@ class _CommunityActionMenuState extends State<CommunityActionMenu> {
                           Icon(Icons.share_outlined, color: AppColors.mainGold, size: 28.w),
                           SizedBox(width: 16.w),
                           Text(
-                            'Share Community',
+                            l10n.communityShareMenuTitle,
                             style: CommunityStyles.menuTitle,
                           ),
                           const Spacer(),
@@ -138,30 +142,45 @@ class _CommunityActionMenuState extends State<CommunityActionMenu> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           _ShareOption(
-                            title: 'Send Link',
+                            title: l10n.communityShareSendLink,
                             onTap: () => _openShareDialog(
                               context,
-                              SendLinkDialog(loader: _loadInvite),
+                              SendLinkDialog(
+                                community: widget.community,
+                                loader: _loadInvite,
+                              ),
                             ),
                           ),
                           _ShareOption(
-                            title: 'Create code',
+                            title: l10n.communityShareCreateCode,
                             onTap: () => _openShareDialog(
                               context,
                               GetCodeDialog(
-                                communityId: widget.community.id,
+                                community: widget.community,
                                 loader: _loadInvite,
                                 repository: widget.repository,
                               ),
                             ),
                           ),
                           _ShareOption(
-                            title: 'Insert Email',
-                            onTap: () => _openShareDialog(context, const InsertEmailDialog()),
+                            title: l10n.communityShareInsertEmail,
+                            onTap: () => _openShareDialog(
+                              context,
+                              InsertEmailDialog(
+                                communityId: widget.community.id,
+                                repository: widget.repository,
+                              ),
+                            ),
                           ),
                           _ShareOption(
-                            title: 'Insert User Name',
-                            onTap: () => _openShareDialog(context, const InsertUsernameDialog()),
+                            title: l10n.communityShareInsertUsername,
+                            onTap: () => _openShareDialog(
+                              context,
+                              InsertUsernameDialog(
+                                communityId: widget.community.id,
+                                repository: widget.repository,
+                              ),
+                            ),
                           ),
                         ],
                       ),
@@ -197,13 +216,9 @@ class _CommunityActionMenuState extends State<CommunityActionMenu> {
                   widget.onChanged?.call();
                 } catch (e) {
                   if (!context.mounted) return;
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text(
-                        communityErrorMessage(e),
-                        style: CommunityStyles.snackBar,
-                      ),
-                    ),
+                  CommunityStyles.showSnackBar(
+                    context,
+                    communityErrorMessage(e, l10n: l10n),
                   );
                 }
               },
@@ -213,12 +228,12 @@ class _CommunityActionMenuState extends State<CommunityActionMenu> {
               _MenuRow(
                 decoration: boxDecoration,
                 icon: Icons.delete_outline_rounded,
-                label: 'Delete Community',
+                label: l10n.communityDeleteCommunity,
                 onTap: () async {
                   Navigator.pop(context);
                   final confirmed = await showCommunityConfirmDialog(
                     context,
-                    message: 'Are you sure you want to delete the community?',
+                    message: l10n.communityDeleteConfirm,
                   );
                   if (confirmed != true || !context.mounted) return;
                   try {
@@ -226,7 +241,7 @@ class _CommunityActionMenuState extends State<CommunityActionMenu> {
                     if (!context.mounted) return;
                     await showCommunitySuccessDialog(
                       context,
-                      message: 'Community deleted successfully!',
+                      message: l10n.communityDeletedSuccess,
                       onDismiss: () {
                         Navigator.pop(context);
                         Navigator.pop(context);
@@ -234,9 +249,7 @@ class _CommunityActionMenuState extends State<CommunityActionMenu> {
                     );
                   } catch (e) {
                     if (!context.mounted) return;
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('$e', style: CommunityStyles.snackBar)),
-                    );
+                    CommunityStyles.showSnackBar(context, '$e');
                   }
                 },
               ),
@@ -328,8 +341,13 @@ class _BaseShareDialog extends StatelessWidget {
 }
 
 class SendLinkDialog extends StatelessWidget {
-  const SendLinkDialog({super.key, required this.loader});
+  const SendLinkDialog({
+    super.key,
+    required this.community,
+    required this.loader,
+  });
 
+  final CommunityModel community;
   final Future<CommunityInviteInfo> Function() loader;
 
   @override
@@ -338,53 +356,34 @@ class SendLinkDialog extends StatelessWidget {
       child: FutureBuilder<CommunityInviteInfo>(
         future: loader(),
         builder: (context, snapshot) {
-          final invite = snapshot.data;
-          final linkUrl = invite?.shareUrl ?? 'https://www.mishkacommunity.com';
+          final l10n = AppLocalizations.of(context)!;
           return Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'Share Community:',
+                l10n.communityShareDialogTitle,
                 style: CommunityStyles.dialogTitle,
               ),
+              if (community.isPublic) ...[
+                SizedBox(height: 6.h),
+                Text(
+                  l10n.communitySharePublicLinkHint,
+                  style: CommunityStyles.caption,
+                ),
+              ],
               SizedBox(height: 12.h),
               if (snapshot.connectionState == ConnectionState.waiting)
                 const Center(child: CircularProgressIndicator())
+              else if (snapshot.hasError)
+                Text(
+                  communityErrorMessage(snapshot.error!, l10n: l10n),
+                  style: CommunityStyles.error,
+                )
               else
-                GestureDetector(
-                  onTap: () {
-                    Clipboard.setData(ClipboardData(text: linkUrl));
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text(
-                          'Link copied to clipboard!',
-                          style: CommunityStyles.snackBar,
-                        ),
-                      ),
-                    );
-                  },
-                  child: Container(
-                    padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 10.h),
-                    decoration: BoxDecoration(
-                      color: AppColors.white,
-                      borderRadius: BorderRadius.circular(6.r),
-                      border: Border.all(color: AppColors.mainGold),
-                    ),
-                    child: Row(
-                      children: [
-                        Icon(Icons.link, color: AppColors.green, size: 18.w),
-                        SizedBox(width: 8.w),
-                        Expanded(
-                          child: Text(
-                            linkUrl,
-                            style: CommunityStyles.link,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
+                CommunityShareCopyField(
+                  value: snapshot.data?.shareUrl ??
+                      'https://www.mishkacommunity.com/communities/${community.id}',
                 ),
             ],
           );
@@ -397,12 +396,12 @@ class SendLinkDialog extends StatelessWidget {
 class GetCodeDialog extends StatefulWidget {
   const GetCodeDialog({
     super.key,
-    required this.communityId,
+    required this.community,
     required this.loader,
     required this.repository,
   });
 
-  final String communityId;
+  final CommunityModel community;
   final Future<CommunityInviteInfo> Function() loader;
   final CommunityRepository repository;
 
@@ -412,6 +411,9 @@ class GetCodeDialog extends StatefulWidget {
 
 class _GetCodeDialogState extends State<GetCodeDialog> {
   CommunityInviteInfo? _invite;
+  String? _error;
+  bool _loading = true;
+  bool _regenerating = false;
 
   @override
   void initState() {
@@ -420,61 +422,107 @@ class _GetCodeDialogState extends State<GetCodeDialog> {
   }
 
   Future<void> _load() async {
-    final invite = await widget.loader();
-    if (!mounted) return;
-    setState(() => _invite = invite);
+    setState(() {
+      _loading = true;
+      _error = null;
+    });
+    try {
+      final invite = await widget.loader();
+      if (!mounted) return;
+      setState(() {
+        _invite = invite;
+        _loading = false;
+      });
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _error = communityErrorMessage(
+          e,
+          l10n: AppLocalizations.of(context)!,
+        );
+        _loading = false;
+      });
+    }
   }
 
   Future<void> _regenerate() async {
-    final invite = await widget.repository.regenerateInvite(widget.communityId);
-    if (!mounted) return;
-    setState(() => _invite = invite);
+    if (widget.community.isPublic) return;
+    setState(() => _regenerating = true);
+    try {
+      final invite = await widget.repository.regenerateInvite(
+        widget.community.id,
+        community: widget.community,
+      );
+      if (!mounted) return;
+      setState(() {
+        _invite = invite;
+        _regenerating = false;
+      });
+    } catch (e) {
+      if (!mounted) return;
+      CommunityStyles.showSnackBar(
+        context,
+        communityErrorMessage(e, l10n: AppLocalizations.of(context)!),
+      );
+      setState(() => _regenerating = false);
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    final code = _invite?.inviteCode ?? '…';
+    final l10n = AppLocalizations.of(context)!;
+    final code = _invite?.inviteCode ?? '';
+    final showRegenerate = !widget.community.isPublic;
+
     return _BaseShareDialog(
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Share Community:',
+            l10n.communityShareDialogTitle,
             style: CommunityStyles.dialogTitle,
           ),
-          SizedBox(height: 12.h),
-          Container(
-            padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
-            decoration: BoxDecoration(
-              color: AppColors.white,
-              borderRadius: BorderRadius.circular(6.r),
-              border: Border.all(color: AppColors.mainGold),
-            ),
-            child: Row(
-              children: [
-                Text(
-                  'Your Code: ',
-                  style: CommunityStyles.bodyBold,
-                ),
-                Text(code, style: CommunityStyles.caption),
-                const Spacer(),
-                IconButton(
-                  padding: EdgeInsets.zero,
-                  constraints: const BoxConstraints(),
-                  icon: Icon(Icons.copy, color: AppColors.green, size: 20.w),
-                  onPressed: () => Clipboard.setData(ClipboardData(text: code)),
-                ),
-                SizedBox(width: 10.w),
-                IconButton(
-                  padding: EdgeInsets.zero,
-                  constraints: const BoxConstraints(),
-                  icon: Icon(Icons.refresh, color: AppColors.green, size: 20.w),
-                  onPressed: _regenerate,
-                ),
-              ],
-            ),
+          SizedBox(height: 6.h),
+          Text(
+            widget.community.isPublic
+                ? l10n.communitySharePublicCodeHint
+                : l10n.communitySharePrivateCodeHint,
+            style: CommunityStyles.caption,
           ),
+          SizedBox(height: 12.h),
+          if (_loading)
+            const Center(child: CircularProgressIndicator())
+          else if (_error != null)
+            Text(_error!, style: CommunityStyles.error)
+          else ...[
+            Text(l10n.communityShareYourCode, style: CommunityStyles.bodyBold),
+            SizedBox(height: 8.h),
+            CommunityShareCopyField(
+              value: code.isEmpty ? '…' : code,
+              icon: Icons.tag,
+            ),
+            if (showRegenerate) ...[
+              SizedBox(height: 12.h),
+              Align(
+                alignment: Alignment.centerRight,
+                child: TextButton.icon(
+                  onPressed: _regenerating ? null : _regenerate,
+                  icon: _regenerating
+                      ? SizedBox(
+                          width: 16.w,
+                          height: 16.w,
+                          child: const CircularProgressIndicator(strokeWidth: 2),
+                        )
+                      : Icon(Icons.refresh, color: AppColors.green, size: 20.w),
+                  label: Text(
+                    l10n.communityShareGenerateNewCode,
+                    style: CommunityStyles.outlineAction(AppColors.green),
+                  ),
+                ),
+              ),
+            ],
+          ],
         ],
       ),
     );
@@ -482,7 +530,14 @@ class _GetCodeDialogState extends State<GetCodeDialog> {
 }
 
 class InsertEmailDialog extends StatefulWidget {
-  const InsertEmailDialog({super.key});
+  const InsertEmailDialog({
+    super.key,
+    required this.communityId,
+    required this.repository,
+  });
+
+  final String communityId;
+  final CommunityRepository repository;
 
   @override
   State<InsertEmailDialog> createState() => _InsertEmailDialogState();
@@ -490,6 +545,7 @@ class InsertEmailDialog extends StatefulWidget {
 
 class _InsertEmailDialogState extends State<InsertEmailDialog> {
   final _controller = TextEditingController();
+  bool _sending = false;
 
   @override
   void dispose() {
@@ -497,23 +553,76 @@ class _InsertEmailDialogState extends State<InsertEmailDialog> {
     super.dispose();
   }
 
+  Future<void> _send() async {
+    final l10n = AppLocalizations.of(context)!;
+    final email = _controller.text.trim();
+    if (email.isEmpty) return;
+    if (isSelfInviteTarget(email, readCachedUser())) {
+      CommunityStyles.showSnackBar(context, l10n.communityInviteCannotInviteSelf);
+      return;
+    }
+    setState(() => _sending = true);
+    try {
+      await widget.repository.inviteMemberByEmail(widget.communityId, email);
+      if (!mounted) return;
+      Navigator.pop(context);
+      CommunityStyles.showSnackBar(
+        context,
+        AppLocalizations.of(context)!.communityInviteEmailSent(email),
+      );
+    } catch (e) {
+      if (!mounted) return;
+      CommunityStyles.showSnackBar(
+        context,
+        communityErrorMessage(e, l10n: AppLocalizations.of(context)!),
+      );
+      setState(() => _sending = false);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return _BaseShareDialog(
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Share Community:',
+            l10n.communityShareDialogTitle,
             style: CommunityStyles.dialogTitle,
           ),
+          SizedBox(height: 8.h),
+          Text(
+            l10n.communityInviteRequiresAccount,
+            style: CommunityStyles.caption,
+          ),
           SizedBox(height: 14.h),
-          Text('Insert Email:', style: CommunityStyles.sectionLabel),
+          Text(l10n.communityShareInsertEmail, style: CommunityStyles.sectionLabel),
           SizedBox(height: 6.h),
           TextField(
             controller: _controller,
-            decoration: CommunityStyles.inputDecoration('Email address'),
+            keyboardType: TextInputType.emailAddress,
+            decoration: CommunityStyles.inputDecoration(l10n.communityInviteEmailHint),
+            enabled: !_sending,
+          ),
+          SizedBox(height: 14.h),
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton(
+              style: CommunityStyles.goldButtonStyle(),
+              onPressed: _sending ? null : _send,
+              child: _sending
+                  ? SizedBox(
+                      width: 22.w,
+                      height: 22.w,
+                      child: const CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: AppColors.white,
+                      ),
+                    )
+                  : Text(l10n.communityInviteSend),
+            ),
           ),
         ],
       ),
@@ -522,7 +631,14 @@ class _InsertEmailDialogState extends State<InsertEmailDialog> {
 }
 
 class InsertUsernameDialog extends StatefulWidget {
-  const InsertUsernameDialog({super.key});
+  const InsertUsernameDialog({
+    super.key,
+    required this.communityId,
+    required this.repository,
+  });
+
+  final String communityId;
+  final CommunityRepository repository;
 
   @override
   State<InsertUsernameDialog> createState() => _InsertUsernameDialogState();
@@ -530,6 +646,7 @@ class InsertUsernameDialog extends StatefulWidget {
 
 class _InsertUsernameDialogState extends State<InsertUsernameDialog> {
   final _controller = TextEditingController();
+  bool _sending = false;
 
   @override
   void dispose() {
@@ -537,23 +654,86 @@ class _InsertUsernameDialogState extends State<InsertUsernameDialog> {
     super.dispose();
   }
 
+  Future<void> _send() async {
+    final l10n = AppLocalizations.of(context)!;
+    final username = normalizeInviteUsername(_controller.text);
+    if (username.isEmpty) return;
+    if (isSelfInviteTarget(username, readCachedUser())) {
+      CommunityStyles.showSnackBar(context, l10n.communityInviteCannotInviteSelf);
+      return;
+    }
+    setState(() => _sending = true);
+    try {
+      await widget.repository.inviteMemberByUsername(
+        widget.communityId,
+        username,
+      );
+      if (!mounted) return;
+      Navigator.pop(context);
+      CommunityStyles.showSnackBar(
+        context,
+        AppLocalizations.of(context)!.communityInviteUsernameSent(username),
+      );
+    } catch (e) {
+      if (!mounted) return;
+      CommunityStyles.showSnackBar(
+        context,
+        communityErrorMessage(e, l10n: AppLocalizations.of(context)!),
+      );
+      setState(() => _sending = false);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return _BaseShareDialog(
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Share Community:',
+            l10n.communityShareDialogTitle,
             style: CommunityStyles.dialogTitle,
           ),
+          SizedBox(height: 8.h),
+          Text(
+            l10n.communityInviteRequiresAccount,
+            style: CommunityStyles.caption,
+          ),
           SizedBox(height: 14.h),
-          Text('Insert User Name:', style: CommunityStyles.sectionLabel),
+          Text(
+            l10n.communityShareInsertUsername,
+            style: CommunityStyles.sectionLabel,
+          ),
           SizedBox(height: 6.h),
           TextField(
             controller: _controller,
-            decoration: CommunityStyles.inputDecoration('Username'),
+            decoration: CommunityStyles.inputDecoration(
+              l10n.communityInviteUsernameHint,
+            ),
+            enabled: !_sending,
+            autocorrect: false,
+            textInputAction: TextInputAction.done,
+            onSubmitted: (_) => _sending ? null : _send(),
+          ),
+          SizedBox(height: 14.h),
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton(
+              style: CommunityStyles.goldButtonStyle(),
+              onPressed: _sending ? null : _send,
+              child: _sending
+                  ? SizedBox(
+                      width: 22.w,
+                      height: 22.w,
+                      child: const CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: AppColors.white,
+                      ),
+                    )
+                  : Text(l10n.communityInviteSend),
+            ),
           ),
         ],
       ),

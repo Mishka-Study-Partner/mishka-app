@@ -1,6 +1,6 @@
 {
-    "name": "mishka_app",
-    "short_name": "mishka_app",
+    "name": "Mishka",
+    "short_name": "Mishka",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",

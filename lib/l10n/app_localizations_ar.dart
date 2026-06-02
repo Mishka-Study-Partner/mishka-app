@@ -1596,7 +1596,7 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get communityHubSavedEmpty =>
-      'No saved communities yet. Open a community and tap ⋮ → Save Community.';
+      'لا توجد مجتمعات محفوظة بعد. افتح مجتمعاً واضغط ⋮ → حفظ المجتمع.';
 
   @override
   String get communityHubPrivateSection => 'مجتمعات خاصة أنت فيها:';
@@ -1675,4 +1675,319 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get communityChatSenderMe => 'أنا';
+
+  @override
+  String get communityShareMenuTitle => 'مشاركة المجتمع';
+
+  @override
+  String get communityShareSendLink => 'إرسال الرابط';
+
+  @override
+  String get communityShareCreateCode => 'إنشاء رمز';
+
+  @override
+  String get communityShareInsertEmail => 'إدخال البريد';
+
+  @override
+  String get communityShareInsertUsername => 'إدخال اسم المستخدم';
+
+  @override
+  String get communityShareDialogTitle => 'مشاركة المجتمع:';
+
+  @override
+  String get communitySharePublicLinkHint =>
+      'يمكن لأي شخص لديه هذا الرابط العثور على مجتمعك العام والانضمام إليه.';
+
+  @override
+  String get communitySharePrivateCodeHint =>
+      'شارك رمز الدعوة هذا لينضم الآخرون إلى مجتمعك الخاص.';
+
+  @override
+  String get communitySharePublicCodeHint =>
+      'المجتمعات العامة تُشارك بالرابط. هذا المعرّف يساعد الآخرين على الانضمام في التطبيق.';
+
+  @override
+  String get communityShareYourCode => 'رمزك';
+
+  @override
+  String get communityShareGenerateNewCode => 'إنشاء رمز جديد';
+
+  @override
+  String get communityEditCommunity => 'تعديل المجتمع';
+
+  @override
+  String get communityDeleteCommunity => 'حذف المجتمع';
+
+  @override
+  String get communityHubRecommendedEmpty =>
+      'لقد اطلعت على كل التوصيات — استكشف «اكتشف» لمزيد من المجتمعات.';
+
+  @override
+  String get communityInviteRequiresAccount =>
+      'يجب أن يكون لدى الشخص حساب في ميشكا (مسجّل في التطبيق).';
+
+  @override
+  String get communityInviteUserNotFound =>
+      'لا يوجد حساب ميشكا بهذا البريد أو اسم المستخدم.';
+
+  @override
+  String get communityInviteCannotInviteSelf =>
+      'لا يمكنك دعوة نفسك. استخدم بريدًا أو اسم مستخدم لعضو آخر.';
+
+  @override
+  String get communityInviteUsernameHint => 'اسم مستخدم ميشكا (بدون @)';
+
+  @override
+  String get communityInviteSend => 'إرسال الدعوة';
+
+  @override
+  String communityInviteEmailSent(String email) {
+    return 'تم إرسال الدعوة إلى $email';
+  }
+
+  @override
+  String get communityJoinPrivateTitle => 'انضم إلى مجتمع خاص';
+
+  @override
+  String get communityJoinPrivateCodePrompt => 'أدخل رمز دعوة المجتمع:';
+
+  @override
+  String get communityJoinPrivateCodeHint => 'رمز المجتمع';
+
+  @override
+  String get communityJoinPrivateButton => 'انضم إلى المجتمع';
+
+  @override
+  String get communityJoinPrivateSuccess => 'لقد انضممت إلى المجتمع!';
+
+  @override
+  String get communityDeleteConfirm => 'هل أنت متأكد أنك تريد حذف هذا المجتمع؟';
+
+  @override
+  String get communityDeletedSuccess => 'تم حذف المجتمع بنجاح!';
+
+  @override
+  String get communityConfirmJoinGroup =>
+      'هل أنت متأكد أنك تريد الانضمام إلى هذه المجموعة؟';
+
+  @override
+  String get communityJoinedGroupSuccess => 'لقد انضممت إلى المجموعة.';
+
+  @override
+  String get communityConfirmDeleteGroup =>
+      'هل أنت متأكد أنك تريد حذف هذه المجموعة؟';
+
+  @override
+  String get communityExitConfirm =>
+      'هل أنت متأكد أنك تريد مغادرة هذا المجتمع؟';
+
+  @override
+  String get communityExitAndDeleteConfirm =>
+      'مغادرة المجتمع وإزالته من قائمتك؟';
+
+  @override
+  String get communityRemoveMemberConfirm => 'إزالة هذا العضو من المجتمع؟';
+
+  @override
+  String get communityMemberRemovedSuccess => 'تمت إزالة العضو من المجتمع.';
+
+  @override
+  String get communityRemoveFromGroupConfirm => 'إزالة هذا العضو من المجموعة؟';
+
+  @override
+  String get communityMemberRemovedFromGroupSuccess =>
+      'تمت إزالة العضو من المجموعة.';
+
+  @override
+  String communityInviteUsernameSent(String username) {
+    return 'تم إرسال الدعوة إلى @$username';
+  }
+
+  @override
+  String get communityHubJoinFailedOpenAnyway =>
+      'تعذّر الانضمام. سيتم فتح المجتمع على أي حال…';
+
+  @override
+  String get communityHubNoneYet => 'لا يوجد بعد.';
+
+  @override
+  String get communityHomeTypeLabel => 'مجتمع';
+
+  @override
+  String get communityHomeAnnouncements => 'الإعلانات';
+
+  @override
+  String get communityHomeWelcomeDefault => 'مرحبًا بك في مجتمعك';
+
+  @override
+  String get communityHomeNoGroups =>
+      'لا توجد مجموعات بعد. أضف مجموعتك الأولى.';
+
+  @override
+  String get communityHomeAddGroup => 'إضافة مجموعة';
+
+  @override
+  String communityDetailStats(int groupCount, int memberCount) {
+    return 'المجتمع: $groupCount مجموعات • $memberCount أعضاء';
+  }
+
+  @override
+  String get communityDetailViewGroups => 'عرض المجموعات';
+
+  @override
+  String get communityDetailViewMembers => 'عرض الأعضاء:';
+
+  @override
+  String get communityDetailManageMembers => 'إدارة الأعضاء';
+
+  @override
+  String get communityDetailExitCommunity => 'مغادرة المجتمع';
+
+  @override
+  String get communityDetailExitAndDelete => 'المغادرة والإزالة من قائمتك';
+
+  @override
+  String communityGroupsTitle(String communityName) {
+    return 'مجموعات $communityName';
+  }
+
+  @override
+  String communityMembersTitle(String communityName) {
+    return 'أعضاء $communityName';
+  }
+
+  @override
+  String get communityGroupJoin => 'انضم إلى المجموعة';
+
+  @override
+  String get communityGroupDelete => 'حذف المجموعة';
+
+  @override
+  String get communityGroupAddNew => '+ إضافة مجموعة جديدة';
+
+  @override
+  String get communityAddGroupTitle => 'إضافة مجموعة';
+
+  @override
+  String get communityAddGroupSuccess => 'تمت إضافة مجموعتك إلى المجتمع!';
+
+  @override
+  String get communityAddGroupHeader => 'إضافة مجموعة جديدة إلى مجتمعك';
+
+  @override
+  String get communityAddGroupProfileLabel => 'أضف ملف مجموعتك:';
+
+  @override
+  String get communityAddGroupNameLabel => 'اسم المجموعة:';
+
+  @override
+  String get communityAddGroupNameHint => 'اسم المجموعة';
+
+  @override
+  String get communityAddGroupDescLabel => 'وصف المجموعة';
+
+  @override
+  String get communityAddGroupDescHint => 'وصف المجموعة';
+
+  @override
+  String get communityAddButton => 'إضافة';
+
+  @override
+  String get communityLabelOptional => '(اختياري):';
+
+  @override
+  String get communityEditProfileHeader => 'تعديل ملف مجتمعك:';
+
+  @override
+  String get communityEditNameLabel => 'اسم المجتمع:';
+
+  @override
+  String get communityEditDescHint => 'وصف المجتمع';
+
+  @override
+  String get communityEditGroupsLabel => 'مجموعات المجتمع:';
+
+  @override
+  String get communityEditSaving => 'جارٍ الحفظ…';
+
+  @override
+  String get communityChatEmpty => 'لا توجد رسائل بعد. قل مرحبًا!';
+
+  @override
+  String get communityChatTypeHint => 'اكتب رسالة…';
+
+  @override
+  String get communityChatMemberFallback => 'عضو';
+
+  @override
+  String get communityChatSharedFromMishka => 'مشارَك من Mishka';
+
+  @override
+  String get communityMemberAddToGroup => 'إضافة إلى مجموعة';
+
+  @override
+  String get communityMemberRemoveFromCommunity => 'إزالة من المجتمع';
+
+  @override
+  String communitySelectGroupPrompt(String memberName) {
+    return 'اختر مجموعة لـ $memberName';
+  }
+
+  @override
+  String get communityMemberAddedToGroupSuccess =>
+      'تمت إضافة العضو إلى المجموعة.';
+
+  @override
+  String get communityShareChooseMaterial =>
+      'اختر مادة ذكاء اصطناعي محفوظة لمشاركتها مع هذه المجموعة.';
+
+  @override
+  String get communityShareNoSavedInCategory =>
+      'لا توجد عناصر محفوظة في هذه الفئة بعد.';
+
+  @override
+  String get communityDiscoverySubjectsOptional => 'المواد (اختياري)';
+
+  @override
+  String get communityDiscoveryPurposeOptional => 'الغرض (اختياري)';
+
+  @override
+  String get communityInviteEmailHint => 'عنوان البريد الإلكتروني';
+
+  @override
+  String get communityErrorServerUnreachable =>
+      'تعذّر الاتصال بالخادم. تحقق من أن الخادم يعمل.';
+
+  @override
+  String get communityRoleOwner => 'المالك';
+
+  @override
+  String get communityRoleAdmin => 'مسؤول';
+
+  @override
+  String get communityRoleMember => 'عضو';
+
+  @override
+  String get communityFallbackName => 'مجتمع';
+
+  @override
+  String get communityFallbackGroupName => 'مجموعة';
+
+  @override
+  String get communityFallbackMemberName => 'عضو';
+
+  @override
+  String get communityBrandMishka => 'Mishka';
+
+  @override
+  String get reportCommunitySection => 'مجتمعنا';
+
+  @override
+  String get reportCommunityMessages => 'الرسائل المنشورة';
+
+  @override
+  String get reportCommunityMaterialShares => 'المواد المشاركة';
+
+  @override
+  String get reportCommunityChannelJoins => 'انضمامات القنوات';
 }

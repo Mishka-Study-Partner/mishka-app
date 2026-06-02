@@ -6,8 +6,11 @@ class StudyTimerModel {
   final int shortBreakMinutes;
   final int longBreakMinutes;
 
-  /// Backend concentration mode ID (e.g. "classic_pomodoro").
+  /// Backend concentration preset (e.g. `classic_pomodoro`, `custom`).
   final String? modeId;
+
+  /// Saved custom timer id when using `concentrationPreset: custom`.
+  final String? customPresetId;
 
   const StudyTimerModel(
     this.title,
@@ -15,6 +18,7 @@ class StudyTimerModel {
     this.shortBreakMinutes,
     this.longBreakMinutes, {
     this.modeId,
+    this.customPresetId,
   });
 
   Duration get studyDuration => Duration(minutes: studyMinutes);

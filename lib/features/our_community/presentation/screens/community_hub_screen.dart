@@ -76,13 +76,9 @@ class _CommunityHubScreenState extends State<CommunityHubScreen> {
         return;
       }
       if (_hub.saved.isEmpty) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              AppLocalizations.of(context)!.communityHubSavedEmptySnack,
-              style: CommunityStyles.snackBar,
-            ),
-          ),
+        CommunityStyles.showSnackBar(
+          context,
+          AppLocalizations.of(context)!.communityHubSavedEmptySnack,
         );
       }
     });
@@ -119,7 +115,10 @@ class _CommunityHubScreenState extends State<CommunityHubScreen> {
     } catch (e) {
       if (!mounted) return;
       setState(() {
-        _error = communityErrorMessage(e);
+        _error = communityErrorMessage(
+          e,
+          l10n: AppLocalizations.of(context)!,
+        );
         _loading = false;
       });
     }
@@ -133,13 +132,9 @@ class _CommunityHubScreenState extends State<CommunityHubScreen> {
       _pushHome(joined.copyWith(isMember: true));
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            communityErrorMessage(e),
-            style: CommunityStyles.snackBar,
-          ),
-        ),
+      CommunityStyles.showSnackBar(
+        context,
+        communityErrorMessage(e, l10n: AppLocalizations.of(context)!),
       );
     }
   }
@@ -153,13 +148,9 @@ class _CommunityHubScreenState extends State<CommunityHubScreen> {
         return;
       } catch (_) {
         if (!mounted) return;
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              'Could not join community. Opening anyway…',
-              style: CommunityStyles.snackBar,
-            ),
-          ),
+        CommunityStyles.showSnackBar(
+          context,
+          AppLocalizations.of(context)!.communityHubJoinFailedOpenAnyway,
         );
       }
     }
@@ -232,7 +223,10 @@ class _CommunityHubScreenState extends State<CommunityHubScreen> {
                         style: CommunityStyles.error,
                       ),
                       SizedBox(height: 8.h),
-                      TextButton(onPressed: _loadHub, child: const Text('Retry')),
+                      TextButton(
+                        onPressed: _loadHub,
+                        child: Text(l10n.retry),
+                      ),
                       SizedBox(height: 8.h),
                     ],
                     TextField(
@@ -285,6 +279,21 @@ class _CommunityHubScreenState extends State<CommunityHubScreen> {
                       communities: public,
                       onTap: _openCommunity,
                     ),
+                    if (_recommended.isEmpty &&
+                        !_loading &&
+                        _error == null &&
+                        (public.isNotEmpty || private.isNotEmpty)) ...[
+                      SizedBox(height: 16.h),
+                      Text(
+                        l10n.communityHubRecommendedSection,
+                        style: CommunityStyles.sectionLabel,
+                      ),
+                      SizedBox(height: 6.h),
+                      Text(
+                        l10n.communityHubRecommendedEmpty,
+                        style: CommunityStyles.caption,
+                      ),
+                    ],
                     if (_recommended.isNotEmpty) ...[
                       SizedBox(height: 16.h),
                       Row(
@@ -421,7 +430,7 @@ class _Section extends StatelessWidget {
         SizedBox(height: 8.h),
         if (communities.isEmpty)
           Text(
-            emptyMessage ?? 'None yet.',
+            emptyMessage ?? AppLocalizations.of(context)!.communityHubNoneYet,
             style: CommunityStyles.caption,
           )
         else

@@ -3,6 +3,7 @@ import 'package:mishka_app/core/network/api_service.dart';
 
 import 'community_discover_models.dart';
 import 'community_json_helpers.dart';
+import 'community_invite_helpers.dart';
 import 'community_models.dart';
 
 class CommunityRemoteDataSource {
@@ -136,7 +137,7 @@ class CommunityRemoteDataSource {
     }
     return CommunityModel(
       id: targetCommunityId,
-      name: 'Community',
+      name: '',
       subtitle: '',
       isMember: true,
     );
@@ -159,7 +160,7 @@ class CommunityRemoteDataSource {
     );
     final row = env.data;
     if (row != null) return CommunityModel.fromJson(row);
-    return CommunityModel(id: id, name: name ?? 'Community', subtitle: '');
+    return CommunityModel(id: id, name: name ?? '', subtitle: '');
   }
 
   Future<void> deleteCommunity(String id) async {
@@ -179,6 +180,31 @@ class CommunityRemoteDataSource {
 
   Future<void> unpinCommunity(String id) async {
     await _api.delete<void>(ApiEndpoints.communityPin(id));
+  }
+
+  /// Direct invite — `POST /communities/:id/invite` with email or username body.
+  Future<void> inviteMember(
+    String communityId, {
+    String? email,
+    String? username,
+  }) async {
+    final body = <String, dynamic>{};
+    final trimmedEmail = email?.trim();
+    final trimmedUsername = username != null && username.isNotEmpty
+        ? normalizeInviteUsername(username)
+        : null;
+    if (trimmedEmail != null && trimmedEmail.isNotEmpty) {
+      body['email'] = trimmedEmail;
+    } else if (trimmedUsername != null && trimmedUsername.isNotEmpty) {
+      body['username'] = trimmedUsername;
+    }
+    if (body.isEmpty) {
+      throw ArgumentError('email or username is required');
+    }
+    await _api.post<void>(
+      ApiEndpoints.communityInvite(communityId),
+      data: body,
+    );
   }
 
   Future<CommunityInviteInfo> fetchInvite(String id) async {

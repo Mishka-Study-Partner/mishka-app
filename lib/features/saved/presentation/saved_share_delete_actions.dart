@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 
 import 'package:mishka_app/core/network/api_exception.dart';
+import 'package:mishka_app/features/community/presentation/share_community_flow.dart';
 import 'package:mishka_app/features/saved/data/repositories/saved_repository.dart';
 import 'package:mishka_app/features/saved/data/saved_detail_cache.dart';
 import 'package:mishka_app/features/saved/domain/saved_content_kind.dart';
 import 'package:mishka_app/features/saved/presentation/widgets/saved_remove_confirm_dialog.dart';
-import 'package:mishka_app/features/saved/presentation/widgets/saved_share_channels_dialog.dart';
 import 'package:mishka_app/l10n/app_localizations.dart';
 
 Future<void> shareSavedLibraryItem({
@@ -13,6 +13,7 @@ Future<void> shareSavedLibraryItem({
   required SavedRepository repository,
   required SavedContentKind kind,
   required String savedListItemId,
+  VoidCallback? onOpenGroup,
 }) async {
   final l10n = AppLocalizations.of(context)!;
   if (savedListItemId.isEmpty) {
@@ -26,27 +27,19 @@ Future<void> shareSavedLibraryItem({
   }
 
   try {
-    final channels = await repository.getShareChannels();
-    if (!context.mounted) return;
-    if (channels.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(l10n.noCommunityChannelsFound)),
-      );
-      return;
-    }
-    final picked = await showSavedShareChannelsDialog(
-      context: context,
-      channels: channels,
-    );
-    if (picked == null || picked.isEmpty) return;
+    final selection = await pickCommunityGroupsForShare(context);
+    if (selection == null || selection.groups.isEmpty) return;
+
     await repository.shareSavedLibraryRow(
       kind: kind,
       savedListRowId: savedListItemId,
-      channelIds: picked.map((e) => e.id).toList(),
+      channelIds: selection.channelIds,
     );
     if (!context.mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(l10n.savedLibraryShared)),
+    await showShareCompletedFeedback(
+      context: context,
+      selection: selection,
+      onOpenGroup: onOpenGroup,
     );
   } catch (e) {
     if (!context.mounted) return;

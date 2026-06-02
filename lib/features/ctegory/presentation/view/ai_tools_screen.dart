@@ -2,11 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:mishka_app/core/utils/app_colors.dart';
 import 'package:mishka_app/core/utils/app_sizes.dart';
+import 'package:mishka_app/features/ctegory/utils/ai_tool_ui_helper.dart';
+import 'package:mishka_app/features/chat_with_mishka/presentation/screens/direct_tool_generator_screen.dart';
 import 'package:mishka_app/features/ctegory/data/models/ai_tool_api_model.dart';
 import 'package:mishka_app/features/ctegory/data/repositories/category_repository.dart';
-import 'package:mishka_app/features/chat_with_mishka/presentation/screens/direct_tool_generator_screen.dart';
 import 'package:mishka_app/l10n/app_localizations.dart';
-import 'package:mishka_app/generated/assets.dart';
 
 import '../../../../core/widgets/custom_app_bar.dart';
 import '../widgets/ai_tools_cards.dart';
@@ -54,15 +54,7 @@ class _AiToolsScreenState extends State<AiToolsScreen> {
     }
   }
 
-  String _imageForTool(String text) {
-    final t = text.toLowerCase();
-    if (t.contains('flash')) return Assets.imagesHomeFlashcardsCard;
-    if (t.contains('quiz')) return Assets.imagesHomeSumaryQuizzesCard;
-    if (t.contains('summary') || t.contains('summar')) {
-      return Assets.imagesHomeSumaryQuizzesCard;
-    }
-    return Assets.imagesHomeChatCard;
-  }
+  String _imageForTool(String text) => AiToolUiHelper.imageForTitle(text);
 
   void _openDirectTool(DirectToolKind kind, String title) {
     Navigator.push(
@@ -104,45 +96,24 @@ class _AiToolsScreenState extends State<AiToolsScreen> {
             if (_isLoading)
               const Center(child: CircularProgressIndicator())
             else if (_aiTools.isEmpty) ...[
-              FeatureAiSectionCard(
-                imagePath: Assets.imagesHomeFlashcardsCard,
-                title: l10n.flashCards,
-                subtitle: '',
-                onTap: () => _openDirectTool(DirectToolKind.flashcards, l10n.flashCards),
-              ),
-              SizedBox(height: 12.h),
-              FeatureAiSectionCard(
-                imagePath: Assets.imagesHomeSumaryQuizzesCard,
-                title: l10n.quizzes,
-                subtitle: '',
-                onTap: () => _openDirectTool(DirectToolKind.quiz, l10n.quizzes),
-              ),
-              SizedBox(height: 12.h),
-              FeatureAiSectionCard(
-                imagePath: Assets.imagesHomeSumaryQuizzesCard,
-                title: l10n.summarize,
-                subtitle: '',
-                onTap: () => _openDirectTool(DirectToolKind.summarize, l10n.summarize),
-              ),
-              SizedBox(height: 12.h),
-              FeatureAiSectionCard(
-                imagePath: Assets.imagesHomeChatCard,
-                title: l10n.mindMap,
-                subtitle: '',
-                onTap: () => _openDirectTool(DirectToolKind.mindmap, l10n.mindMap),
-              ),
+              for (final entry in [
+                (DirectToolKind.flashcards, l10n.flashCards),
+                (DirectToolKind.quiz, l10n.quizzes),
+                (DirectToolKind.summarize, l10n.summarize),
+                (DirectToolKind.mindmap, l10n.mindMap),
+              ])
+                Padding(
+                  padding: EdgeInsets.only(bottom: 12.h),
+                  child: FeatureAiSectionCard(
+                    imagePath: AiToolUiHelper.imageForTitle(entry.$2),
+                    title: entry.$2,
+                    subtitle: '',
+                    onTap: () => _openDirectTool(entry.$1, entry.$2),
+                  ),
+                ),
             ] else
               ..._aiTools.map((tool) {
-                final lower = tool.title.toLowerCase();
-                final kind = lower.contains('flash')
-                    ? DirectToolKind.flashcards
-                    : lower.contains('quiz')
-                        ? DirectToolKind.quiz
-                        : lower.contains('mind')
-                            ? DirectToolKind.mindmap
-                            : lower.contains('summ')
-                                ? DirectToolKind.summarize
-                                : null;
+                final kind = AiToolUiHelper.directKindForTitle(tool.title);
                 return Padding(
                   padding: EdgeInsets.only(bottom: 12.h),
                   child: FeatureAiSectionCard(

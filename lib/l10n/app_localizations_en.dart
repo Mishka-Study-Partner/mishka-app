@@ -1691,4 +1691,323 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get communityChatSenderMe => 'Me';
+
+  @override
+  String get communityShareMenuTitle => 'Share Community';
+
+  @override
+  String get communityShareSendLink => 'Send Link';
+
+  @override
+  String get communityShareCreateCode => 'Create code';
+
+  @override
+  String get communityShareInsertEmail => 'Insert Email';
+
+  @override
+  String get communityShareInsertUsername => 'Insert User Name';
+
+  @override
+  String get communityShareDialogTitle => 'Share Community:';
+
+  @override
+  String get communitySharePublicLinkHint =>
+      'Anyone with this link can find and join your public community.';
+
+  @override
+  String get communitySharePrivateCodeHint =>
+      'Share this invite code so others can join your private community.';
+
+  @override
+  String get communitySharePublicCodeHint =>
+      'Public communities share by link. This ID helps others join in the app.';
+
+  @override
+  String get communityShareYourCode => 'Your code';
+
+  @override
+  String get communityShareGenerateNewCode => 'Generate new code';
+
+  @override
+  String get communityEditCommunity => 'Edit Community';
+
+  @override
+  String get communityDeleteCommunity => 'Delete Community';
+
+  @override
+  String get communityHubRecommendedEmpty =>
+      'You\'re all caught up — explore Discover for more communities.';
+
+  @override
+  String get communityInviteRequiresAccount =>
+      'The person must already have a Mishka account (signed up in the app).';
+
+  @override
+  String get communityInviteUserNotFound =>
+      'No Mishka account found for that email or username.';
+
+  @override
+  String get communityInviteCannotInviteSelf =>
+      'You cannot invite yourself. Use another member\'s email or username.';
+
+  @override
+  String get communityInviteUsernameHint => 'Mishka username (no @)';
+
+  @override
+  String get communityInviteSend => 'Send invite';
+
+  @override
+  String communityInviteEmailSent(String email) {
+    return 'Invitation sent to $email';
+  }
+
+  @override
+  String get communityJoinPrivateTitle => 'Join Private Community';
+
+  @override
+  String get communityJoinPrivateCodePrompt =>
+      'Enter your community invite code:';
+
+  @override
+  String get communityJoinPrivateCodeHint => 'Community code';
+
+  @override
+  String get communityJoinPrivateButton => 'Join community';
+
+  @override
+  String get communityJoinPrivateSuccess => 'You have joined the community!';
+
+  @override
+  String get communityDeleteConfirm =>
+      'Are you sure you want to delete this community?';
+
+  @override
+  String get communityDeletedSuccess => 'Community deleted successfully!';
+
+  @override
+  String get communityConfirmJoinGroup =>
+      'Are you sure you want to join this group?';
+
+  @override
+  String get communityJoinedGroupSuccess => 'You joined the group.';
+
+  @override
+  String get communityConfirmDeleteGroup =>
+      'Are you sure you want to delete this group?';
+
+  @override
+  String get communityExitConfirm =>
+      'Are you sure you want to leave this community?';
+
+  @override
+  String get communityExitAndDeleteConfirm =>
+      'Leave and remove this community from your list?';
+
+  @override
+  String get communityRemoveMemberConfirm =>
+      'Remove this member from the community?';
+
+  @override
+  String get communityMemberRemovedSuccess =>
+      'Member removed from the community.';
+
+  @override
+  String get communityRemoveFromGroupConfirm =>
+      'Remove this member from the group?';
+
+  @override
+  String get communityMemberRemovedFromGroupSuccess =>
+      'Member removed from the group.';
+
+  @override
+  String communityInviteUsernameSent(String username) {
+    return 'Invitation sent to @$username';
+  }
+
+  @override
+  String get communityHubJoinFailedOpenAnyway =>
+      'Could not join community. Opening anyway…';
+
+  @override
+  String get communityHubNoneYet => 'None yet.';
+
+  @override
+  String get communityHomeTypeLabel => 'Community';
+
+  @override
+  String get communityHomeAnnouncements => 'Announcements';
+
+  @override
+  String get communityHomeWelcomeDefault => 'Welcome to your community';
+
+  @override
+  String get communityHomeNoGroups => 'No groups yet. Add your first group.';
+
+  @override
+  String get communityHomeAddGroup => 'Add Group';
+
+  @override
+  String communityDetailStats(int groupCount, int memberCount) {
+    return 'Community: $groupCount groups • $memberCount members';
+  }
+
+  @override
+  String get communityDetailViewGroups => 'View Groups';
+
+  @override
+  String get communityDetailViewMembers => 'View Members:';
+
+  @override
+  String get communityDetailManageMembers => 'Manage Members';
+
+  @override
+  String get communityDetailExitCommunity => 'Leave community';
+
+  @override
+  String get communityDetailExitAndDelete => 'Leave and remove from your list';
+
+  @override
+  String communityGroupsTitle(String communityName) {
+    return '$communityName Groups';
+  }
+
+  @override
+  String communityMembersTitle(String communityName) {
+    return '$communityName Members';
+  }
+
+  @override
+  String get communityGroupJoin => 'Join Group';
+
+  @override
+  String get communityGroupDelete => 'Delete Group';
+
+  @override
+  String get communityGroupAddNew => '+ Add new Group';
+
+  @override
+  String get communityAddGroupTitle => 'Add Group';
+
+  @override
+  String get communityAddGroupSuccess =>
+      'Your group was added to the community!';
+
+  @override
+  String get communityAddGroupHeader => 'Add New Group To Your Community';
+
+  @override
+  String get communityAddGroupProfileLabel => 'Add your group\'s profile:';
+
+  @override
+  String get communityAddGroupNameLabel => 'Group name:';
+
+  @override
+  String get communityAddGroupNameHint => 'Group name';
+
+  @override
+  String get communityAddGroupDescLabel => 'Group description';
+
+  @override
+  String get communityAddGroupDescHint => 'Group description';
+
+  @override
+  String get communityAddButton => 'Add';
+
+  @override
+  String get communityLabelOptional => '(optional):';
+
+  @override
+  String get communityEditProfileHeader => 'Edit your community profile:';
+
+  @override
+  String get communityEditNameLabel => 'Community name:';
+
+  @override
+  String get communityEditDescHint => 'Community description';
+
+  @override
+  String get communityEditGroupsLabel => 'Community groups:';
+
+  @override
+  String get communityEditSaving => 'Saving…';
+
+  @override
+  String get communityChatEmpty => 'No messages yet. Say hello!';
+
+  @override
+  String get communityChatTypeHint => 'Type a message…';
+
+  @override
+  String get communityChatMemberFallback => 'Member';
+
+  @override
+  String get communityChatSharedFromMishka => 'Shared from Mishka';
+
+  @override
+  String get communityMemberAddToGroup => 'Add to group';
+
+  @override
+  String get communityMemberRemoveFromCommunity => 'Remove from community';
+
+  @override
+  String communitySelectGroupPrompt(String memberName) {
+    return 'Select a group for $memberName';
+  }
+
+  @override
+  String get communityMemberAddedToGroupSuccess => 'Member added to the group.';
+
+  @override
+  String get communityShareChooseMaterial =>
+      'Choose saved AI material to share with this group.';
+
+  @override
+  String get communityShareNoSavedInCategory =>
+      'No saved items in this category yet.';
+
+  @override
+  String get communityDiscoverySubjectsOptional => 'Subjects (optional)';
+
+  @override
+  String get communityDiscoveryPurposeOptional => 'Purpose (optional)';
+
+  @override
+  String get communityInviteEmailHint => 'Email address';
+
+  @override
+  String get communityErrorServerUnreachable =>
+      'Could not reach the server. Check that the backend is running.';
+
+  @override
+  String get communityRoleOwner => 'Owner';
+
+  @override
+  String get communityRoleAdmin => 'Admin';
+
+  @override
+  String get communityRoleMember => 'Member';
+
+  @override
+  String get communityFallbackName => 'Community';
+
+  @override
+  String get communityFallbackGroupName => 'Group';
+
+  @override
+  String get communityFallbackMemberName => 'Member';
+
+  @override
+  String get communityBrandMishka => 'Mishka';
+
+  @override
+  String get reportCommunitySection => 'Our Community';
+
+  @override
+  String get reportCommunityMessages => 'Messages posted';
+
+  @override
+  String get reportCommunityMaterialShares => 'Materials shared';
+
+  @override
+  String get reportCommunityChannelJoins => 'Channel joins';
 }

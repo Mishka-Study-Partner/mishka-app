@@ -1,0 +1,11 @@
+name: mishka_api_verify
+description: Standalone HTTP verification scripts (no Flutter / native_assets).
+version: 0.0.1
+publish_to: none
+
+environment:
+  sdk: ^3.5.0
+
+executables:
+  verify_community_backend_fixes:
+  verify_self_invite:

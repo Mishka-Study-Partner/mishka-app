@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import 'package:mishka_app/core/utils/app_colors.dart';
+import 'package:mishka_app/l10n/app_localizations.dart';
 
+import '../../community_display_helper.dart';
 import '../../community_styles.dart';
 import '../../data/community_discover_models.dart';
 import '../../data/community_json_helpers.dart';
@@ -15,7 +17,7 @@ class DiscoverCommunityTile extends StatelessWidget {
     this.subtitle,
     this.onTap,
     this.onJoin,
-    this.joinLabel = 'Join',
+    this.joinLabel,
     this.compact = false,
   });
 
@@ -23,11 +25,13 @@ class DiscoverCommunityTile extends StatelessWidget {
   final String? subtitle;
   final VoidCallback? onTap;
   final VoidCallback? onJoin;
-  final String joinLabel;
+  final String? joinLabel;
   final bool compact;
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final joinText = joinLabel ?? l10n.communityDiscoverJoin;
     final community = card.toCommunityModel(subtitleOverride: subtitle);
     final displaySubtitle = subtitle ??
         (card.primarySubjectLabel.isNotEmpty
@@ -64,7 +68,7 @@ class DiscoverCommunityTile extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    card.name,
+                    communityDisplayName(card.name, l10n),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: CommunityStyles.sectionLabel,
@@ -88,7 +92,7 @@ class DiscoverCommunityTile extends StatelessWidget {
                   padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 4.h),
                 ),
                 child: Text(
-                  joinLabel,
+                  joinText,
                   style: CommunityStyles.bodySemiBold.copyWith(
                     fontSize: 12.sp,
                   ),

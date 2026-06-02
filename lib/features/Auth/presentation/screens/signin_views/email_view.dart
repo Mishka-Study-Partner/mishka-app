@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:mishka_app/l10n/app_localizations.dart';
 
 import '../../widgets/form_text.dart';
@@ -20,13 +19,13 @@ class EmailView extends StatelessWidget {
     
     return Column(
       children: [
-        SizedBox(height: 24.h),
+        SizedBox(height: CustomInputField.spacingBetweenFields),
         CustomInputField(
           label: l10n.emailAddress,
           hint: l10n.exampleEmail,
           controller: emailController,
         ),
-        SizedBox(height: 24.h),
+        SizedBox(height: CustomInputField.spacingBetweenFields),
         CustomInputField(
           label: l10n.password,
           hint: l10n.examplePassword,

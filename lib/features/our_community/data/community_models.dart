@@ -19,6 +19,8 @@ class CommunityModel {
   final bool isPinned;
   final String? myRole;
   final String? ownerUserId;
+  final String? inviteCode;
+  final String? inviteToken;
 
   const CommunityModel({
     required this.id,
@@ -35,6 +37,8 @@ class CommunityModel {
     this.isPinned = false,
     this.myRole,
     this.ownerUserId,
+    this.inviteCode,
+    this.inviteToken,
   });
 
   bool isOwnerUser(String userId) {
@@ -66,6 +70,8 @@ class CommunityModel {
     bool? isPinned,
     String? myRole,
     String? ownerUserId,
+    String? inviteCode,
+    String? inviteToken,
   }) {
     return CommunityModel(
       id: id,
@@ -82,6 +88,8 @@ class CommunityModel {
       isPinned: isPinned ?? this.isPinned,
       myRole: myRole ?? this.myRole,
       ownerUserId: ownerUserId ?? this.ownerUserId,
+      inviteCode: inviteCode ?? this.inviteCode,
+      inviteToken: inviteToken ?? this.inviteToken,
     );
   }
 
@@ -153,10 +161,22 @@ class CommunityModel {
 
     final isPinned = parseBool(membership?['isPinned']) ||
         parseBool(membership?['pinned']) ||
+        parseBool(membership?['saved']) ||
+        parseBool(membership?['isSaved']) ||
+        parseBool(membership?['bookmarked']) ||
         parseBool(row['isPinned']) ||
         parseBool(row['pinned']) ||
+        parseBool(row['saved']) ||
+        parseBool(row['isSaved']) ||
         parseBool(source['isPinned']) ||
-        parseBool(source['pinned']);
+        parseBool(source['pinned']) ||
+        parseBool(source['saved']) ||
+        parseBool(source['isSaved']) ||
+        (membership != null &&
+            readString(
+              Map<String, dynamic>.from(membership),
+              const ['pinnedAt', 'savedAt'],
+            ).isNotEmpty);
 
     final myRole = readString(membership ?? row, membershipRoleKeys);
 
@@ -166,12 +186,15 @@ class CommunityModel {
       'createdByUserId',
     ]);
 
+    final inviteCode = readString(source, const ['inviteCode', 'code']);
+    final inviteToken = readString(source, const ['inviteToken', 'token']);
+
     final isPublicCommunity = isPublicVisibility(visibility);
     final preferDescription = isPublicCommunity && !isMember;
 
     return CommunityModel(
       id: id,
-      name: name.isEmpty ? 'Community' : name,
+      name: name,
       description: description.isEmpty ? null : description,
       imageUrl: imageUrl.isEmpty ? null : imageUrl,
       subtitle: buildCommunitySubtitle(
@@ -188,6 +211,8 @@ class CommunityModel {
       isPinned: isPinned,
       myRole: myRole.isEmpty ? null : myRole,
       ownerUserId: ownerUserId.isEmpty ? null : ownerUserId,
+      inviteCode: inviteCode.isEmpty ? null : inviteCode,
+      inviteToken: inviteToken.isEmpty ? null : inviteToken,
     );
   }
 }
@@ -249,16 +274,16 @@ class CommunityGroupModel {
       row['memberCount'] ?? row['membersCount'] ?? row['member_count'],
     );
     final joined = parseBool(row['joined'], defaultValue: false);
-    final displayName = name.isEmpty ? 'Group' : name;
+    final iconKey = name.isEmpty ? 'group' : name;
 
     return CommunityGroupModel(
       id: id,
-      name: displayName,
+      name: name,
       description: description.isEmpty ? null : description,
       imageUrl: imageUrl.isEmpty ? null : imageUrl,
       memberLabel: memberCountLabel(memberCount),
-      icon: iconForGroupName(displayName),
-      iconColor: colorForGroupName(displayName),
+      icon: iconForGroupName(iconKey),
+      iconColor: colorForGroupName(iconKey),
       joined: joined,
     );
   }
@@ -333,7 +358,7 @@ class CommunityMemberModel {
 
     return CommunityMemberModel(
       userId: userId,
-      name: name.isEmpty ? 'Member' : name,
+      name: name,
       role: role,
       groups: groups,
     );
@@ -345,13 +370,24 @@ class CommunityInviteInfo {
     this.inviteCode,
     this.inviteToken,
     this.shareUrl,
+    this.supported = true,
+    this.visibility,
+    this.hint,
   });
 
   final String? inviteCode;
   final String? inviteToken;
   final String? shareUrl;
+  final bool supported;
+  final String? visibility;
+  final String? hint;
 
-    static CommunityInviteInfo fromJson(Object? raw) {
+  bool get hasShareable =>
+      (inviteCode?.isNotEmpty ?? false) ||
+      (inviteToken?.isNotEmpty ?? false) ||
+      (shareUrl?.isNotEmpty ?? false);
+
+  static CommunityInviteInfo fromJson(Object? raw) {
     final row = raw is Map ? Map<String, dynamic>.from(raw) : const <String, dynamic>{};
     final code = readString(row, const ['inviteCode', 'code']);
     final token = readString(row, const ['inviteToken', 'token']);
@@ -365,6 +401,13 @@ class CommunityInviteInfo {
       inviteCode: code.isEmpty ? null : code,
       inviteToken: token.isEmpty ? null : token,
       shareUrl: url.isEmpty ? null : url,
+      supported: parseBool(row['supported'], defaultValue: true),
+      visibility: readString(row, const ['visibility']).isEmpty
+          ? null
+          : readString(row, const ['visibility']),
+      hint: readString(row, const ['hint']).isEmpty
+          ? null
+          : readString(row, const ['hint']),
     );
   }
 }

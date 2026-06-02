@@ -2,11 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../../core/utils/app_colors.dart';
 import '../../../../core/utils/app_sizes.dart';
+import 'package:mishka_app/features/todo_lists/utils/todo_icon_catalog.dart';
+import 'todo_list_icon_widget.dart';
 
 class TodoListItem extends StatelessWidget {
   final String title;
-  final IconData icon;
-  final Color iconColor;
+  final TodoIconOption icon;
   final VoidCallback onTap;
   final VoidCallback? onRename;
 
@@ -14,7 +15,6 @@ class TodoListItem extends StatelessWidget {
     super.key,
     required this.title,
     required this.icon,
-    required this.iconColor,
     required this.onTap,
     this.onRename,
   });
@@ -34,7 +34,7 @@ class TodoListItem extends StatelessWidget {
         ),
         child: Row(
           children: [
-            Icon(icon, color: iconColor, size: AppSizes.iconSmall),
+            TodoListIconWidget(option: icon, size: AppSizes.iconSmall),
             SizedBox(width: 12.w),
             Expanded(
               child: Text(

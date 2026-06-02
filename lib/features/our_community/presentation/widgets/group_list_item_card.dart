@@ -3,7 +3,9 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import 'package:mishka_app/core/utils/app_colors.dart';
 import 'package:mishka_app/core/utils/app_sizes.dart';
+import 'package:mishka_app/l10n/app_localizations.dart';
 
+import '../../community_display_helper.dart';
 import '../../community_styles.dart';
 import '../../data/community_models.dart';
 import 'community_avatar.dart';
@@ -20,6 +22,8 @@ class GroupListItemCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final groupTitle = communityGroupDisplayName(group.name, l10n);
     return Container(
       margin: EdgeInsets.symmetric(vertical: 6.h),
       decoration: BoxDecoration(
@@ -41,7 +45,7 @@ class GroupListItemCard extends StatelessWidget {
           height: 48.w,
           child: GroupAvatar(group: group, radius: 24),
         ),
-        title: Text(group.name, style: CommunityStyles.bodyLarge.copyWith(fontWeight: FontWeight.w600)),
+        title: Text(groupTitle, style: CommunityStyles.bodyLarge.copyWith(fontWeight: FontWeight.w600)),
         subtitle: Padding(
           padding: EdgeInsets.only(top: 4.h),
           child: Text(group.memberLabel, style: CommunityStyles.caption),
@@ -69,6 +73,7 @@ class EditableGroupCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Container(
       margin: EdgeInsets.symmetric(vertical: 5.h),
       decoration: CommunityStyles.cardDecoration,
@@ -80,7 +85,7 @@ class EditableGroupCard extends StatelessWidget {
           child: GroupAvatar(group: group, radius: 22),
         ),
         title: Text(
-          group.name,
+          communityGroupDisplayName(group.name, l10n),
           style: CommunityStyles.bodyLarge.copyWith(fontWeight: FontWeight.w700),
         ),
         subtitle: Text(group.memberLabel, style: CommunityStyles.caption),

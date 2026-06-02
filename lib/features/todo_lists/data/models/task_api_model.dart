@@ -9,6 +9,8 @@ class TaskApiModel {
     this.deadline,
     this.completed,
     this.status,
+    this.completedAt,
+    this.updatedAt,
   });
 
   final String id;
@@ -18,6 +20,8 @@ class TaskApiModel {
   final DateTime? deadline;
   final bool? completed;
   final String? status;
+  final DateTime? completedAt;
+  final DateTime? updatedAt;
 
   /// Resolves the visual state of the task based on status + deadline.
   TaskStatus get resolvedStatus {
@@ -55,6 +59,13 @@ class TaskApiModel {
       ),
       completed: isCompleted,
       status: statusRaw,
+      completedAt: parseDate(
+        json['completedAt'] ??
+            json['completed_at'] ??
+            json['finishedAt'] ??
+            json['finished_at'],
+      ),
+      updatedAt: parseDate(json['updatedAt'] ?? json['updated_at']),
     );
   }
 }

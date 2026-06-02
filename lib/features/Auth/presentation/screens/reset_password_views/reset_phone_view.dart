@@ -46,12 +46,14 @@ class _ResetPhoneViewState extends State<ResetPhoneView> {
         MaterialPageRoute(
           builder: (context) => OtpVerificationScreen(
             title: l10n.verifyByPhoneNumber,
-            subtitle: l10n.enter5DigitsCodePhone,
-            allowEmptyCode: false,
-            onVerify: (otpCode) async {
-              Navigator.push(
+            subtitle: l10n.enter6DigitsCodePhone('+20 $phone'),
+            showVerifiedDialog: true,
+            onVerify: (_) async {},
+            afterVerified: (otpCode) async {
+              if (!context.mounted) return;
+              await Navigator.pushReplacement<void, void>(
                 context,
-                MaterialPageRoute(
+                MaterialPageRoute<void>(
                   builder: (context) => NewPasswordView(
                     resetCode: otpCode,
                     phoneNumber: phone,
@@ -81,7 +83,7 @@ class _ResetPhoneViewState extends State<ResetPhoneView> {
     return Center(
       child: Column(
         children: [
-          SizedBox(height: 48.h),
+          SizedBox(height: 16.h),
           Text(
             l10n.forgetPassword,
             style: TextStyle(
@@ -102,13 +104,13 @@ class _ResetPhoneViewState extends State<ResetPhoneView> {
               color: AppColors.mainDark,
             ),
           ),
-          SizedBox(height: 24.h),
+          SizedBox(height: CustomInputField.spacingBetweenFields),
           CustomInputField(
             label: l10n.phoneNumber,
             hint: '+20 ${l10n.phoneNumber}',
             controller: phoneController,
           ),
-          SizedBox(height: 24.h),
+          SizedBox(height: CustomInputField.spacingBetweenFields),
           AuthButton(
             text: l10n.getCode,
             isLoading: _isLoading,
