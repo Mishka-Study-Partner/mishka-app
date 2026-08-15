@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:mishka_app/core/navigation/safe_navigation.dart';
 import 'package:mishka_app/core/utils/app_colors.dart';
 import 'package:mishka_app/core/utils/app_sizes.dart';
 import 'package:mishka_app/generated/assets.dart';
@@ -64,16 +65,10 @@ class MishkaAppBar extends StatelessWidget implements PreferredSizeWidget {
             height: AppSizes.appBarHeight,
             child: Row(
               children: [
-                GestureDetector(
-                  onTap: onBackTap ?? () => Navigator.pop(context),
-                  child: showBack
-                      ? Icon(
-                          Icons.arrow_back,
-                          color: AppColors.mainGold,
-                          size: AppSizes.iconMedium,
-                        )
-                      : SizedBox(width: 24.w),
-                ),
+                if (showBack)
+                  _DebouncedBackButton(onBackTap: onBackTap)
+                else
+                  SizedBox(width: 24.w),
                 if (topTitle != null)
                   Expanded(
                     child: Center(
@@ -140,6 +135,44 @@ class MishkaAppBar extends StatelessWidget implements PreferredSizeWidget {
             ),
           ),
       ],
+    );
+  }
+}
+
+class _DebouncedBackButton extends StatefulWidget {
+  const _DebouncedBackButton({this.onBackTap});
+
+  final VoidCallback? onBackTap;
+
+  @override
+  State<_DebouncedBackButton> createState() => _DebouncedBackButtonState();
+}
+
+class _DebouncedBackButtonState extends State<_DebouncedBackButton> {
+  DateTime? _lastTap;
+  static const _debounce = Duration(milliseconds: 350);
+
+  void _handleTap() {
+    final now = DateTime.now();
+    if (_lastTap != null && now.difference(_lastTap!) < _debounce) return;
+    _lastTap = now;
+
+    if (widget.onBackTap != null) {
+      widget.onBackTap!();
+      return;
+    }
+    SafeNavigator.popIfPossible(context);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: _handleTap,
+      child: Icon(
+        Icons.arrow_back,
+        color: AppColors.mainGold,
+        size: AppSizes.iconMedium,
+      ),
     );
   }
 }

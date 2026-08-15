@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
+import 'package:mishka_app/core/layout/app_breakpoints.dart';
+import 'package:mishka_app/core/layout/app_scale.dart';
+import 'package:mishka_app/core/utils/app_sizes.dart';
 import 'package:mishka_app/features/saved/domain/saved_content_kind.dart';
 
 /// Saved hub list row — layout/colors from `Mishka.md` “# all saved” (`SavedItemCard`).
@@ -21,6 +24,7 @@ class SavedLibraryMishkaCard extends StatelessWidget {
     this.onShare,
     this.onDelete,
     this.onRename,
+    this.tabletCardHeight,
   });
 
   final String title;
@@ -34,10 +38,38 @@ class SavedLibraryMishkaCard extends StatelessWidget {
   final VoidCallback? onDelete;
   final VoidCallback? onRename;
 
+  /// Tablet only — splits list height across cards (phone ignores this).
+  final double? tabletCardHeight;
+
   /// Mishka.md theme (do not substitute app colors — preserves prototype look).
   static const Color kNavy = Color(0xFF1A2A3A);
   static const Color kGold = Color(0xFFC9A66B);
   static const Color kWhite = Color(0xFFFFFFFF);
+
+  bool _isTablet(BuildContext context) => AppBreakpoints.isTablet(context);
+
+  /// Phone-only sizing — unchanged from original design.
+  double _cardHeight(BuildContext context) {
+    if (!_isTablet(context)) return 180.h;
+    return tabletCardHeight ?? AppScale.h(168);
+  }
+
+  double _imageStripWidth(BuildContext context, double cardHeight) {
+    if (!_isTablet(context)) return 140.w;
+    return AppScale.w((cardHeight * 1.12).clamp(140.0, 230.0));
+  }
+
+  double _titleFontSize(BuildContext context) =>
+      _isTablet(context) ? AppSizes.fontSizeXLarge : 22.sp;
+
+  static double _actionFontSize(BuildContext context) =>
+      AppSizes.fontSizeMedium;
+
+  double _actionIconSize(BuildContext context) =>
+      _isTablet(context) ? AppSizes.iconSmall : 18.sp;
+
+  BoxFit _imageFit(BuildContext context) =>
+      _isTablet(context) ? BoxFit.contain : BoxFit.cover;
 
   /// Optional category image paths from Mishka.md (add files under `assets/images/`).
   static String prototypePrimaryAsset(SavedContentKind kind) {
@@ -51,8 +83,12 @@ class SavedLibraryMishkaCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isTablet = _isTablet(context);
+    final cardH = _cardHeight(context);
+    final stripW = _imageStripWidth(context, cardH);
+
     return Container(
-      height: 180.h,
+      height: cardH,
       decoration: BoxDecoration(
         color: kWhite,
         borderRadius: BorderRadius.circular(16.r),
@@ -76,6 +112,10 @@ class SavedLibraryMishkaCard extends StatelessWidget {
               child: _ImageSection(
                 primary: primaryImageAsset,
                 fallback: fallbackImageAsset,
+                cardHeight: cardH,
+                stripWidth: stripW,
+                imageFit: _imageFit(context),
+                isTablet: isTablet,
               ),
             ),
           Expanded(
@@ -96,7 +136,7 @@ class SavedLibraryMishkaCard extends StatelessWidget {
                       overflow: TextOverflow.ellipsis,
                       style: TextStyle(
                         color: kNavy,
-                        fontSize: 22.sp,
+                        fontSize: _titleFontSize(context),
                         fontWeight: FontWeight.bold,
                         fontFamily: 'Pridi',
                       ),
@@ -116,11 +156,16 @@ class SavedLibraryMishkaCard extends StatelessWidget {
                             foregroundColor: kWhite,
                             elevation: 2,
                             padding: EdgeInsets.symmetric(
-                              horizontal: 24.w,
-                              vertical: 8.h,
+                              horizontal: isTablet ? AppScale.w(20) : 24.w,
+                              vertical: isTablet ? AppScale.h(10) : 8.h,
                             ),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(8.r),
+                            ),
+                            textStyle: TextStyle(
+                              fontFamily: 'Pridi',
+                              fontSize: _actionFontSize(context),
+                              fontWeight: FontWeight.w600,
                             ),
                           ),
                           child: Row(
@@ -129,13 +174,19 @@ class SavedLibraryMishkaCard extends StatelessWidget {
                             children: [
                               Text(
                                 actionLabel,
-                                style: const TextStyle(
+                                style: TextStyle(
                                   fontFamily: 'Pridi',
-                                  fontWeight: FontWeight.bold,
+                                  fontSize: _actionFontSize(context),
+                                  fontWeight: FontWeight.w600,
+                                  color: kWhite,
                                 ),
                               ),
                               SizedBox(width: 4.w),
-                              Icon(Icons.chevron_right, size: 18.sp),
+                              Icon(
+                                Icons.chevron_right,
+                                size: _actionIconSize(context),
+                                color: kWhite,
+                              ),
                             ],
                           ),
                         ),
@@ -199,6 +250,10 @@ class SavedLibraryMishkaCard extends StatelessWidget {
               child: _ImageSection(
                 primary: primaryImageAsset,
                 fallback: fallbackImageAsset,
+                cardHeight: cardH,
+                stripWidth: stripW,
+                imageFit: _imageFit(context),
+                isTablet: isTablet,
               ),
             ),
         ],
@@ -222,25 +277,41 @@ class _ImageSection extends StatelessWidget {
   const _ImageSection({
     required this.primary,
     required this.fallback,
+    required this.cardHeight,
+    required this.stripWidth,
+    required this.imageFit,
+    required this.isTablet,
   });
 
   final String primary;
   final String fallback;
+  final double cardHeight;
+  final double stripWidth;
+  final BoxFit imageFit;
+  final bool isTablet;
 
   @override
   Widget build(BuildContext context) {
+    final inset = isTablet ? AppScale.w(10) : 12.r;
+
     return SizedBox(
-      width: 140.w,
+      width: stripWidth,
       child: Padding(
-        padding: EdgeInsets.all(12.r),
+        padding: EdgeInsets.all(inset),
         child: ClipRRect(
           borderRadius: BorderRadius.circular(12.r),
-          child: SizedBox(
-            height: 180.h - 24.h,
-            width: double.infinity,
-            child: _FallbackAssetImage(
-              primary: primary,
-              fallback: fallback,
+          child: ColoredBox(
+            color: isTablet
+                ? SavedLibraryMishkaCard.kGold.withValues(alpha: 0.08)
+                : SavedLibraryMishkaCard.kWhite,
+            child: SizedBox(
+              height: cardHeight - inset * 2,
+              width: double.infinity,
+              child: _FallbackAssetImage(
+                primary: primary,
+                fallback: fallback,
+                fit: imageFit,
+              ),
             ),
           ),
         ),
@@ -253,21 +324,27 @@ class _FallbackAssetImage extends StatelessWidget {
   const _FallbackAssetImage({
     required this.primary,
     required this.fallback,
+    required this.fit,
   });
 
   final String primary;
   final String fallback;
+  final BoxFit fit;
 
   @override
   Widget build(BuildContext context) {
     return Image.asset(
       primary,
-      fit: BoxFit.cover,
+      fit: fit,
+      alignment: Alignment.center,
+      filterQuality: FilterQuality.high,
       errorBuilder: (context, error, stackTrace) {
         if (primary != fallback) {
           return Image.asset(
             fallback,
-            fit: BoxFit.cover,
+            fit: fit,
+            alignment: Alignment.center,
+            filterQuality: FilterQuality.high,
             errorBuilder: (c, e2, s2) => _brokenImagePlaceholder(),
           );
         }

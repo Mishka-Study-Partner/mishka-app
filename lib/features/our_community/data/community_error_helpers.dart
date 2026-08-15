@@ -28,6 +28,10 @@ String communityErrorMessage(
         return l10n.communityInviteCannotInviteSelf;
       }
     }
+    if (error.statusCode == 403 || error.error == 'FORBIDDEN') {
+      return l10n?.communityAccessDenied ??
+          'You do not have permission to access this community.';
+    }
     final code = error.statusCode;
     if (code == 502 || error.message.toLowerCase().contains('ngrok')) {
       return l10n?.communityErrorServerUnreachable ??

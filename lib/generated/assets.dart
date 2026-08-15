@@ -2,6 +2,14 @@
 class Assets {
   Assets._();
 
+  static const String assetsImagesAppLauncher = 'assets/images/app-launcher.png';
+  static const String assetsImagesHomeChatCard = 'assets/images/home_chat_card.png';
+  static const String assetsImagesHomeFlashcardsCard = 'assets/images/home_flashcards_card.png';
+  static const String assetsImagesHomeSumaryQuizzesCard = 'assets/images/home_sumary_quizzes_card.png';
+  static const String assetsImagesLogo = 'assets/images/logo.png';
+  static const String assetsImagesLogoNoName = 'assets/images/logo_no_name.png';
+  static const String assetsImagesOnboarding1Tablet = 'assets/images/onboarding1_tablet.png';
+  static const String assetsImagesPerfectScore = 'assets/images/perfect_score.png';
   static const String fontsPridiBold = 'assets/fonts/Pridi-Bold.ttf';
   static const String fontsPridiExtraLight = 'assets/fonts/Pridi-ExtraLight.ttf';
   static const String fontsPridiLight = 'assets/fonts/Pridi-Light.ttf';
@@ -9,17 +17,21 @@ class Assets {
   static const String fontsPridiRegular = 'assets/fonts/Pridi-Regular.ttf';
   static const String fontsPridiSemiBold = 'assets/fonts/Pridi-SemiBold.ttf';
   static const String imagesAiTools = 'assets/images/ai_tools.png';
-  static const String imagesAppLauncher = 'assets/images/app-launcher.png';
+  static const String imagesAppLauncher = 'assets/images/app-launcher.pdf';
   static const String imagesArrowBackground = 'assets/images/arrow_background.png';
   static const String imagesChatWithMishkaAiTools = 'assets/images/chat_with_mishka_ai_tools.png';
+  static const String imagesChatWithMishkaBadge = 'assets/images/chat_with_mishka_badge.png';
+  static const String imagesFinishingAllYourTasks = 'assets/images/finishing_all_your_tasks.png';
   static const String imagesFlashcardItem1 = 'assets/images/flashcard_item1.png';
   static const String imagesFlashcardItem2 = 'assets/images/flashcard_item2.png';
   static const String imagesFlashcardItem3 = 'assets/images/flashcard_item3.png';
+  static const String imagesFlashcardsReviewed = 'assets/images/flashcards-reviewed.png';
   static const String imagesGamification = 'assets/images/gamification.png';
   static const String imagesHomeChatCard = 'assets/images/home_chat_card.png';
   static const String imagesHomeFlashcardsCard = 'assets/images/home_flashcards_card.png';
   static const String imagesHomeSumaryQuizzesCard = 'assets/images/home_sumary_quizzes_card.png';
   static const String imagesHomeTopCards = 'assets/images/home_top_cards.png';
+  static const String imagesKeepLearning = 'assets/images/keep-learning.png';
   static const String imagesLogo = 'assets/images/logo.png';
   static const String imagesLogoNoName = 'assets/images/logo_no_name.png';
   static const String imagesLongBreakMishka = 'assets/images/long_break_mishka.png';
@@ -30,12 +42,15 @@ class Assets {
   static const String imagesMishkaSupport2 = 'assets/images/mishka_support2.png';
   static const String imagesMiskaSupport1 = 'assets/images/miska_support1.png';
   static const String imagesOnboarding1 = 'assets/images/onboarding1.png';
+  static const String imagesOnboarding1Tablet = 'assets/images/onboarding1-tablet.png';
   static const String imagesOurCommunity = 'assets/images/our_community.png';
-  static const String imagesPerfectScore = 'assets/images/perfect_score.png';
+  static const String imagesPerfectScore = 'assets/images/perfectScore.png';
   static const String imagesPics = 'assets/images/pics.png';
+  static const String imagesProgressReport = 'assets/images/progress_report.png';
   static const String imagesSavedCard1 = 'assets/images/saved_card_1.png';
   static const String imagesSavedCard2 = 'assets/images/saved_card_2.png';
   static const String imagesSavedCard3 = 'assets/images/saved_card_3.png';
+  static const String imagesScore80 = 'assets/images/score80.png';
   static const String imagesShortBreakMishka = 'assets/images/short_break_mishka.png';
   static const String imagesStreakToday = 'assets/images/streak_today.png';
   static const String imagesStudyCallMode = 'assets/images/study_call_mode.png';
@@ -43,8 +58,11 @@ class Assets {
   static const String imagesStudyTimeMishka = 'assets/images/study_time_mishka.png';
   static const String imagesStudyWithMe = 'assets/images/study_with_me.png';
   static const String imagesStudyWithMishkaHome = 'assets/images/study_with_mishka_home.png';
+  static const String imagesSummaryReviewed = 'assets/images/summary-reviewed.png';
   static const String imagesTipBackground = 'assets/images/tip_background.png';
   static const String imagesTipPhoto = 'assets/images/tip_photo.png';
   static const String imagesToDoList = 'assets/images/to_do_list.png';
+  static const String soundsPostureCritical = 'assets/sounds/posture_critical.wav';
+  static const String soundsPostureWarning = 'assets/sounds/posture_warning.wav';
 
 }

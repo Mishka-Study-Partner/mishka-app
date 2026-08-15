@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import 'package:mishka_app/core/utils/app_colors.dart';
+import 'package:mishka_app/core/widgets/screen_end_spacer.dart';
 import 'package:mishka_app/core/widgets/custom_app_bar.dart';
 import 'package:mishka_app/l10n/app_localizations.dart';
 
@@ -146,13 +147,25 @@ class _CommunityHubScreenState extends State<CommunityHubScreen> {
         if (!mounted) return;
         _pushHome(joined.copyWith(isMember: true));
         return;
-      } catch (_) {
+      } catch (e) {
         if (!mounted) return;
         CommunityStyles.showSnackBar(
           context,
-          AppLocalizations.of(context)!.communityHubJoinFailedOpenAnyway,
+          communityErrorMessage(
+            e,
+            l10n: AppLocalizations.of(context)!,
+          ),
         );
+        return;
       }
+    }
+    if (!community.isMember) {
+      if (!mounted) return;
+      CommunityStyles.showSnackBar(
+        context,
+        AppLocalizations.of(context)!.communityAccessDenied,
+      );
+      return;
     }
     _pushHome(community);
   }
@@ -213,7 +226,7 @@ class _CommunityHubScreenState extends State<CommunityHubScreen> {
               child: SingleChildScrollView(
                 controller: _scrollController,
                 physics: const AlwaysScrollableScrollPhysics(),
-                padding: EdgeInsets.all(12.w),
+                padding: AppScrollInsets.page(horizontal: 12.w, top: 12.h),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [

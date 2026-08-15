@@ -4,11 +4,14 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:mishka_app/core/network/api_exception.dart';
 import 'package:mishka_app/core/network/api_service.dart';
+import 'package:mishka_app/core/layout/app_breakpoints.dart';
+import 'package:mishka_app/core/layout/app_scale.dart';
 import 'package:mishka_app/core/utils/app_colors.dart';
 import 'package:mishka_app/core/utils/app_sizes.dart';
 import 'package:mishka_app/features/Auth/data/data_sources/auth_remote_data_source.dart';
 import 'package:mishka_app/features/Auth/data/models/user_model.dart';
 import 'package:mishka_app/features/Auth/view/bloc/auth_bloc.dart';
+import 'package:mishka_app/core/widgets/screen_end_spacer.dart';
 import 'package:mishka_app/features/settings/presentation/screens/help_support_screen.dart';
 import 'package:mishka_app/features/settings/presentation/screens/privacy_policy_screen.dart';
 import 'package:mishka_app/features/settings/presentation/screens/settings_screen.dart';
@@ -17,6 +20,7 @@ import 'package:mishka_app/generated/assets.dart';
 import '../../../../core/widgets/custom_app_bar.dart';
 import '../widgets/profile_action_button.dart';
 import '../widgets/profile_avatar.dart';
+import '../widgets/profile_field_metrics.dart';
 import '../widgets/profile_info_row.dart';
 import '../widgets/profile_section_card.dart';
 import '../widgets/profile_text_field.dart';
@@ -348,7 +352,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     final female = _isFemale(user);
     final male = _isMale(user);
     final preferNot = _isPreferNot(user);
-    final scheme = Theme.of(context).colorScheme;
+    final isTablet = AppBreakpoints.isTablet(context);
 
     return Scaffold(
       appBar: MishkaAppBar(
@@ -396,8 +400,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
               Container(
                 width: double.infinity,
                 padding: EdgeInsets.symmetric(
-                  horizontal: AppSizes.paddingLarge,
-                  vertical: AppSizes.paddingMedium,
+                  horizontal: isTablet
+                      ? AppScale.w(28)
+                      : AppSizes.paddingLarge,
+                  vertical: isTablet
+                      ? AppScale.h(18)
+                      : AppSizes.paddingMedium,
                 ),
                 child: Column(
                   children: [
@@ -410,25 +418,26 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             label: l10n.fullName,
                             value: _displayName(user, l10n),
                           ),
-                          SizedBox(height: 12.h),
+                          SizedBox(
+                            height: ProfileFieldMetrics.sectionGap(context),
+                          ),
                           ProfileTextField(
                             label: l10n.userName,
                             value: _username(user, l10n),
                           ),
-                          SizedBox(height: 12.h),
+                          SizedBox(
+                            height: ProfileFieldMetrics.sectionGap(context),
+                          ),
                           Align(
                             alignment: AlignmentDirectional.centerStart,
                             child: Text(
                               l10n.gender,
-                              style: TextStyle(
-                                fontFamily: 'Pridi',
-                                fontSize: 12,
-                                fontWeight: FontWeight.w500,
-                                color: scheme.onSurface.withValues(alpha: 0.9),
-                              ),
+                              style: ProfileFieldMetrics.labelStyle(context),
                             ),
                           ),
-                          SizedBox(height: 8.h),
+                          SizedBox(
+                            height: ProfileFieldMetrics.labelGap(context),
+                          ),
                           Row(
                             children: [
                               Expanded(
@@ -467,11 +476,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               ),
                             ],
                           ),
-                          SizedBox(height: 12.h),
+                          SizedBox(
+                            height: ProfileFieldMetrics.sectionGap(context),
+                          ),
                           ProfileInfoRow(
                             icon: Icons.school_outlined,
                             title: l10n.educationLevel,
                             value: formatEducationSummary(user, l10n),
+                            matchFieldStyle: true,
                             onTap: () => _openEditEducation(user),
                           ),
                         ],
@@ -487,7 +499,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             label: l10n.email,
                             value: _email(user, l10n),
                           ),
-                          SizedBox(height: 12.h),
+                          SizedBox(
+                            height: ProfileFieldMetrics.sectionGap(context),
+                          ),
                           ProfileTextField(
                             label: l10n.phoneNumber,
                             value: _phone(user, l10n),
@@ -562,6 +576,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   ],
                 ),
               ),
+              const ScreenEndSpacer(),
             ],
           ),
         ),

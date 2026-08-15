@@ -1,3 +1,5 @@
+import 'package:dio/dio.dart';
+
 import 'package:mishka_app/core/network/api_exception.dart';
 import 'package:mishka_app/core/network/api_endpoints.dart';
 import 'package:mishka_app/core/network/api_service.dart';
@@ -7,6 +9,9 @@ import 'package:mishka_app/features/report/data/models/your_report_bundle_model.
 class YourReportRemoteDataSource {
   YourReportRemoteDataSource(this._api);
 
+  /// PDF render + SMTP on Railway can exceed the default 30s Dio receive timeout.
+  static const Duration exportTimeout = Duration(seconds: 120);
+
   final ApiService _api;
 
   Future<YourReportBundleModel> getBundle({
@@ -14,11 +19,13 @@ class YourReportRemoteDataSource {
     required DateTime anchorDate,
     required String locale,
   }) async {
+    final date = _dateString(anchorDate);
     final env = await _api.get<Map<String, dynamic>>(
       ApiEndpoints.yourReport,
       queryParameters: {
         'period': period.name,
-        'date': _dateString(anchorDate),
+        'date': date,
+        'anchorDate': date,
         'locale': locale,
         'format': 'bundle',
       },
@@ -82,6 +89,10 @@ class YourReportRemoteDataSource {
     final env = await _api.post<Map<String, dynamic>>(
       ApiEndpoints.yourReportExport,
       data: body,
+      options: Options(
+        receiveTimeout: exportTimeout,
+        sendTimeout: exportTimeout,
+      ),
       dataFromJson: (raw) {
         if (raw is Map) return Map<String, dynamic>.from(raw);
         throw const FormatException('Invalid export response');

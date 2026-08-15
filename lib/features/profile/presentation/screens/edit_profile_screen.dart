@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:mishka_app/core/network/api_exception.dart';
+import 'package:mishka_app/core/widgets/screen_end_spacer.dart';
 import 'package:mishka_app/core/network/api_service.dart';
 import 'package:mishka_app/core/utils/app_colors.dart';
 import 'package:mishka_app/core/utils/app_sizes.dart';
@@ -171,10 +172,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       body: Form(
         key: _formKey,
         child: ListView(
-          padding: EdgeInsets.symmetric(
-            horizontal: AppSizes.paddingLarge,
-            vertical: 20.h,
-          ),
+          padding: AppScrollInsets.page(horizontal: AppSizes.paddingLarge, top: 20.h),
           physics: const BouncingScrollPhysics(),
           children: [
             Text(
@@ -369,8 +367,9 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                 ),
                 child: Text(
                   l10n.save,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontFamily: 'Pridi',
+                    fontSize: AppSizes.fontSizeLarge,
                     fontWeight: FontWeight.w600,
                   ),
                 ),

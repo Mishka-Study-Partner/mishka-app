@@ -4,6 +4,8 @@ import 'package:mishka_app/core/network/api_exception.dart';
 import 'package:mishka_app/core/utils/app_colors.dart';
 import 'package:mishka_app/core/utils/app_sizes.dart';
 import 'package:mishka_app/core/widgets/custom_app_bar.dart';
+import 'package:mishka_app/features/chat_with_mishka/data/tool_data_normalizer.dart';
+import 'package:mishka_app/features/chat_with_mishka/presentation/widgets/formatted_study_text.dart';
 import 'package:mishka_app/features/chat_with_mishka/presentation/widgets/tool_preview_renderer.dart';
 import 'package:mishka_app/features/saved/data/models/saved_detail_model.dart';
 import 'package:mishka_app/features/saved/data/repositories/saved_repository.dart';
@@ -292,7 +294,10 @@ class _SavedItemDetailScreenState extends State<SavedItemDetailScreen> {
             ],
             SizedBox(height: 24.h),
             Expanded(
-              child: _buildBody(l10n),
+              child: Padding(
+                padding: EdgeInsets.only(bottom: AppSizes.screenEndPadding),
+                child: _buildBody(l10n),
+              ),
             ),
           ],
         ),
@@ -377,9 +382,10 @@ class _SavedItemDetailScreenState extends State<SavedItemDetailScreen> {
         child: Padding(
           padding: EdgeInsets.all(AppSizes.paddingMedium),
           child: SingleChildScrollView(
-            child: SelectableText(
-              summaryText,
-              style: TextStyle(
+            child: FormattedStudyText(
+              text: summaryText,
+              textAlign: TextAlign.justify,
+              baseStyle: TextStyle(
                 fontFamily: 'Pridi',
                 fontSize: AppSizes.fontSizeMedium,
                 color: AppColors.mainDark,
@@ -434,23 +440,22 @@ class _SavedItemDetailScreenState extends State<SavedItemDetailScreen> {
         return null;
 
       case SavedContentKind.quiz:
-        final nested = raw['quiz'];
-        final content = nested is Map ? Map<String, dynamic>.from(nested) : raw;
-        final questions = content['questions'];
-        if (questions is List && questions.isNotEmpty) {
-          return {
-            'tool_type': 'quiz',
-            'title': content['title'] ?? content['name'] ?? '',
-            'questions': questions,
-            if (content['totalQuestions'] != null)
-              'totalQuestions': content['totalQuestions'],
-          };
-        }
-        return null;
+        return buildQuizToolDataFromSavedDetail(
+          raw,
+          fallbackTitle: widget.title,
+        );
 
       case SavedContentKind.mindmap:
         final nested = raw['mindMap'] ?? raw['mind_map'];
         final content = nested is Map ? Map<String, dynamic>.from(nested) : raw;
+        final apiTree = content['content'];
+        if (apiTree is Map && (apiTree['children'] as List?)?.isNotEmpty == true) {
+          return normalizeToolData({
+            'tool_type': 'mind_maps',
+            'title': content['title'] ?? content['name'] ?? '',
+            'content': apiTree,
+          });
+        }
         final nodes = content['nodes'];
         final root = content['root'] ?? content['centralTopic'] ?? content['title'];
         if (nodes is List && nodes.isNotEmpty && root != null) {
@@ -475,11 +480,14 @@ class _SavedItemDetailScreenState extends State<SavedItemDetailScreen> {
     final nested = raw['summary'];
     if (nested is Map) {
       final content = Map<String, dynamic>.from(nested);
-      final text = content['text'] ?? content['content'] ?? content['summary'];
+      final text = content['summaryText'] ??
+          content['text'] ??
+          content['content'] ??
+          content['summary'];
       if (text is String && text.isNotEmpty) return text;
     }
     if (nested is String && nested.isNotEmpty) return nested;
-    final text = raw['text'] ?? raw['content'];
+    final text = raw['summaryText'] ?? raw['text'] ?? raw['content'];
     if (text is String && text.isNotEmpty) return text;
     return null;
   }
@@ -489,7 +497,7 @@ class _SavedItemDetailScreenState extends State<SavedItemDetailScreen> {
       SavedContentKind.flashcards => l10n.savedFlashCards,
       SavedContentKind.quiz => l10n.savedQuizes,
       SavedContentKind.summary => l10n.savedSummary,
-      SavedContentKind.mindmap => l10n.mindMap,
+      SavedContentKind.mindmap => l10n.savedMindMap,
     };
   }
 }

@@ -3,6 +3,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import 'package:mishka_app/core/utils/app_colors.dart';
 import 'package:mishka_app/core/utils/app_sizes.dart';
+import 'package:mishka_app/core/widgets/button_label.dart';
 import 'package:mishka_app/l10n/app_localizations.dart';
 
 /// Centered success card used after OTP verify / password reset (design frames).
@@ -85,23 +86,30 @@ class AuthSuccessDialog extends StatelessWidget {
               SizedBox(height: 24.h),
               SizedBox(
                 width: double.infinity,
-                height: 44.h,
                 child: ElevatedButton(
                   onPressed: () => Navigator.of(context).pop(),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.mainGold,
                     foregroundColor: AppColors.white,
                     elevation: 0,
+                    padding: EdgeInsets.symmetric(
+                      horizontal: 16.w,
+                      vertical: 12.h,
+                    ),
+                    minimumSize: Size(double.infinity, AppSizes.buttonHeightSmall),
+                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(6.r),
                     ),
                   ),
-                  child: Text(
+                  child: ButtonLabel(
                     AppLocalizations.of(context)!.yesContinue,
                     style: TextStyle(
                       fontFamily: 'Pridi',
                       fontSize: AppSizes.fontSizeLarge,
                       fontWeight: FontWeight.w600,
+                      color: AppColors.white,
+                      height: 1.2,
                     ),
                   ),
                 ),

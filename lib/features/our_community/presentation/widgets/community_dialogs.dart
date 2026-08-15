@@ -3,6 +3,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import 'package:mishka_app/core/utils/app_colors.dart';
 import 'package:mishka_app/core/utils/app_sizes.dart';
+import 'package:mishka_app/core/widgets/button_label.dart';
 import 'package:mishka_app/l10n/app_localizations.dart';
 
 import '../../community_styles.dart';
@@ -145,7 +146,13 @@ class CommunitySuccessDialog extends StatelessWidget {
                   onDismiss?.call();
                 },
                 style: CommunityStyles.goldButtonStyle(verticalPadding: 12.h),
-                child: Text(l10n.ok),
+                child: ButtonLabel(
+                  l10n.ok,
+                  style: CommunityStyles.bodyLarge.copyWith(
+                    color: AppColors.white,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
               ),
             ),
           ],
@@ -225,7 +232,13 @@ Future<void> showJoinPrivateCommunityDialog(
                             height: 20.w,
                             child: const CircularProgressIndicator(strokeWidth: 2),
                           )
-                        : Text(l10n.communityJoinPrivateButton),
+                        : ButtonLabel(
+                            l10n.communityJoinPrivateButton,
+                            style: CommunityStyles.bodyLarge.copyWith(
+                              color: AppColors.white,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
                   ),
                 ),
               ],

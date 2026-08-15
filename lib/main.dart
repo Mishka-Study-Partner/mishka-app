@@ -13,6 +13,8 @@ import 'package:mishka_app/core/widgets/app_settings_scope.dart';
 import 'package:mishka_app/features/Auth/data/data_sources/auth_remote_data_source.dart';
 import 'package:mishka_app/features/Auth/view/bloc/auth_bloc.dart';
 import 'package:mishka_app/features/onboarding/presentation/app_launch_gate.dart';
+// Deep links disabled — re-enable with CommunityInviteDeepLinkCoordinator + entitlements.
+// import 'package:mishka_app/features/our_community/data/community_invite_deep_link_coordinator.dart';
 import 'package:mishka_app/features/settings/data/models/user_preferences_model.dart';
 import 'package:mishka_app/features/settings/data/user_preferences_applier.dart';
 
@@ -29,6 +31,7 @@ Future<void> main() async {
   debugPrint('🚀 Mishka: AppPreferences ready');
   DioClient.instance.init();
   debugPrint('🚀 Mishka: DioClient ready — launching app');
+  // await CommunityInviteDeepLinkCoordinator.instance.init();
   runApp(const MishkaApp());
 }
 
@@ -62,13 +65,14 @@ class _MishkaAppState extends State<MishkaApp> {
     setState(() => _notificationsEnabled = enabled);
   }
 
-  Future<void> _applyServerPreferences(UserPreferencesModel prefs) async {
-    await UserPreferencesApplier.apply(prefs);
+  Future<void> _applyServerPreferences(UserPreferencesModel? server) async {
+    final effective = UserPreferencesApplier.resolve(server);
+    await UserPreferencesApplier.apply(effective);
     if (!mounted) return;
     setState(() {
-      _locale = prefs.locale;
-      _themeMode = prefs.themeMode;
-      _notificationsEnabled = prefs.notificationsEnabled;
+      _locale = effective.locale;
+      _themeMode = effective.themeMode;
+      _notificationsEnabled = effective.notificationsEnabled;
     });
   }
 

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:mishka_app/core/layout/form_screen_body.dart';
+import 'package:mishka_app/core/layout/app_scale.dart';
 import 'package:mishka_app/core/utils/app_colors.dart';
 import 'package:mishka_app/core/utils/app_sizes.dart';
 import 'package:mishka_app/l10n/app_localizations.dart';
@@ -97,13 +98,7 @@ class _LoginScreenState extends State<LoginScreen> {
           return Scaffold(
         backgroundColor: AppColors.screenBackground,
         appBar: const MishkaAppBar(title: '', showBottomBar: false),
-        body: Padding(
-          padding: EdgeInsetsDirectional.only(
-            start: AppSizes.paddingMedium,
-            end: AppSizes.paddingMedium,
-            bottom: AppSizes.paddingMedium,
-          ),
-          child: SingleChildScrollView(
+        body: FormScreenBody(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.center,
               mainAxisAlignment: MainAxisAlignment.start,
@@ -116,7 +111,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     fontWeight: FontWeight.w500,
                   ),
                 ),
-                SizedBox(height: 4.h),
+                SizedBox(height: AppScale.h(4)),
                 Text(
                   l10n.welcomeBackToMishka,
                   style: TextStyle(
@@ -125,7 +120,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     fontWeight: FontWeight.w500,
                   ),
                 ),
-                SizedBox(height: 24.h),
+                SizedBox(height: AppScale.h(24)),
                 CustomSegmentedButton(
                   selectedIndex: selectedIndex,
                   onChanged: (i) => setState(() => selectedIndex = i),
@@ -142,7 +137,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     passwordController: passwordController,
                   ),
 
-                SizedBox(height: 16.h),
+                SizedBox(height: AppScale.h(16)),
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
@@ -183,13 +178,13 @@ class _LoginScreenState extends State<LoginScreen> {
                   },
                   label: l10n.agreeToTerms,
                 ),
-                SizedBox(height: 24.h),
+                SizedBox(height: AppScale.h(24)),
                 AuthButton(
                   text: l10n.signIn,
                   isLoading: isLoading,
                   onPressed: _submitLogin,
                 ),
-                SizedBox(height: 16.h),
+                SizedBox(height: AppScale.h(16)),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   crossAxisAlignment: CrossAxisAlignment.center,
@@ -224,17 +219,17 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                   ],
                 ),
-                SizedBox(height: 16.h),
+                SizedBox(height: AppScale.h(16)),
                 Row(
                   children: [
                     Expanded(
                       child: Container(
-                        height: 1.h,
+                        height: AppScale.h(1),
                         color: AppColors.mainDark,
                       ),
                     ),
                     Padding(
-                      padding: EdgeInsets.all(8.w),
+                      padding: EdgeInsets.all(AppScale.w(8)),
                       child: Text(
                         l10n.orSignUpWith,
                         style: TextStyle(
@@ -247,17 +242,16 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                     Expanded(
                       child: Container(
-                        height: 1.h,
+                        height: AppScale.h(1),
                         color: AppColors.mainDark,
                       ),
                     ),
                   ],
                 ),
                 SocialAuthRow(onGoogle: () {  }, onApple: () {  }, onFacebook: () {  },),
-              ],),
-          ),
+              ],
+            ),
         ),
-
     );
         },
       );

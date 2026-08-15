@@ -21,17 +21,20 @@ class CommunityActionMenu extends StatefulWidget {
     required this.community,
     required this.repository,
     this.onChanged,
+    this.onLeftCommunity,
   });
 
   final CommunityModel community;
   final CommunityRepository repository;
   final VoidCallback? onChanged;
+  final VoidCallback? onLeftCommunity;
 
   static Future<void> show(
     BuildContext context, {
     required CommunityModel community,
     required CommunityRepository repository,
     VoidCallback? onChanged,
+    VoidCallback? onLeftCommunity,
   }) {
     return showDialog<void>(
       context: context,
@@ -43,6 +46,7 @@ class CommunityActionMenu extends StatefulWidget {
           community: community,
           repository: repository,
           onChanged: onChanged,
+          onLeftCommunity: onLeftCommunity,
         ),
       ),
     );
@@ -122,11 +126,12 @@ class _CommunityActionMenuState extends State<CommunityActionMenu> {
                         children: [
                           Icon(Icons.share_outlined, color: AppColors.mainGold, size: 28.w),
                           SizedBox(width: 16.w),
-                          Text(
-                            l10n.communityShareMenuTitle,
-                            style: CommunityStyles.menuTitle,
+                          Expanded(
+                            child: Text(
+                              l10n.communityShareMenuTitle,
+                              style: CommunityStyles.menuTitle,
+                            ),
                           ),
-                          const Spacer(),
                           Icon(
                             _shareExpanded ? Icons.keyboard_arrow_up : Icons.keyboard_arrow_down,
                             color: AppColors.lightText,
@@ -223,41 +228,54 @@ class _CommunityActionMenuState extends State<CommunityActionMenu> {
                 }
               },
             ),
-            if (_canManage) ...[
+            SizedBox(height: 14.h),
+            _MenuRow(
+              decoration: boxDecoration,
+              icon: Icons.logout_rounded,
+              label: l10n.communityDetailExitCommunity,
+              onTap: () => _leaveCommunity(context, keepSaved: false),
+            ),
+            if (!_canManage) ...[
               SizedBox(height: 14.h),
               _MenuRow(
                 decoration: boxDecoration,
-                icon: Icons.delete_outline_rounded,
-                label: l10n.communityDeleteCommunity,
-                onTap: () async {
-                  Navigator.pop(context);
-                  final confirmed = await showCommunityConfirmDialog(
-                    context,
-                    message: l10n.communityDeleteConfirm,
-                  );
-                  if (confirmed != true || !context.mounted) return;
-                  try {
-                    await widget.repository.deleteCommunity(widget.community.id);
-                    if (!context.mounted) return;
-                    await showCommunitySuccessDialog(
-                      context,
-                      message: l10n.communityDeletedSuccess,
-                      onDismiss: () {
-                        Navigator.pop(context);
-                        Navigator.pop(context);
-                      },
-                    );
-                  } catch (e) {
-                    if (!context.mounted) return;
-                    CommunityStyles.showSnackBar(context, '$e');
-                  }
-                },
+                icon: Icons.bookmark_remove_outlined,
+                label: l10n.communityDetailExitAndDelete,
+                onTap: () => _leaveCommunity(context, keepSaved: true),
               ),
             ],
           ],
         ),
       ),
     );
+  }
+
+  Future<void> _leaveCommunity(
+    BuildContext context, {
+    required bool keepSaved,
+  }) async {
+    final l10n = AppLocalizations.of(context)!;
+    final confirmed = await showCommunityConfirmDialog(
+      context,
+      message: keepSaved
+          ? l10n.communityExitAndDeleteConfirm
+          : l10n.communityExitConfirm,
+    );
+    if (confirmed != true || !context.mounted) return;
+    Navigator.pop(context);
+    try {
+      await widget.repository.leaveCommunity(
+        widget.community.id,
+        keepSaved: keepSaved,
+      );
+      widget.onLeftCommunity?.call();
+    } catch (e) {
+      if (!context.mounted) return;
+      CommunityStyles.showSnackBar(
+        context,
+        communityErrorMessage(e, l10n: l10n),
+      );
+    }
   }
 
   void _openShareDialog(BuildContext context, Widget dialog) {
@@ -291,9 +309,13 @@ class _MenuRow extends StatelessWidget {
           children: [
             Icon(icon, color: AppColors.mainGold, size: 28.w),
             SizedBox(width: 16.w),
-            Text(
-              label,
-              style: CommunityStyles.menuTitle,
+            Expanded(
+              child: Text(
+                label,
+                style: CommunityStyles.menuTitle,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+              ),
             ),
           ],
         ),

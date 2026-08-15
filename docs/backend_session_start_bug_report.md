@@ -10,7 +10,7 @@ All attempts to start a study session via `POST /study-with-mishka/sessions/star
 
 ## Environment
 
-- **API Base URL:** `https://mishka-backend-production.up.railway.app`
+- **API Base URL:** `https://mishka-backend-production-3f6f.up.railway.app`
 - **Authenticated User ID:** `45e6c56e-01b3-4b6a-b58c-35ffd9861eba`
 - **Date/Time:** 2026-05-14 ~01:50 UTC+3
 - **Client:** Flutter iOS app

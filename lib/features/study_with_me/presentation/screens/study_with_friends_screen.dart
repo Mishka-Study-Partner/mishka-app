@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:mishka_app/core/utils/app_colors.dart';
 import 'package:mishka_app/core/utils/app_sizes.dart';
+import 'package:mishka_app/core/widgets/screen_end_spacer.dart';
 import 'package:mishka_app/core/widgets/custom_app_bar.dart';
 import 'package:mishka_app/l10n/app_localizations.dart';
 
@@ -47,6 +48,8 @@ class StudyWithFriendsScreen extends StatelessWidget {
               icon: Icons.link,
               onTap: () => _showCreateLinkDialog(context, l10n, withPassword: true),
             ),
+            const Spacer(),
+            const ScreenEndSpacer(),
           ],
         ),
       ),

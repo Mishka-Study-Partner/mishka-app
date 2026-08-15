@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:mishka_app/core/utils/app_colors.dart';
 import 'package:mishka_app/core/utils/app_sizes.dart';
+import 'package:mishka_app/core/widgets/button_label.dart';
 import 'package:mishka_app/l10n/app_localizations.dart';
 
 enum ShareToCommunitySuccessAction { continueFlow, openGroup }
@@ -42,28 +43,20 @@ Future<ShareToCommunitySuccessAction?> showShareToCommunitySuccessDialog({
                   ),
                 ),
                 SizedBox(height: 24.h),
-                Row(
-                  children: [
-                    Expanded(
-                      child: _ShareSuccessOutlinedButton(
-                        label: l10n.shareSuccessContinue,
-                        onPressed: () => Navigator.pop(
-                          dialogContext,
-                          ShareToCommunitySuccessAction.continueFlow,
-                        ),
-                      ),
-                    ),
-                    SizedBox(width: 10.w),
-                    Expanded(
-                      child: _ShareSuccessOutlinedButton(
-                        label: l10n.shareOpenGroup,
-                        onPressed: () => Navigator.pop(
-                          dialogContext,
-                          ShareToCommunitySuccessAction.openGroup,
-                        ),
-                      ),
-                    ),
-                  ],
+                _ShareSuccessOutlinedButton(
+                  label: l10n.shareSuccessContinue,
+                  onPressed: () => Navigator.pop(
+                    dialogContext,
+                    ShareToCommunitySuccessAction.continueFlow,
+                  ),
+                ),
+                SizedBox(height: 10.h),
+                _ShareSuccessOutlinedButton(
+                  label: l10n.shareOpenGroup,
+                  onPressed: () => Navigator.pop(
+                    dialogContext,
+                    ShareToCommunitySuccessAction.openGroup,
+                  ),
                 ),
               ],
             ),
@@ -114,7 +107,7 @@ class _ShareSuccessOutlinedButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      height: 44.h,
+      width: double.infinity,
       child: OutlinedButton(
         onPressed: onPressed,
         style: OutlinedButton.styleFrom(
@@ -123,15 +116,17 @@ class _ShareSuccessOutlinedButton extends StatelessWidget {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(6.r),
           ),
-          padding: EdgeInsets.symmetric(horizontal: 8.w),
+          padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
+          minimumSize: Size(double.infinity, AppSizes.buttonHeightSmall),
+          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
         ),
-        child: Text(
+        child: ButtonLabel(
           label,
-          textAlign: TextAlign.center,
           style: TextStyle(
             fontFamily: 'Pridi',
             fontSize: AppSizes.fontSizeMedium,
             fontWeight: FontWeight.w600,
+            height: 1.2,
           ),
         ),
       ),

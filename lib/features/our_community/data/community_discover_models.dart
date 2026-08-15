@@ -207,16 +207,35 @@ class DiscoverCategoryChip {
   }
 }
 
+class CommunityCategoryTitle {
+  const CommunityCategoryTitle({
+    required this.title,
+    this.communityCount = 0,
+  });
+
+  final String title;
+  final int communityCount;
+
+  static CommunityCategoryTitle fromJson(Map<String, dynamic> json) {
+    return CommunityCategoryTitle(
+      title: readString(json, const ['title']),
+      communityCount: parseInt(json['communityCount']),
+    );
+  }
+}
+
 class DiscoverCategories {
   const DiscoverCategories({
     this.subjects = const [],
     this.purposes = const [],
     this.educationLevels = const [],
+    this.categoryTitles = const [],
   });
 
   final List<DiscoverCategoryChip> subjects;
   final List<DiscoverCategoryChip> purposes;
   final List<DiscoverCategoryChip> educationLevels;
+  final List<CommunityCategoryTitle> categoryTitles;
 
   static DiscoverCategories fromJson(Map<String, dynamic> json) {
     List<DiscoverCategoryChip> parseList(Object? raw) {
@@ -228,10 +247,24 @@ class DiscoverCategories {
           .toList();
     }
 
+    List<CommunityCategoryTitle> parseTitles(Object? raw) {
+      if (raw is! List) return const [];
+      return raw
+          .whereType<Map>()
+          .map(
+            (e) => CommunityCategoryTitle.fromJson(
+              Map<String, dynamic>.from(e),
+            ),
+          )
+          .where((t) => t.title.isNotEmpty)
+          .toList();
+    }
+
     return DiscoverCategories(
       subjects: parseList(json['subjects']),
       purposes: parseList(json['purposes']),
       educationLevels: parseList(json['educationLevels']),
+      categoryTitles: parseTitles(json['categoryTitles']),
     );
   }
 }

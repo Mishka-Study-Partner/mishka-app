@@ -34,7 +34,7 @@ The Flutter **Your Report** screen is live and reads **real backend data** for s
 
 **Auth:** All routes require JWT (`Authorization: Bearer <token>`).
 
-**Base URL (production):** `https://mishka-backend-production.up.railway.app`
+**Base URL (production):** `https://mishka-backend-production-3f6f.up.railway.app`
 
 ---
 
@@ -367,11 +367,11 @@ To verify study report APIs manually (replace token and date):
 ```bash
 # Concentration
 curl -s -H "Authorization: Bearer $TOKEN" \
-  "https://mishka-backend-production.up.railway.app/study-with-mishka/reports/week?date=2026-05-19&topLevelMode=concentration"
+  "https://mishka-backend-production-3f6f.up.railway.app/study-with-mishka/reports/week?date=2026-05-19&topLevelMode=concentration"
 
 # Camera mode
 curl -s -H "Authorization: Bearer $TOKEN" \
-  "https://mishka-backend-production.up.railway.app/study-with-mishka/reports/week?date=2026-05-19&topLevelMode=call_with_mishka"
+  "https://mishka-backend-production-3f6f.up.railway.app/study-with-mishka/reports/week?date=2026-05-19&topLevelMode=call_with_mishka"
 ```
 
 Compare `totals.sumApproximateMainStudySeconds` and `sessionSummaries` length — app sums both for the Study with Mishka chart.

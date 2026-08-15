@@ -1,14 +1,44 @@
+import 'package:flutter/material.dart';
 import 'package:mishka_app/features/home/data/models/daily_streak_model.dart';
 
 enum ReportPeriod { daily, weekly, monthly, yearly }
 
-enum ReportDataSource { bundle, legacy }
-
 class ReportBucket {
-  const ReportBucket({required this.label, required this.value});
+  const ReportBucket({
+    required this.label,
+    required this.value,
+    this.color,
+  });
 
   final String label;
   final double value;
+  final Color? color;
+}
+
+class StudySubjectReportRow {
+  const StudySubjectReportRow({
+    this.studentSubjectId,
+    required this.name,
+    this.colorHex,
+    this.studyMinutes = 0,
+    this.sessionCount = 0,
+    this.percentOfTotal = 0,
+  });
+
+  final String? studentSubjectId;
+  final String name;
+  final String? colorHex;
+  final double studyMinutes;
+  final int sessionCount;
+  final int percentOfTotal;
+
+  Color? get displayColor {
+    final hex = colorHex?.replaceFirst('#', '');
+    if (hex == null || hex.length != 6) return null;
+    final value = int.tryParse(hex, radix: 16);
+    if (value == null) return null;
+    return Color(0xFF000000 | value);
+  }
 }
 
 class TaskReportBucket {
@@ -30,14 +60,33 @@ class CommunityReportStats {
     this.messagesPosted = 0,
     this.materialShares = 0,
     this.channelJoins = 0,
+    this.activityByDay = const [],
   });
 
   final int messagesPosted;
   final int materialShares;
   final int channelJoins;
+  final List<ReportBucket> activityByDay;
 
   bool get hasActivity =>
-      messagesPosted > 0 || materialShares > 0 || channelJoins > 0;
+      messagesPosted > 0 ||
+      materialShares > 0 ||
+      channelJoins > 0 ||
+      activityByDay.any((b) => b.value > 0);
+}
+
+class AiToolRing {
+  const AiToolRing({
+    required this.key,
+    required this.count,
+    required this.percent,
+    this.label,
+  });
+
+  final String key;
+  final int count;
+  final int percent;
+  final String? label;
 }
 
 class AiToolReportStats {
@@ -46,41 +95,39 @@ class AiToolReportStats {
     this.flashcards = 0,
     this.summaries = 0,
     this.mindMaps = 0,
+    this.rings = const [],
   });
 
   final int quizzes;
   final int flashcards;
   final int summaries;
   final int mindMaps;
+  final List<AiToolRing> rings;
 
-  int percentFor(int count, ReportPeriod period) {
+  int percentForKey(String key, ReportPeriod period) {
+    for (final ring in rings) {
+      if (ring.key == key) {
+        return ring.percent.clamp(0, 100);
+      }
+    }
+    final count = switch (key) {
+      'quizzes' => quizzes,
+      'flashcards' => flashcards,
+      'summaries' => summaries,
+      'mindMaps' => mindMaps,
+      _ => 0,
+    };
+    return _clientPercent(count, period);
+  }
+
+  int _clientPercent(int count, ReportPeriod period) {
     final target = switch (period) {
       ReportPeriod.daily => 1,
       ReportPeriod.weekly => 7,
       ReportPeriod.monthly => 28,
       ReportPeriod.yearly => 365,
     };
-    final goal = target.toDouble();
-    return (count / goal * 100).round().clamp(0, 100);
-  }
-}
-
-class StudyPeriodReport {
-  const StudyPeriodReport({
-    this.sumStudySeconds = 0,
-    this.sessionSummaries = const [],
-  });
-
-  final int sumStudySeconds;
-  final List<Map<String, dynamic>> sessionSummaries;
-
-  double get studyMinutes => sumStudySeconds / 60.0;
-
-  StudyPeriodReport merge(StudyPeriodReport other) {
-    return StudyPeriodReport(
-      sumStudySeconds: sumStudySeconds + other.sumStudySeconds,
-      sessionSummaries: [...sessionSummaries, ...other.sessionSummaries],
-    );
+    return (count / target * 100).round().clamp(0, 100);
   }
 }
 
@@ -97,8 +144,9 @@ class YourReportSnapshot {
     int? longestStreak,
     int? freezesRemaining,
     List<ReportBucket>? tasksCompletedByDay,
+    this.studyBySubject = const [],
+    this.totalStudyMinutes,
     this.community = const CommunityReportStats(),
-    this.dataSource = ReportDataSource.bundle,
   })  : studyMinutes = studyMinutes ?? const [],
         aiTools = aiTools ?? const AiToolReportStats(),
         _streakWeek = streakWeek,
@@ -118,8 +166,9 @@ class YourReportSnapshot {
   final int? _longestStreak;
   final int? _freezesRemaining;
   final List<ReportBucket> tasksCompletedByDay;
+  final List<StudySubjectReportRow> studyBySubject;
+  final double? totalStudyMinutes;
   final CommunityReportStats community;
-  final ReportDataSource dataSource;
 
   /// Current ISO week streak days (Mon–Sun). Meaningful on weekly view.
   List<DailyStreakDayModel> get streakWeek => _streakWeek ?? const [];
@@ -134,6 +183,9 @@ class YourReportSnapshot {
 
   bool get hasTasksCompletedData =>
       tasksCompletedByDay.any((bucket) => bucket.value > 0);
+
+  bool get hasStudyBySubject =>
+      studyBySubject.any((row) => row.studyMinutes > 0);
 
   bool get canExportPdf =>
       period == ReportPeriod.weekly ||

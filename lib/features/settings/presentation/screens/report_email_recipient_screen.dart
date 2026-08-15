@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:mishka_app/core/network/api_exception.dart';
+import 'package:mishka_app/core/widgets/screen_end_spacer.dart';
 import 'package:mishka_app/core/network/api_service.dart';
 import 'package:mishka_app/core/preferences/app_preferences.dart';
 import 'package:mishka_app/core/utils/app_colors.dart';
@@ -105,10 +106,7 @@ class _ReportEmailRecipientScreenState extends State<ReportEmailRecipientScreen>
       body: Form(
         key: _formKey,
         child: ListView(
-          padding: EdgeInsets.symmetric(
-            horizontal: AppSizes.paddingLarge,
-            vertical: 20.h,
-          ),
+          padding: AppScrollInsets.page(horizontal: AppSizes.paddingLarge, top: 20.h),
           children: [
             Text(
               l10n.settingsReportRecipientBody,

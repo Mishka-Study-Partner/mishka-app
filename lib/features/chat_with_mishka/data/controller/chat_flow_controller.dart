@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:mishka_app/features/chat_with_mishka/data/chat_flow_strings.dart';
 import 'package:mishka_app/features/chat_with_mishka/data/data_sources/chat_session_remote_data_source.dart';
+import 'package:mishka_app/features/chat_with_mishka/data/tool_data_normalizer.dart';
 
 enum ChatStep {
   idle,
@@ -44,6 +45,7 @@ class ChatMessage {
   final List<String>? options;
   final String? selectedOption;
   final Map<String, dynamic>? toolData;
+  final String? backendMessageId;
 
   const ChatMessage({
     required this.isFromMishka,
@@ -54,7 +56,29 @@ class ChatMessage {
     this.options,
     this.selectedOption,
     this.toolData,
+    this.backendMessageId,
   });
+
+  ChatMessage copyWith({
+    String? text,
+    String? fileName,
+    List<String>? options,
+    String? selectedOption,
+    Map<String, dynamic>? toolData,
+    String? backendMessageId,
+  }) {
+    return ChatMessage(
+      isFromMishka: isFromMishka,
+      type: type,
+      time: time,
+      text: text ?? this.text,
+      fileName: fileName ?? this.fileName,
+      options: options ?? this.options,
+      selectedOption: selectedOption ?? this.selectedOption,
+      toolData: toolData ?? this.toolData,
+      backendMessageId: backendMessageId ?? this.backendMessageId,
+    );
+  }
 }
 
 class ChatFlowController {
@@ -74,6 +98,7 @@ class ChatFlowController {
   String? uploadedPdfName;
   DifficultyLevel? difficulty;
   String? sessionId;
+  String? lastExplanationText;
   StudyAction? lastSelectedTool;
 
   final List<ChatMessage> messages = [];
@@ -84,11 +109,24 @@ class ChatFlowController {
     _strings = strings;
   }
 
+  void setBackendMessageId(int index, String id) {
+    if (index < 0 || index >= messages.length) return;
+    messages[index] = messages[index].copyWith(backendMessageId: id);
+  }
+
+  void updateToolPreviewData(int index, Map<String, dynamic> toolData) {
+    if (index < 0 || index >= messages.length) return;
+    final message = messages[index];
+    if (message.type != MessageType.toolPreview) return;
+    messages[index] = message.copyWith(toolData: toolData);
+  }
+
   void reset({bool withGreeting = true}) {
     messages.clear();
     uploadedPdfName = null;
     difficulty = null;
     sessionId = null;
+    lastExplanationText = null;
     lastSelectedTool = null;
     step = ChatStep.idle;
     if (withGreeting) {
@@ -132,6 +170,11 @@ class ChatFlowController {
           }
         } catch (_) {}
         continue;
+      }
+
+      if (msg.inputType == 'explanation' &&
+          msg.messageContent.trim().isNotEmpty) {
+        lastExplanationText = msg.messageContent;
       }
 
       final restored = _messageFromTimeline(msg);
@@ -195,14 +238,17 @@ class ChatFlowController {
         );
       case 'tool_preview':
         try {
-          final data = Map<String, dynamic>.from(
-            jsonDecode(msg.messageContent) as Map,
+          final data = normalizeToolData(
+            Map<String, dynamic>.from(
+              jsonDecode(msg.messageContent) as Map,
+            ),
           );
           return ChatMessage(
             isFromMishka: true,
             type: MessageType.toolPreview,
             toolData: data,
             time: time,
+            backendMessageId: msg.id,
           );
         } catch (_) {
           return null;
@@ -286,6 +332,7 @@ class ChatFlowController {
     required String sessionId,
   }) {
     this.sessionId = sessionId;
+    lastExplanationText = explanationText;
     step = ChatStep.freeInteraction;
 
     messages.add(
@@ -302,7 +349,7 @@ class ChatFlowController {
         isFromMishka: true,
         type: MessageType.options,
         options: _strings?.toolOptions ??
-            const ['Quiz', 'Flashcards', 'Mind Map', 'Summarize'],
+            const ['Quiz', 'Flashcards', 'Mind Map'],
         time: DateTime.now(),
       ),
     );
@@ -388,7 +435,7 @@ class ChatFlowController {
           isFromMishka: true,
           type: MessageType.options,
           options: _strings?.toolOptions ??
-              const ['Quiz', 'Flashcards', 'Mind Map', 'Summarize'],
+              const ['Quiz', 'Flashcards', 'Mind Map'],
           time: DateTime.now(),
         ),
       );
@@ -439,6 +486,7 @@ class ChatFlowController {
 
   void onToolPreviewGenerated({
     required Map<String, dynamic> toolData,
+    String? backendMessageId,
   }) {
     messages.add(
       ChatMessage(
@@ -446,6 +494,7 @@ class ChatFlowController {
         type: MessageType.toolPreview,
         toolData: toolData,
         time: DateTime.now(),
+        backendMessageId: backendMessageId,
       ),
     );
   }

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import 'package:mishka_app/core/utils/app_colors.dart';
+import 'package:mishka_app/core/widgets/screen_end_spacer.dart';
 import 'package:mishka_app/core/widgets/custom_app_bar.dart';
 import 'package:mishka_app/l10n/app_localizations.dart';
 
@@ -113,6 +114,7 @@ class _ManageMembersScreenState extends State<ManageMembersScreen> {
               child: _members.isEmpty
                   ? ListView(
                       physics: const AlwaysScrollableScrollPhysics(),
+                      padding: AppScrollInsets.list(),
                       children: [
                         SizedBox(height: 48.h),
                         Center(
@@ -124,7 +126,7 @@ class _ManageMembersScreenState extends State<ManageMembersScreen> {
                       ],
                     )
                   : ListView.builder(
-                      padding: EdgeInsets.all(12.w),
+                      padding: AppScrollInsets.list(horizontal: 12.w),
                       itemCount: _members.length,
                       itemBuilder: (context, index) {
                         final member = _members[index];

@@ -21,6 +21,95 @@ int parseInt(Object? value) {
   return int.tryParse(value?.toString() ?? '') ?? 0;
 }
 
+int _parseNestedCountField(
+  Map<String, dynamic> row,
+  List<String> fieldKeys,
+) {
+  for (final containerKey in const ['_count', 'stats', 'counts', 'meta']) {
+    final container = row[containerKey];
+    if (container is! Map) continue;
+    final nested = Map<String, dynamic>.from(container);
+    for (final fieldKey in fieldKeys) {
+      final parsed = parseInt(nested[fieldKey]);
+      if (parsed > 0) return parsed;
+    }
+  }
+  return 0;
+}
+
+/// Member total on community list/detail payloads (incl. Prisma `_count`).
+int parseCommunityMemberCount(
+  Map<String, dynamic> source, {
+  Map<String, dynamic>? row,
+}) {
+  final direct = parseInt(
+    source['memberCount'] ??
+        source['membersCount'] ??
+        source['member_count'] ??
+        source['totalMembers'] ??
+        row?['memberCount'] ??
+        row?['membersCount'] ??
+        row?['member_count'],
+  );
+  if (direct > 0) return direct;
+
+  final fromSource = _parseNestedCountField(source, const [
+    'members',
+    'memberCount',
+    'membersCount',
+    'memberships',
+    'users',
+  ]);
+  if (fromSource > 0) return fromSource;
+
+  if (row != null) {
+    return _parseNestedCountField(row, const [
+      'members',
+      'memberCount',
+      'membersCount',
+      'memberships',
+      'users',
+    ]);
+  }
+  return 0;
+}
+
+/// Channel/group total on community payloads.
+int parseCommunityGroupCount(
+  Map<String, dynamic> source, {
+  Map<String, dynamic>? row,
+}) {
+  final direct = parseInt(
+    source['channelCount'] ??
+        source['channelsCount'] ??
+        source['groupCount'] ??
+        source['groupsCount'] ??
+        source['channel_count'] ??
+        row?['channelCount'] ??
+        row?['groupsCount'] ??
+        row?['groupCount'],
+  );
+  if (direct > 0) return direct;
+
+  final fromSource = _parseNestedCountField(source, const [
+    'channels',
+    'channelCount',
+    'groups',
+    'groupCount',
+  ]);
+  if (fromSource > 0) return fromSource;
+
+  if (row != null) {
+    return _parseNestedCountField(row, const [
+      'channels',
+      'channelCount',
+      'groups',
+      'groupCount',
+    ]);
+  }
+  return 0;
+}
+
 bool parseBool(Object? value, {bool defaultValue = false}) {
   if (value == null) return defaultValue;
   if (value is bool) return value;

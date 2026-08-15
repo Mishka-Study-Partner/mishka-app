@@ -1,3 +1,4 @@
+import 'package:mishka_app/features/home/data/daily_streak_week_utils.dart';
 import 'package:mishka_app/features/home/data/models/daily_streak_model.dart';
 import 'package:mishka_app/features/report/data/models/report_models.dart';
 
@@ -51,6 +52,8 @@ class YourReportBundleModel {
     this.longestStreak = 0,
     this.freezesRemaining = 0,
     this.tasksCompletedByDay = const [],
+    this.studyBySubject = const [],
+    this.totalStudyMinutes,
     this.community = const CommunityReportStats(),
   });
 
@@ -65,6 +68,8 @@ class YourReportBundleModel {
   final int longestStreak;
   final int freezesRemaining;
   final List<ReportBucket> tasksCompletedByDay;
+  final List<StudySubjectReportRow> studyBySubject;
+  final double? totalStudyMinutes;
   final CommunityReportStats community;
 
   YourReportSnapshot toSnapshot() {
@@ -80,8 +85,9 @@ class YourReportBundleModel {
       longestStreak: longestStreak,
       freezesRemaining: freezesRemaining,
       tasksCompletedByDay: tasksCompletedByDay,
+      studyBySubject: studyBySubject,
+      totalStudyMinutes: totalStudyMinutes,
       community: community,
-      dataSource: ReportDataSource.bundle,
     );
   }
 
@@ -99,6 +105,8 @@ class YourReportBundleModel {
       rangeStart: _parseDate(json['rangeStart']) ?? DateTime.now().toUtc(),
       rangeEnd: _parseDate(json['rangeEnd']) ?? DateTime.now().toUtc(),
       studyMinutes: _parseStudyBuckets(studyRaw),
+      studyBySubject: _parseStudyBySubject(studyRaw),
+      totalStudyMinutes: _parseStudyTotalMinutes(studyRaw),
       aiTools: _parseAiTools(aiRaw),
       streakWeek: _parseStreakWeek(streakRaw),
       currentStreak: _parseInt(
@@ -117,14 +125,28 @@ class YourReportBundleModel {
 
   static CommunityReportStats _parseCommunity(Object? raw) {
     if (raw is! Map) return const CommunityReportStats();
-    final totals = raw['totals'];
+    final root = Map<String, dynamic>.from(raw);
+    final totals = root['totals'];
     if (totals is! Map) return const CommunityReportStats();
     final map = Map<String, dynamic>.from(totals);
     return CommunityReportStats(
       messagesPosted: _parseInt(map['messagesPosted']),
       materialShares: _parseInt(map['materialShares']),
       channelJoins: _parseInt(map['channelJoins']),
+      activityByDay: _parseCommunityBuckets(root['buckets']),
     );
+  }
+
+  static List<ReportBucket> _parseCommunityBuckets(Object? raw) {
+    if (raw is! List) return const [];
+    return raw.whereType<Map>().map((item) {
+      final map = Map<String, dynamic>.from(item);
+      final label = (map['label'] ?? '').toString();
+      final messages = _parseDouble(
+        map['messagesPosted'] ?? map['value'] ?? map['count'],
+      );
+      return ReportBucket(label: label, value: messages);
+    }).toList();
   }
 
   static ReportPeriod _periodFromString(String? raw) {
@@ -150,6 +172,40 @@ class YourReportBundleModel {
     }).toList();
   }
 
+  static double? _parseStudyTotalMinutes(Object? raw) {
+    if (raw is! Map) return null;
+    final totals = raw['totals'];
+    if (totals is! Map) return null;
+    final map = Map<String, dynamic>.from(totals);
+    final value = map['sumStudyMinutes'] ?? map['studyMinutes'] ?? map['total'];
+    if (value == null) return null;
+    return _parseDouble(value);
+  }
+
+  static List<StudySubjectReportRow> _parseStudyBySubject(Object? raw) {
+    if (raw is! Map) return const [];
+    final root = Map<String, dynamic>.from(raw);
+    final rows = root['bySubject'] ?? root['by_subject'];
+    if (rows is! List) return const [];
+    return rows.whereType<Map>().map((item) {
+      final map = Map<String, dynamic>.from(item);
+      final idRaw = map['studentSubjectId'] ?? map['student_subject_id'];
+      final id = idRaw?.toString();
+      return StudySubjectReportRow(
+        studentSubjectId: id == null || id.isEmpty || id == 'null' ? null : id,
+        name: (map['name'] ?? map['label'] ?? '').toString(),
+        colorHex: (map['color'] ?? map['colorHex'])?.toString(),
+        studyMinutes: _parseDouble(
+          map['studyMinutes'] ?? map['study_minutes'] ?? map['minutes'],
+        ),
+        sessionCount: _parseInt(map['sessionCount'] ?? map['session_count']),
+        percentOfTotal: _parseInt(
+          map['percentOfTotal'] ?? map['percent_of_total'] ?? map['percent'],
+        ),
+      );
+    }).toList();
+  }
+
   static AiToolReportStats _parseAiTools(Object? raw) {
     if (raw is! Map) return const AiToolReportStats();
     final map = Map<String, dynamic>.from(raw);
@@ -158,14 +214,28 @@ class YourReportBundleModel {
       flashcards: _parseInt(map['flashcards']),
       summaries: _parseInt(map['summaries']),
       mindMaps: _parseInt(map['mindMaps']),
+      rings: _parseAiRings(map['rings']),
     );
+  }
+
+  static List<AiToolRing> _parseAiRings(Object? raw) {
+    if (raw is! List) return const [];
+    return raw.whereType<Map>().map((item) {
+      final map = Map<String, dynamic>.from(item);
+      return AiToolRing(
+        key: (map['key'] ?? '').toString(),
+        count: _parseInt(map['count']),
+        percent: _parseInt(map['percent']),
+        label: map['label']?.toString(),
+      );
+    }).toList();
   }
 
   static List<DailyStreakDayModel> _parseStreakWeek(Object? raw) {
     if (raw is! Map) return const [];
     final week = raw['week'];
     if (week is! List) return const [];
-    return week.whereType<Map>().map((item) {
+    final days = week.whereType<Map>().map((item) {
       final map = Map<String, dynamic>.from(item);
       if (map.containsKey('state')) {
         return DailyStreakDayModel.fromJson(map);
@@ -183,6 +253,15 @@ class YourReportBundleModel {
         status: map['status']?.toString(),
       );
     }).toList();
+    return sanitizeStreakWeek(
+      alignStreakWeek(
+        days,
+        today: raw['today']?.toString(),
+      ),
+      currentStreak: _parseInt(raw['currentStreak']),
+      longestStreak: _parseInt(raw['longestStreak']),
+      today: raw['today']?.toString(),
+    );
   }
 
   static List<ReportBucket> _parseTaskBuckets(Object? raw) {

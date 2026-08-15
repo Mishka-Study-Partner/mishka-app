@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:mishka_app/core/layout/form_screen_body.dart';
 import 'package:mishka_app/core/network/api_exception.dart';
 import 'package:mishka_app/core/network/api_service.dart';
 import 'package:mishka_app/core/utils/app_colors.dart';
@@ -8,6 +9,7 @@ import 'package:mishka_app/core/utils/app_sizes.dart';
 import 'package:mishka_app/features/Auth/data/data_sources/auth_remote_data_source.dart';
 import 'package:mishka_app/features/Auth/utils/auth_navigation.dart';
 import 'package:mishka_app/features/Auth/utils/auth_validators.dart';
+import 'package:mishka_app/features/Auth/utils/auth_error_messages.dart';
 import 'package:mishka_app/l10n/app_localizations.dart';
 import 'package:mishka_app/features/Auth/view/bloc/auth_bloc.dart';
 
@@ -69,7 +71,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(_errorMessage(e, l10n))),
+          SnackBar(content: Text(AuthErrorMessages.from(e, l10n))),
         );
       }
       return;
@@ -126,27 +128,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
     );
   }
 
-  String _errorMessage(Object error, AppLocalizations l10n) {
-    if (error is ApiException) {
-      if (error.error == 'UNIQUE_VIOLATION') {
-        return l10n.accountAlreadyExists;
-      }
-      final buffer = StringBuffer();
-      if (error.statusCode != null) {
-        buffer.write('[${error.statusCode}] ');
-      }
-      if (error.error != null && error.error!.isNotEmpty) {
-        buffer.write('[${error.error}] ');
-      }
-      buffer.write(error.message);
-      if (error.details != null) {
-        buffer.write('\n${error.details}');
-      }
-      return buffer.toString();
-    }
-    return error.toString();
-  }
-
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
@@ -170,13 +151,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
         return Scaffold(
       backgroundColor: AppColors.screenBackground,
       appBar: const MishkaAppBar(title: '', showBottomBar: false),
-      body: Padding(
-        padding: EdgeInsetsDirectional.only(
-          start: AppSizes.paddingMedium,
-          end: AppSizes.paddingMedium,
-          bottom: AppSizes.paddingMedium,
-        ),
-        child: SingleChildScrollView(
+      body: FormScreenBody(
           child: Form(
             key: _formKey,
             child: Column(
@@ -325,8 +300,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
             ),
           ),
         ),
-      ),
-    );
+      );
       },
     );
   }

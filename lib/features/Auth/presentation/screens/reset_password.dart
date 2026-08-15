@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:mishka_app/core/layout/app_scale.dart';
+import 'package:mishka_app/core/layout/form_screen_body.dart';
 import 'package:mishka_app/core/utils/app_colors.dart';
 import 'package:mishka_app/core/utils/app_sizes.dart';
 import 'package:mishka_app/l10n/app_localizations.dart';
@@ -31,13 +32,7 @@ class _ResetPasswordState extends State<ResetPassword> {
         title: '',
         showBottomBar: false,
       ),
-      body: Padding(
-        padding: EdgeInsetsDirectional.only(
-          start: AppSizes.paddingMedium,
-          end: AppSizes.paddingMedium,
-          bottom: AppSizes.paddingMedium,
-        ),
-        child: SingleChildScrollView(
+      body: FormScreenBody(
           child: Column(
             children: [
               Text(
@@ -48,7 +43,7 @@ class _ResetPasswordState extends State<ResetPassword> {
                   fontWeight: FontWeight.w600,
                 ),
               ),
-              SizedBox(height: 24.h),
+              SizedBox(height: AppScale.h(24)),
               CustomSegmentedButton(
                 selectedIndex: selectedIndex,
                 onChanged: (i) => setState(() => selectedIndex = i),
@@ -60,7 +55,6 @@ class _ResetPasswordState extends State<ResetPassword> {
                  ResetPhoneView(),
             ],
           ),
-        ),
       ),
     );
   }

@@ -2,17 +2,12 @@ import 'package:flutter/foundation.dart';
 import 'package:mishka_app/core/network/api_service.dart';
 import 'package:mishka_app/features/report/data/data_sources/your_report_remote_data_source.dart';
 import 'package:mishka_app/features/report/data/models/report_models.dart';
-import 'package:mishka_app/features/report/data/repositories/report_legacy_loader.dart';
 
 class ReportRepository {
-  ReportRepository({
-    YourReportRemoteDataSource? remote,
-    ReportLegacyLoader? legacy,
-  })  : _remote = remote ?? YourReportRemoteDataSource(ApiService()),
-        _legacy = legacy ?? ReportLegacyLoader();
+  ReportRepository({YourReportRemoteDataSource? remote})
+      : _remote = remote ?? YourReportRemoteDataSource(ApiService());
 
   final YourReportRemoteDataSource _remote;
-  final ReportLegacyLoader _legacy;
 
   static const _cacheTtl = Duration(minutes: 2);
   final Map<_CacheKey, _CacheEntry> _cache = {};
@@ -32,23 +27,14 @@ class ReportRepository {
     }
 
     final anchor = DateTime.now();
-    YourReportSnapshot snapshot;
-
-    try {
-      final bundle = await _remote.getBundle(
-        period: period,
-        anchorDate: anchor,
-        locale: locale,
-      );
-      snapshot = bundle.toSnapshot();
-      if (kDebugMode) {
-        debugPrint('📊 YourReport: loaded via bundle API');
-      }
-    } catch (e, st) {
-      if (kDebugMode) {
-        debugPrint('📊 YourReport bundle failed, using legacy: $e\n$st');
-      }
-      snapshot = await _legacy.loadReport(period);
+    final bundle = await _remote.getBundle(
+      period: period,
+      anchorDate: anchor,
+      locale: locale,
+    );
+    final snapshot = bundle.toSnapshot();
+    if (kDebugMode) {
+      debugPrint('📊 YourReport: loaded via bundle API');
     }
 
     _cache[key] = _CacheEntry(snapshot, DateTime.now());

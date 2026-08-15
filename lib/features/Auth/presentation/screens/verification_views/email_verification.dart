@@ -25,7 +25,7 @@ class EmailVerification extends StatelessWidget {
         padding: EdgeInsetsDirectional.only(
           start: 18.w,
           end: 18.w,
-          bottom: AppSizes.paddingMedium,
+          bottom: AppSizes.paddingMedium + AppSizes.screenEndPadding,
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,

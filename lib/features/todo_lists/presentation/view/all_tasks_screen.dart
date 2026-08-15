@@ -3,10 +3,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:intl/intl.dart';
 import 'package:mishka_app/core/network/api_exception.dart';
+import 'package:mishka_app/core/widgets/screen_end_spacer.dart';
 import 'package:mishka_app/core/utils/app_colors.dart';
 import 'package:mishka_app/core/utils/app_sizes.dart';
 import 'package:mishka_app/core/widgets/custom_app_bar.dart';
 import 'package:mishka_app/features/ctegory/presentation/widgets/search_bar.dart';
+import 'package:mishka_app/features/todo_lists/data/task_due_fields.dart';
 import 'package:mishka_app/features/todo_lists/data/models/task_api_model.dart';
 import 'package:mishka_app/features/todo_lists/data/repositories/todo_repository.dart';
 import 'package:mishka_app/features/todo_lists/presentation/widgets/custom_task_card.dart';
@@ -175,15 +177,15 @@ class _AllTasksScreenState extends State<AllTasksScreen> {
     }
   }
 
-  String _formatTaskDate(DateTime? deadline, String localeName) {
-    if (deadline == null) return '--';
-    return DateFormat.yMMMd(localeName).format(deadline.toLocal());
-  }
+  String _formatTaskDate(DateTime? deadline, String localeName) =>
+      TaskDueFields.formatDate(deadline, localeName);
 
-  String _formatTaskTime(DateTime? deadline, String localeName) {
-    if (deadline == null) return '--';
-    return DateFormat.jm(localeName).format(deadline.toLocal());
-  }
+  String _formatTaskTime(TaskApiModel task, String localeName) =>
+      TaskDueFields.formatTime(
+        deadline: task.deadline,
+        hasDueTime: task.hasDueTime,
+        locale: localeName,
+      );
 
   @override
   Widget build(BuildContext context) {
@@ -242,6 +244,7 @@ class _AllTasksScreenState extends State<AllTasksScreen> {
                       : RefreshIndicator(
                           onRefresh: _loadTasks,
                           child: ListView.separated(
+                            padding: AppScrollInsets.list(),
                             itemCount: _tasks.length,
                             separatorBuilder: (_, __) => SizedBox(height: 10.h),
                             itemBuilder: (context, index) {
@@ -249,7 +252,7 @@ class _AllTasksScreenState extends State<AllTasksScreen> {
                               return CustomTaskCard(
                                 title: task.title,
                                 date: _formatTaskDate(task.deadline, localeName),
-                                time: _formatTaskTime(task.deadline, localeName),
+                                time: _formatTaskTime(task, localeName),
                                 taskStatus: task.resolvedStatus,
                                 listName: task.todoListTitle,
                                 onEdit: () => _editTask(task),

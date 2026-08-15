@@ -179,7 +179,7 @@ abstract class AppLocalizations {
   /// No description provided for @alreadyHaveAccount.
   ///
   /// In en, this message translates to:
-  /// **'Already have account? Sign In'**
+  /// **'Already have account?'**
   String get alreadyHaveAccount;
 
   /// No description provided for @orSignUpWith.
@@ -209,7 +209,7 @@ abstract class AppLocalizations {
   /// No description provided for @dontHaveAccount.
   ///
   /// In en, this message translates to:
-  /// **'Don\'t have account? create account'**
+  /// **'Don\'t have account?'**
   String get dontHaveAccount;
 
   /// No description provided for @resetPassword.
@@ -367,6 +367,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Welcome, Back Ziad!'**
   String get welcomeBackSara;
+
+  /// No description provided for @welcomeBackName.
+  ///
+  /// In en, this message translates to:
+  /// **'Welcome back, {name}'**
+  String welcomeBackName(String name);
 
   /// No description provided for @sundayJan26.
   ///
@@ -764,6 +770,24 @@ abstract class AppLocalizations {
   /// **'Failed to analyze PDF.\n{error}'**
   String chatAnalyzePdfFailed(String error);
 
+  /// No description provided for @chatAiServiceUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Mishka\'s AI service is temporarily unavailable. The model server could not reach OpenRouter — ask your team to check the OpenRouter API key on the Mishka AI model server (Railway), then try again.'**
+  String get chatAiServiceUnavailable;
+
+  /// No description provided for @chatAiServerUnreachable.
+  ///
+  /// In en, this message translates to:
+  /// **'Mishka\'s AI server is not responding. Check that the Railway AI deployment is running and healthy, then try again.'**
+  String get chatAiServerUnreachable;
+
+  /// No description provided for @chatAiSessionExpired.
+  ///
+  /// In en, this message translates to:
+  /// **'This study session expired. Please start a new chat and upload your PDF again.'**
+  String get chatAiSessionExpired;
+
   /// No description provided for @chatToolGenerationFailed.
   ///
   /// In en, this message translates to:
@@ -895,6 +919,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Mishka\'s Support:'**
   String get mishkasSupport;
+
+  /// No description provided for @supportStudyHoursBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'Count your daily study hours with Mishka'**
+  String get supportStudyHoursBadge;
+
+  /// No description provided for @supportChallengesBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'Win Mishka\'s challenges and get your prize'**
+  String get supportChallengesBadge;
 
   /// No description provided for @exploreMore.
   ///
@@ -1087,6 +1123,42 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'points, streaks, Badges, Challenges.'**
   String get gamificationSubtitle;
+
+  /// No description provided for @gamificationPoints.
+  ///
+  /// In en, this message translates to:
+  /// **'Points'**
+  String get gamificationPoints;
+
+  /// No description provided for @gamificationBadges.
+  ///
+  /// In en, this message translates to:
+  /// **'Badges'**
+  String get gamificationBadges;
+
+  /// No description provided for @gamificationRewards.
+  ///
+  /// In en, this message translates to:
+  /// **'Rewards'**
+  String get gamificationRewards;
+
+  /// No description provided for @gamificationChallenges.
+  ///
+  /// In en, this message translates to:
+  /// **'Challenges'**
+  String get gamificationChallenges;
+
+  /// No description provided for @myProgress.
+  ///
+  /// In en, this message translates to:
+  /// **'My Progress'**
+  String get myProgress;
+
+  /// No description provided for @myProgressSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Study time, streaks, tasks, and AI usage by week or month.'**
+  String get myProgressSubtitle;
 
   /// No description provided for @accountSetting.
   ///
@@ -1544,6 +1616,12 @@ abstract class AppLocalizations {
   /// **'You successfully reviewed all our flashcards great job!'**
   String get successfullyReviewedFlashcards;
 
+  /// No description provided for @flashcardsFinishedMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'You Have Successfully Finished All Your Flashcards'**
+  String get flashcardsFinishedMessage;
+
   /// No description provided for @eyeOfHorus.
   ///
   /// In en, this message translates to:
@@ -1766,6 +1844,30 @@ abstract class AppLocalizations {
   /// **'Saved Flash Cards'**
   String get savedFlashCards;
 
+  /// No description provided for @savedFlashCardTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Saved Flash Card'**
+  String get savedFlashCardTitle;
+
+  /// No description provided for @savedFlashcardSourcePrompt.
+  ///
+  /// In en, this message translates to:
+  /// **'Make me FLASHCARDS for this uploaded file'**
+  String get savedFlashcardSourcePrompt;
+
+  /// No description provided for @savedFlashcardFileTypePdf.
+  ///
+  /// In en, this message translates to:
+  /// **'Type: pdf file'**
+  String get savedFlashcardFileTypePdf;
+
+  /// No description provided for @savedCreatedOnDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Created on {date}'**
+  String savedCreatedOnDate(String date);
+
   /// No description provided for @view.
   ///
   /// In en, this message translates to:
@@ -1778,11 +1880,131 @@ abstract class AppLocalizations {
   /// **'Saved Quizes'**
   String get savedQuizes;
 
+  /// No description provided for @savedQuizzes.
+  ///
+  /// In en, this message translates to:
+  /// **'Saved Quizzes'**
+  String get savedQuizzes;
+
+  /// No description provided for @savedQuizTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Saved Quiz'**
+  String get savedQuizTitle;
+
+  /// No description provided for @savedQuizSearchHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Search...'**
+  String get savedQuizSearchHint;
+
+  /// No description provided for @savedQuizUploadedFileLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'This is the uploaded file:'**
+  String get savedQuizUploadedFileLabel;
+
+  /// No description provided for @savedQuizTypeMcq.
+  ///
+  /// In en, this message translates to:
+  /// **'Type: Multiple choice questions'**
+  String get savedQuizTypeMcq;
+
+  /// No description provided for @savedQuizQuestionsCount.
+  ///
+  /// In en, this message translates to:
+  /// **'Questions: {count} mcq'**
+  String savedQuizQuestionsCount(int count);
+
+  /// No description provided for @savedQuizCreatedOn.
+  ///
+  /// In en, this message translates to:
+  /// **'Created on: {date}'**
+  String savedQuizCreatedOn(String date);
+
+  /// No description provided for @viewDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'View Details'**
+  String get viewDetails;
+
+  /// No description provided for @savedQuizQuestionLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Question {current}/{total}'**
+  String savedQuizQuestionLabel(int current, int total);
+
+  /// No description provided for @savedQuizCorrectWrong.
+  ///
+  /// In en, this message translates to:
+  /// **'{correct} Correct / {wrong} Wrong'**
+  String savedQuizCorrectWrong(int correct, int wrong);
+
+  /// No description provided for @savedQuizPreviousScore.
+  ///
+  /// In en, this message translates to:
+  /// **'Your previous score: {percent}%'**
+  String savedQuizPreviousScore(int percent);
+
+  /// No description provided for @savedQuizSolveAgain.
+  ///
+  /// In en, this message translates to:
+  /// **'Solve again'**
+  String get savedQuizSolveAgain;
+
+  /// No description provided for @focusBeforeAnswering.
+  ///
+  /// In en, this message translates to:
+  /// **'Focus before answering'**
+  String get focusBeforeAnswering;
+
+  /// No description provided for @flashcardProgress.
+  ///
+  /// In en, this message translates to:
+  /// **'Card {current} of {total}'**
+  String flashcardProgress(int current, int total);
+
   /// No description provided for @savedSummary.
   ///
   /// In en, this message translates to:
   /// **'Saved Summary'**
   String get savedSummary;
+
+  /// No description provided for @savedSummaryTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Saved Summary'**
+  String get savedSummaryTitle;
+
+  /// No description provided for @savedMindMap.
+  ///
+  /// In en, this message translates to:
+  /// **'Saved Mind Map'**
+  String get savedMindMap;
+
+  /// No description provided for @savedMindMapTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Saved Mind Map'**
+  String get savedMindMapTitle;
+
+  /// No description provided for @summaryFinishedMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'You Have Successfully Finished Your Summarized Paragraph'**
+  String get summaryFinishedMessage;
+
+  /// No description provided for @mindMapFinishedMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'You Have Successfully Finished Your Mind Map'**
+  String get mindMapFinishedMessage;
+
+  /// No description provided for @savedSnippetMore.
+  ///
+  /// In en, this message translates to:
+  /// **'More'**
+  String get savedSnippetMore;
 
   /// No description provided for @savedSearchHint.
   ///
@@ -1865,7 +2087,7 @@ abstract class AppLocalizations {
   /// No description provided for @keepItUp.
   ///
   /// In en, this message translates to:
-  /// **'Keep it up'**
+  /// **'Keep It Up'**
   String get keepItUp;
 
   /// No description provided for @collectBadge.
@@ -1873,6 +2095,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Collect Badge'**
   String get collectBadge;
+
+  /// No description provided for @quizYouHaveAnsweredPercent.
+  ///
+  /// In en, this message translates to:
+  /// **'You Have Answered {percent}%'**
+  String quizYouHaveAnsweredPercent(int percent);
+
+  /// No description provided for @correctAnswers.
+  ///
+  /// In en, this message translates to:
+  /// **'Correct Answers'**
+  String get correctAnswers;
 
   /// No description provided for @answered100Percent.
   ///
@@ -1895,7 +2129,7 @@ abstract class AppLocalizations {
   /// No description provided for @keepGoing.
   ///
   /// In en, this message translates to:
-  /// **'Keep going'**
+  /// **'Keep Going'**
   String get keepGoing;
 
   /// No description provided for @delete.
@@ -1939,6 +2173,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Error'**
   String get errorPrefix;
+
+  /// No description provided for @networkConnectionError.
+  ///
+  /// In en, this message translates to:
+  /// **'Can\'t reach Mishka right now. Check your internet connection and try again.'**
+  String get networkConnectionError;
 
   /// No description provided for @pleaseFillAllRequiredFields.
   ///
@@ -2125,6 +2365,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Open group'**
   String get shareOpenGroup;
+
+  /// No description provided for @shareOptionalNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a note (optional)'**
+  String get shareOptionalNote;
+
+  /// No description provided for @communitySharedMaterialTapToOpen.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap to open full screen'**
+  String get communitySharedMaterialTapToOpen;
 
   /// No description provided for @noCommunityChannelsFound.
   ///
@@ -2408,6 +2660,18 @@ abstract class AppLocalizations {
   /// **'Camera On'**
   String get cameraOn;
 
+  /// No description provided for @callMishka.
+  ///
+  /// In en, this message translates to:
+  /// **'Call Mishka'**
+  String get callMishka;
+
+  /// No description provided for @startCallWithMishka.
+  ///
+  /// In en, this message translates to:
+  /// **'Start call with Mishka'**
+  String get startCallWithMishka;
+
   /// No description provided for @videoCallWithMishka.
   ///
   /// In en, this message translates to:
@@ -2425,6 +2689,78 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Camera is Off'**
   String get cameraIsOff;
+
+  /// No description provided for @studyFocusConnecting.
+  ///
+  /// In en, this message translates to:
+  /// **'Connecting to focus monitor…'**
+  String get studyFocusConnecting;
+
+  /// No description provided for @studyFocusFocused.
+  ///
+  /// In en, this message translates to:
+  /// **'Focused'**
+  String get studyFocusFocused;
+
+  /// No description provided for @studyFocusDistracted.
+  ///
+  /// In en, this message translates to:
+  /// **'Check your posture'**
+  String get studyFocusDistracted;
+
+  /// No description provided for @studyFocusUnknown.
+  ///
+  /// In en, this message translates to:
+  /// **'Analyzing…'**
+  String get studyFocusUnknown;
+
+  /// No description provided for @studyFocusOffline.
+  ///
+  /// In en, this message translates to:
+  /// **'Focus monitor unavailable'**
+  String get studyFocusOffline;
+
+  /// No description provided for @studyPostureCalibration.
+  ///
+  /// In en, this message translates to:
+  /// **'Breathe softly and sit as you naturally do. My ancient whiskers are adjusting to your unique aura.'**
+  String get studyPostureCalibration;
+
+  /// No description provided for @studyMlCalibrating.
+  ///
+  /// In en, this message translates to:
+  /// **'Settle into your natural stance while Mishka calibrates your workspace…'**
+  String get studyMlCalibrating;
+
+  /// No description provided for @studyMlFocusing.
+  ///
+  /// In en, this message translates to:
+  /// **'Focused — keep going!'**
+  String get studyMlFocusing;
+
+  /// No description provided for @studyMlBadPosture.
+  ///
+  /// In en, this message translates to:
+  /// **'Mishka says: Sit up straight to protect your energy!'**
+  String get studyMlBadPosture;
+
+  /// No description provided for @studyMlLookingAway.
+  ///
+  /// In en, this message translates to:
+  /// **'Eyes back on your material!'**
+  String get studyMlLookingAway;
+
+  /// No description provided for @studyMlNoUser.
+  ///
+  /// In en, this message translates to:
+  /// **'Mishka lost track of you. Ensure your camera isn\'t obstructed.'**
+  String get studyMlNoUser;
+
+  /// No description provided for @studyMlError.
+  ///
+  /// In en, this message translates to:
+  /// **'Focus monitor had a hiccup — stay seated and we\'ll retry.'**
+  String get studyMlError;
 
   /// No description provided for @timer.
   ///
@@ -2513,13 +2849,13 @@ abstract class AppLocalizations {
   /// No description provided for @onboardingIntroLine1.
   ///
   /// In en, this message translates to:
-  /// **'I am Mishka, custodian of'**
+  /// **'I am Mishka, custodian of knowledge,'**
   String get onboardingIntroLine1;
 
   /// No description provided for @onboardingIntroLine2.
   ///
   /// In en, this message translates to:
-  /// **'knowledge our quest for glory'**
+  /// **'our quest for glory'**
   String get onboardingIntroLine2;
 
   /// No description provided for @onboardingIntroLine3.
@@ -2582,6 +2918,12 @@ abstract class AppLocalizations {
   /// **'Which School Stage Are You Currently In?'**
   String get schoolStageQuestion;
 
+  /// No description provided for @primarySchoolColon.
+  ///
+  /// In en, this message translates to:
+  /// **'Primary School:'**
+  String get primarySchoolColon;
+
   /// No description provided for @middleSchoolColon.
   ///
   /// In en, this message translates to:
@@ -2593,6 +2935,42 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'High School:'**
   String get highSchoolColon;
+
+  /// No description provided for @firstPrimary.
+  ///
+  /// In en, this message translates to:
+  /// **'1st Primary'**
+  String get firstPrimary;
+
+  /// No description provided for @secondPrimary.
+  ///
+  /// In en, this message translates to:
+  /// **'2nd Primary'**
+  String get secondPrimary;
+
+  /// No description provided for @thirdPrimary.
+  ///
+  /// In en, this message translates to:
+  /// **'3rd Primary'**
+  String get thirdPrimary;
+
+  /// No description provided for @fourthPrimary.
+  ///
+  /// In en, this message translates to:
+  /// **'4th Primary'**
+  String get fourthPrimary;
+
+  /// No description provided for @fifthPrimary.
+  ///
+  /// In en, this message translates to:
+  /// **'5th Primary'**
+  String get fifthPrimary;
+
+  /// No description provided for @sixthPrimary.
+  ///
+  /// In en, this message translates to:
+  /// **'6th Primary'**
+  String get sixthPrimary;
 
   /// No description provided for @firstPreparatory.
   ///
@@ -2753,8 +3131,20 @@ abstract class AppLocalizations {
   /// No description provided for @reportEmailMyReport.
   ///
   /// In en, this message translates to:
-  /// **'Email my report'**
+  /// **'Create PDF and send link to email'**
   String get reportEmailMyReport;
+
+  /// No description provided for @reportOpenSettings.
+  ///
+  /// In en, this message translates to:
+  /// **'Open your report\'s settings'**
+  String get reportOpenSettings;
+
+  /// No description provided for @reportSettingsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Report settings'**
+  String get reportSettingsTitle;
 
   /// No description provided for @reportPdfEmailSent.
   ///
@@ -2768,11 +3158,17 @@ abstract class AppLocalizations {
   /// **'Could not open the report PDF link.'**
   String get reportPdfOpenFailed;
 
-  /// No description provided for @reportPdfSharedLocally.
+  /// No description provided for @reportExportNoData.
   ///
   /// In en, this message translates to:
-  /// **'Server export unavailable — shared a local PDF copy instead.'**
-  String get reportPdfSharedLocally;
+  /// **'No activity in this period to export yet.'**
+  String get reportExportNoData;
+
+  /// No description provided for @reportExportEmailNotConfigured.
+  ///
+  /// In en, this message translates to:
+  /// **'Email delivery is not available right now. Try again later or contact support.'**
+  String get reportExportEmailNotConfigured;
 
   /// No description provided for @reportUsingLegacyData.
   ///
@@ -2789,7 +3185,7 @@ abstract class AppLocalizations {
   /// No description provided for @reportDuringConcentrationMode.
   ///
   /// In en, this message translates to:
-  /// **'Total study time (Concentration + Camera modes):'**
+  /// **'Total study time (all modes):'**
   String get reportDuringConcentrationMode;
 
   /// No description provided for @reportAiTools.
@@ -2995,6 +3391,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Community description'**
   String get communityCreateDescHint;
+
+  /// No description provided for @communityCreateCategoryLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Category (optional):'**
+  String get communityCreateCategoryLabel;
+
+  /// No description provided for @communityCreateCategoryHint.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. Physics, Exam prep'**
+  String get communityCreateCategoryHint;
+
+  /// No description provided for @communityCreateCategoryHelper.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick a suggestion or type a new category name'**
+  String get communityCreateCategoryHelper;
 
   /// No description provided for @communityCreateDiscoverSection.
   ///
@@ -3446,11 +3860,11 @@ abstract class AppLocalizations {
   /// **'Invitation sent to @{username}'**
   String communityInviteUsernameSent(String username);
 
-  /// No description provided for @communityHubJoinFailedOpenAnyway.
+  /// No description provided for @communityAccessDenied.
   ///
   /// In en, this message translates to:
-  /// **'Could not join community. Opening anyway…'**
-  String get communityHubJoinFailedOpenAnyway;
+  /// **'You do not have access to this community. Join to see channels and groups.'**
+  String get communityAccessDenied;
 
   /// No description provided for @communityHubNoneYet.
   ///
@@ -3710,11 +4124,23 @@ abstract class AppLocalizations {
   /// **'Subjects (optional)'**
   String get communityDiscoverySubjectsOptional;
 
+  /// No description provided for @communityDiscoverySubjectsHelper.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap one or more subject tags for discover'**
+  String get communityDiscoverySubjectsHelper;
+
   /// No description provided for @communityDiscoveryPurposeOptional.
   ///
   /// In en, this message translates to:
   /// **'Purpose (optional)'**
   String get communityDiscoveryPurposeOptional;
+
+  /// No description provided for @communityDiscoveryPurposeHelper.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap one purpose tag — e.g. study group or exam prep'**
+  String get communityDiscoveryPurposeHelper;
 
   /// No description provided for @communityInviteEmailHint.
   ///
@@ -3793,6 +4219,438 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Channel joins'**
   String get reportCommunityChannelJoins;
+
+  /// No description provided for @studySubjectPickerTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'What are you studying?'**
+  String get studySubjectPickerTitle;
+
+  /// No description provided for @studySubjectPickerSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Optional — pick a course or continue without one.'**
+  String get studySubjectPickerSubtitle;
+
+  /// No description provided for @studySubjectNone.
+  ///
+  /// In en, this message translates to:
+  /// **'No specific subject'**
+  String get studySubjectNone;
+
+  /// No description provided for @studySubjectManage.
+  ///
+  /// In en, this message translates to:
+  /// **'Manage my subjects'**
+  String get studySubjectManage;
+
+  /// No description provided for @studySubjectStartSession.
+  ///
+  /// In en, this message translates to:
+  /// **'Start session'**
+  String get studySubjectStartSession;
+
+  /// No description provided for @studentSubjectsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'My subjects'**
+  String get studentSubjectsTitle;
+
+  /// No description provided for @studentSubjectsSettingsHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Add courses to track study time per subject.'**
+  String get studentSubjectsSettingsHint;
+
+  /// No description provided for @studentSubjectsDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Create up to 20 subjects (Physics, Arabic, …). Pick one when you start a study session, or leave it unassigned.'**
+  String get studentSubjectsDescription;
+
+  /// No description provided for @studentSubjectsEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No subjects yet. Tap + to add your first course.'**
+  String get studentSubjectsEmpty;
+
+  /// No description provided for @studentSubjectsAddTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Add subject'**
+  String get studentSubjectsAddTitle;
+
+  /// No description provided for @studentSubjectsEditTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit subject'**
+  String get studentSubjectsEditTitle;
+
+  /// No description provided for @studentSubjectsEditMenu.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit'**
+  String get studentSubjectsEditMenu;
+
+  /// No description provided for @studentSubjectsNameLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Subject name'**
+  String get studentSubjectsNameLabel;
+
+  /// No description provided for @studentSubjectsColorLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Color'**
+  String get studentSubjectsColorLabel;
+
+  /// No description provided for @studentSubjectsDeleteTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete subject?'**
+  String get studentSubjectsDeleteTitle;
+
+  /// No description provided for @studentSubjectsDeleteBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove \"{name}\" from your list? Past study sessions keep their history in reports.'**
+  String studentSubjectsDeleteBody(String name);
+
+  /// No description provided for @studentSubjectsNameInUse.
+  ///
+  /// In en, this message translates to:
+  /// **'You already have a subject with this name.'**
+  String get studentSubjectsNameInUse;
+
+  /// No description provided for @studentSubjectsSaveFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not save subject. Try again.'**
+  String get studentSubjectsSaveFailed;
+
+  /// No description provided for @studentSubjectsMaxReached.
+  ///
+  /// In en, this message translates to:
+  /// **'You can have up to {count} subjects.'**
+  String studentSubjectsMaxReached(int count);
+
+  /// No description provided for @reportStudyBySubject.
+  ///
+  /// In en, this message translates to:
+  /// **'Study by subject'**
+  String get reportStudyBySubject;
+
+  /// No description provided for @reportTotalStudyMinutes.
+  ///
+  /// In en, this message translates to:
+  /// **'{minutes} min total'**
+  String reportTotalStudyMinutes(int minutes);
+
+  /// No description provided for @reportMinutesSuffix.
+  ///
+  /// In en, this message translates to:
+  /// **'m'**
+  String get reportMinutesSuffix;
+
+  /// No description provided for @reportNoStudyBySubject.
+  ///
+  /// In en, this message translates to:
+  /// **'No subject breakdown for this period yet.'**
+  String get reportNoStudyBySubject;
+
+  /// No description provided for @gamificationHubTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Gamifications'**
+  String get gamificationHubTitle;
+
+  /// No description provided for @gamificationWeekly.
+  ///
+  /// In en, this message translates to:
+  /// **'weekly'**
+  String get gamificationWeekly;
+
+  /// No description provided for @gamificationMonthly.
+  ///
+  /// In en, this message translates to:
+  /// **'monthly'**
+  String get gamificationMonthly;
+
+  /// No description provided for @gamificationLoadFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not load gamification data.'**
+  String get gamificationLoadFailed;
+
+  /// No description provided for @gamificationStreakDaysPerWeek.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} days streak/ week'**
+  String gamificationStreakDaysPerWeek(int count);
+
+  /// No description provided for @gamificationTodoSection.
+  ///
+  /// In en, this message translates to:
+  /// **'To Do List :'**
+  String get gamificationTodoSection;
+
+  /// No description provided for @gamificationTodoGoalWeekly.
+  ///
+  /// In en, this message translates to:
+  /// **'Finishing all tasks/week == 1 Badge'**
+  String get gamificationTodoGoalWeekly;
+
+  /// No description provided for @gamificationTasksPerWeek.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} Tasks/ week'**
+  String gamificationTasksPerWeek(int count);
+
+  /// No description provided for @gamificationTasksAwayFromBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} Tasks away to get Badge'**
+  String gamificationTasksAwayFromBadge(int count);
+
+  /// No description provided for @gamificationTasksProgress.
+  ///
+  /// In en, this message translates to:
+  /// **'{done} tasks/ {total} done...'**
+  String gamificationTasksProgress(int done, int total);
+
+  /// No description provided for @gamificationBadgesEarnedMonth.
+  ///
+  /// In en, this message translates to:
+  /// **'Got {count} badges this month'**
+  String gamificationBadgesEarnedMonth(int count);
+
+  /// No description provided for @gamificationAiToolsSection.
+  ///
+  /// In en, this message translates to:
+  /// **'AI Tools :'**
+  String get gamificationAiToolsSection;
+
+  /// No description provided for @gamificationStudySection.
+  ///
+  /// In en, this message translates to:
+  /// **'Study with Mishka :'**
+  String get gamificationStudySection;
+
+  /// No description provided for @gamificationStudyGoalWeekly.
+  ///
+  /// In en, this message translates to:
+  /// **'Counting total study minutes (3hrs/Day == 21hr/week)'**
+  String get gamificationStudyGoalWeekly;
+
+  /// No description provided for @gamificationStudyHoursPerWeek.
+  ///
+  /// In en, this message translates to:
+  /// **'{hours} hrs / week'**
+  String gamificationStudyHoursPerWeek(int hours);
+
+  /// No description provided for @gamificationStudyHoursAway.
+  ///
+  /// In en, this message translates to:
+  /// **'{hours} hr away to get Badge'**
+  String gamificationStudyHoursAway(int hours);
+
+  /// No description provided for @gamificationStudyProgress.
+  ///
+  /// In en, this message translates to:
+  /// **'{done} hrs/ {total} done...'**
+  String gamificationStudyProgress(int done, int total);
+
+  /// No description provided for @gamificationCommunitySection.
+  ///
+  /// In en, this message translates to:
+  /// **'Mishka\'s Community :'**
+  String get gamificationCommunitySection;
+
+  /// No description provided for @gamificationCommunityGoalWeekly.
+  ///
+  /// In en, this message translates to:
+  /// **'Active in community 700% /week (1 Badge == >500% /week)'**
+  String get gamificationCommunityGoalWeekly;
+
+  /// No description provided for @gamificationCommunityPercentWeek.
+  ///
+  /// In en, this message translates to:
+  /// **'{percent}% / week'**
+  String gamificationCommunityPercentWeek(int percent);
+
+  /// No description provided for @gamificationCommunityPercentAway.
+  ///
+  /// In en, this message translates to:
+  /// **'{percent}% away to get Badge'**
+  String gamificationCommunityPercentAway(int percent);
+
+  /// No description provided for @gamificationCommunityProgress.
+  ///
+  /// In en, this message translates to:
+  /// **'{done}%/ {total} done...'**
+  String gamificationCommunityProgress(int done, int total);
+
+  /// No description provided for @gamificationBadgeQuizPerfect.
+  ///
+  /// In en, this message translates to:
+  /// **'Get 10 / 10 in Quizzes'**
+  String get gamificationBadgeQuizPerfect;
+
+  /// No description provided for @gamificationBadgeQuizScore80.
+  ///
+  /// In en, this message translates to:
+  /// **'Get 8 / 10 in Quizzes'**
+  String get gamificationBadgeQuizScore80;
+
+  /// No description provided for @gamificationBadgeQuizKeepLearning.
+  ///
+  /// In en, this message translates to:
+  /// **'Get <5 / 10 in Quizzes'**
+  String get gamificationBadgeQuizKeepLearning;
+
+  /// No description provided for @gamificationBadgeFlashcards.
+  ///
+  /// In en, this message translates to:
+  /// **'Finishing all your Flashcards'**
+  String get gamificationBadgeFlashcards;
+
+  /// No description provided for @gamificationBadgeSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'Finishing your Summarized'**
+  String get gamificationBadgeSummary;
+
+  /// No description provided for @gamificationBadgeMindMap.
+  ///
+  /// In en, this message translates to:
+  /// **'Finishing your Mind Map'**
+  String get gamificationBadgeMindMap;
+
+  /// No description provided for @gamificationBadgeChat.
+  ///
+  /// In en, this message translates to:
+  /// **'Chat with Mishka (Every 1 Text = 1 point)'**
+  String get gamificationBadgeChat;
+
+  /// No description provided for @gamificationChatBadgeFootnote.
+  ///
+  /// In en, this message translates to:
+  /// **'(10 point = 1 badge)'**
+  String get gamificationChatBadgeFootnote;
+
+  /// No description provided for @gamificationBadgeEarnedCount.
+  ///
+  /// In en, this message translates to:
+  /// **'Got this Badge {count} times'**
+  String gamificationBadgeEarnedCount(int count);
+
+  /// No description provided for @gamificationMonthlyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'{section} — Monthly'**
+  String gamificationMonthlyTitle(String section);
+
+  /// No description provided for @gamificationMonthlyPlaceholder.
+  ///
+  /// In en, this message translates to:
+  /// **'Monthly breakdown for this section will appear here once the backend ships aggregated data. Share the Figma monthly screen when ready and we will match it.'**
+  String get gamificationMonthlyPlaceholder;
+
+  /// No description provided for @gamificationStreakCalendarTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Your Monthly Streak Calendar'**
+  String get gamificationStreakCalendarTitle;
+
+  /// No description provided for @gamificationStreakDaysPerMonth.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} days streak/month'**
+  String gamificationStreakDaysPerMonth(int count);
+
+  /// No description provided for @gamificationStreakOpenedApp.
+  ///
+  /// In en, this message translates to:
+  /// **'Opened The App'**
+  String get gamificationStreakOpenedApp;
+
+  /// No description provided for @gamificationStreakMissedApp.
+  ///
+  /// In en, this message translates to:
+  /// **'Didn\'t Open The App'**
+  String get gamificationStreakMissedApp;
+
+  /// No description provided for @gamificationWeekLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Week {week}'**
+  String gamificationWeekLabel(int week);
+
+  /// No description provided for @gamificationDetailsLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Details:'**
+  String get gamificationDetailsLabel;
+
+  /// No description provided for @gamificationMonthlyBadgesHighlight.
+  ///
+  /// In en, this message translates to:
+  /// **'Monthly Badges'**
+  String get gamificationMonthlyBadgesHighlight;
+
+  /// No description provided for @gamificationTodoMonthlyAppBar.
+  ///
+  /// In en, this message translates to:
+  /// **'To Do List Monthly Badges'**
+  String get gamificationTodoMonthlyAppBar;
+
+  /// No description provided for @gamificationTodoMonthlyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'To Do List'**
+  String get gamificationTodoMonthlyTitle;
+
+  /// No description provided for @gamificationStudyGoalWeeklyShort.
+  ///
+  /// In en, this message translates to:
+  /// **'21 hr/ week == 1 badge'**
+  String get gamificationStudyGoalWeeklyShort;
+
+  /// No description provided for @gamificationStudyMonthlyAppBar.
+  ///
+  /// In en, this message translates to:
+  /// **'Study With Mishka Monthly Badges'**
+  String get gamificationStudyMonthlyAppBar;
+
+  /// No description provided for @gamificationStudyMonthlyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Study With Mishka'**
+  String get gamificationStudyMonthlyTitle;
+
+  /// No description provided for @gamificationCommunityMonthlyAppBar.
+  ///
+  /// In en, this message translates to:
+  /// **'Mishka\'s Community Monthly Badges'**
+  String get gamificationCommunityMonthlyAppBar;
+
+  /// No description provided for @gamificationCommunityMonthlyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Mishka\'s Community'**
+  String get gamificationCommunityMonthlyTitle;
+
+  /// No description provided for @gamificationAiToolsMonthlyAppBar.
+  ///
+  /// In en, this message translates to:
+  /// **'Mishka\'s AI Tool\'s Monthly Badges'**
+  String get gamificationAiToolsMonthlyAppBar;
+
+  /// No description provided for @gamificationAiToolsMonthlyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Mishka\'s AI Tool\'s'**
+  String get gamificationAiToolsMonthlyTitle;
 }
 
 class _AppLocalizationsDelegate

@@ -3,9 +3,10 @@ import 'package:mishka_app/core/network/api_service.dart';
 import 'community_chat_bundle.dart';
 import 'community_create_params.dart';
 import 'community_discover_models.dart';
+import 'community_invite_link.dart';
 import 'community_invite_resolver.dart';
+import 'community_json_helpers.dart';
 import 'community_models.dart';
-import 'community_pinned_store.dart';
 import 'community_remote_data_source.dart';
 
 class CommunityRepository {
@@ -71,6 +72,12 @@ class CommunityRepository {
   Future<DiscoverCategories> loadDiscoverCategories({String locale = 'en'}) =>
       _remote.fetchDiscoverCategories(locale: locale);
 
+  Future<List<CommunityCategoryTitle>> loadCategoryTitles({
+    String? q,
+    int limit = 50,
+  }) =>
+      _remote.fetchCategoryTitles(q: q, limit: limit);
+
   Future<DiscoverBrowsePage> browseDiscover({
     String? subject,
     String? educationStatus,
@@ -91,7 +98,6 @@ class CommunityRepository {
       );
 
   Future<CommunityHubData> loadHub() async {
-    await CommunityPinnedStore.ensureLoaded();
     _invalidateMembershipsCache();
     final memberships = await _fetchMembershipsCached();
     final communities = await _remote.fetchCommunities();
@@ -123,11 +129,7 @@ class CommunityRepository {
       );
     }
 
-    var all = merged.values.toList();
-    await CommunityPinnedStore.reconcileWithMemberships(
-      all.where((c) => c.isMember),
-    );
-    all = all.map(_applyPinnedState).toList()
+    var all = merged.values.toList()
       ..sort((a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()));
 
     final saved = <CommunityModel>[];
@@ -147,6 +149,12 @@ class CommunityRepository {
         private.add(community);
       }
     }
+
+    saved.sort((a, b) {
+      final aTime = a.pinnedAt ?? DateTime.fromMillisecondsSinceEpoch(0);
+      final bTime = b.pinnedAt ?? DateTime.fromMillisecondsSinceEpoch(0);
+      return bTime.compareTo(aTime);
+    });
 
     return CommunityHubData(
       saved: saved,
@@ -186,7 +194,7 @@ class CommunityRepository {
     required String id,
     CommunityModel? seed,
   }) async {
-    await CommunityPinnedStore.ensureLoaded();
+    var merged = applyResolvedCommunityCounts(model: community, seed: seed);
 
     for (final membership in await _fetchMembershipsCached()) {
       if (_communityIdFromMembership(membership) != id) continue;
@@ -195,21 +203,26 @@ class CommunityRepository {
         membership,
         membership: membership,
       );
-      return _applyPinnedState(
-        community.copyWith(
+      merged = applyResolvedCommunityCounts(
+        model: merged.copyWith(
           isMember: true,
-          myRole: role.isEmpty ? (seed?.myRole ?? community.myRole) : role,
-          isPinned: community.isPinned || fromMembership.isPinned,
-          ownerUserId: community.ownerUserId ?? seed?.ownerUserId,
+          myRole: role.isEmpty ? (seed?.myRole ?? merged.myRole) : role,
+          isPinned: merged.isPinned || fromMembership.isPinned,
+          pinnedAt: fromMembership.pinnedAt ?? merged.pinnedAt,
+          category: merged.category ?? fromMembership.category ?? seed?.category,
+          ownerUserId: merged.ownerUserId ?? seed?.ownerUserId,
         ),
+        seed: seed ?? fromMembership,
       );
+      return merged;
     }
 
-    return _applyPinnedState(
-      community.copyWith(
-        myRole: community.myRole ?? seed?.myRole,
-        ownerUserId: community.ownerUserId ?? seed?.ownerUserId,
+    return applyResolvedCommunityCounts(
+      model: merged.copyWith(
+        myRole: merged.myRole ?? seed?.myRole,
+        ownerUserId: merged.ownerUserId ?? seed?.ownerUserId,
       ),
+      seed: seed,
     );
   }
 
@@ -234,6 +247,8 @@ class CommunityRepository {
       universityYear: d?.universityYear,
       purpose: d?.purpose,
       locale: d?.locale,
+      category: d?.category,
+      newCategoryTitle: d?.newCategoryTitle,
     );
   }
 
@@ -247,7 +262,30 @@ class CommunityRepository {
   Future<CommunityModel> joinByInviteCode(String code) async {
     _invalidateMembershipsCache();
     _invalidateCommunityDetailCache();
-    return _remote.joinCommunity(inviteCode: code.trim());
+    final trimmed = code.trim();
+    final looksLikeToken = RegExp(
+      r'^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$',
+      caseSensitive: false,
+    ).hasMatch(trimmed);
+    return _remote.joinCommunity(
+      inviteCode: looksLikeToken ? null : trimmed,
+      inviteToken: looksLikeToken ? trimmed : null,
+    );
+  }
+
+  Future<CommunityModel> joinFromInviteLink(CommunityInviteLink link) async {
+    if (link.inviteToken != null && link.inviteToken!.isNotEmpty) {
+      _invalidateMembershipsCache();
+      _invalidateCommunityDetailCache();
+      return _remote.joinCommunity(inviteToken: link.inviteToken!.trim());
+    }
+    if (link.inviteCode != null && link.inviteCode!.isNotEmpty) {
+      return joinByInviteCode(link.inviteCode!);
+    }
+    if (link.communityId != null && link.communityId!.isNotEmpty) {
+      return joinPublicCommunity(link.communityId!.trim());
+    }
+    throw ArgumentError('Invalid community invite link');
   }
 
   Future<CommunityModel> joinPublicCommunity(String communityId) async {
@@ -318,7 +356,6 @@ class CommunityRepository {
 
   Future<void> pinCommunity(String id) async {
     await _remote.pinCommunity(id);
-    await CommunityPinnedStore.pin(id);
     _invalidateMembershipsCache();
     _invalidateRecommendedCache();
     _invalidateCommunityDetailCache(id);
@@ -326,7 +363,6 @@ class CommunityRepository {
 
   Future<void> unpinCommunity(String id) async {
     await _remote.unpinCommunity(id);
-    await CommunityPinnedStore.unpin(id);
     _invalidateMembershipsCache();
     _invalidateRecommendedCache();
     _invalidateCommunityDetailCache(id);
@@ -346,7 +382,7 @@ class CommunityRepository {
     try {
       final api = await _remote.fetchInvite(id);
       if (hint != null) return CommunityInviteResolver.merge(api, hint);
-      return api;
+      return CommunityInviteResolver.sanitizeInvite(api, communityId: id);
     } catch (_) {
       final model = hint ?? await refreshCommunity(id);
       if (model != null) return CommunityInviteResolver.fromCommunity(model);
@@ -358,28 +394,38 @@ class CommunityRepository {
     String id, {
     CommunityModel? community,
   }) async {
-    if (community?.isPublic == true) {
-      return CommunityInviteResolver.fromCommunity(community!);
+    try {
+      final api = await _remote.fetchInvite(id);
+      if (community != null) return CommunityInviteResolver.merge(api, community);
+      return CommunityInviteResolver.sanitizeInvite(api, communityId: id);
+    } catch (_) {
+      if (community?.isPublic == true) {
+        return CommunityInviteResolver.fromCommunity(community!);
+      }
+      final api = await _remote.regenerateInvite(id);
+      if (community != null) return CommunityInviteResolver.merge(api, community);
+      return CommunityInviteResolver.sanitizeInvite(api, communityId: id);
     }
-    final api = await _remote.regenerateInvite(id);
-    if (community != null) return CommunityInviteResolver.merge(api, community);
-    return api;
   }
 
   Future<CommunityModel> updateCommunity(
     String id, {
     String? name,
     String? description,
+    String? category,
+    String? newCategoryTitle,
   }) async {
     _invalidateCommunityDetailCache(id);
     return _remote.updateCommunity(
       id,
       name: name,
       description: description,
+      category: category,
+      newCategoryTitle: newCategoryTitle,
     );
   }
 
-  /// One round-trip set for group chat: community, members, messages with roles.
+  /// Group chat: community refresh + messages only (no members list).
   Future<CommunityChatBundle> loadChatBundle(
     String communityId,
     String channelId, {
@@ -392,46 +438,33 @@ class CommunityRepository {
       throw StateError('Community not found');
     }
 
-    final members = await _remote.fetchMembers(
-      communityId,
-      ownerUserId: community.ownerUserId,
-    );
-
-    final memberNamesByUserId = <String, String>{};
-    final memberRolesByUserId = <String, String>{};
-    for (final member in members) {
-      if (member.userId.isEmpty) continue;
-      if (member.name.isNotEmpty) {
-        memberNamesByUserId[member.userId] = member.name;
-      }
-      memberRolesByUserId[member.userId] = member.role;
-    }
-
-    final messages = (await _remote.fetchMessages(communityId, channelId))
-        .map(
-          (message) => message.withResolvedRole(
-            rolesByUserId: memberRolesByUserId,
-            ownerUserId: community.ownerUserId,
-          ),
-        )
-        .toList();
+    final messages = await _remote.fetchMessages(communityId, channelId);
 
     return CommunityChatBundle(
       community: community,
-      members: members,
       messages: messages,
-      memberNamesByUserId: memberNamesByUserId,
-      memberRolesByUserId: memberRolesByUserId,
     );
   }
 
   Future<List<CommunityChatMessage>> loadMessages(
     String communityId,
-    String channelId,
-  ) async {
-    final bundle = await loadChatBundle(communityId, channelId);
+    String channelId, {
+    CommunityModel? seedCommunity,
+  }) async {
+    final bundle = await loadChatBundle(
+      communityId,
+      channelId,
+      seedCommunity: seedCommunity,
+    );
     return bundle.messages;
   }
+
+  /// Lightweight poll — messages only, no community refresh.
+  Future<List<CommunityChatMessage>> fetchChannelMessages(
+    String communityId,
+    String channelId,
+  ) =>
+      _remote.fetchMessages(communityId, channelId);
 
   Future<CommunityChatMessage> postMessage(
     String communityId,
@@ -473,13 +506,6 @@ class CommunityRepository {
     }
     return '';
   }
-
-  CommunityModel _applyPinnedState(CommunityModel community) {
-    final pinned =
-        community.isPinned || CommunityPinnedStore.isPinned(community.id);
-    if (pinned == community.isPinned) return community;
-    return community.copyWith(isPinned: pinned);
-  }
 }
 
 class _CommunityDetailCacheEntry {
@@ -487,4 +513,38 @@ class _CommunityDetailCacheEntry {
 
   final CommunityModel model;
   final DateTime loadedAt;
+}
+
+CommunityModel applyResolvedCommunityCounts({
+  required CommunityModel model,
+  CommunityModel? seed,
+  int? membersLoaded,
+}) {
+  var memberCount = model.memberCount;
+  if (memberCount <= 0 && seed != null && seed.memberCount > 0) {
+    memberCount = seed.memberCount;
+  }
+  if (memberCount <= 0 && membersLoaded != null && membersLoaded > 0) {
+    memberCount = membersLoaded;
+  }
+
+  var groupCount = model.groupCount;
+  if (groupCount <= 0 && seed != null && seed.groupCount > 0) {
+    groupCount = seed.groupCount;
+  }
+
+  if (memberCount == model.memberCount && groupCount == model.groupCount) {
+    return model;
+  }
+
+  return model.copyWith(
+    memberCount: memberCount,
+    groupCount: groupCount,
+    subtitle: buildCommunitySubtitle(
+      memberCount: memberCount,
+      groupCount: groupCount,
+      description: model.description,
+      preferDescription: model.isLongSubtitle,
+    ),
+  );
 }

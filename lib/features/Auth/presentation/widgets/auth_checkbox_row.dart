@@ -23,7 +23,8 @@ class AuthCheckboxRow extends StatelessWidget {
   Widget build(BuildContext context) {
     final fontSize = AppSizes.fontSizeSmall;
     final lineHeight = fontSize * _lineHeightFactor;
-    final boxSize = 18.w;
+    final boxSize = 20.w;
+    final rowHeight = lineHeight > boxSize ? lineHeight : boxSize;
 
     final labelStyle = TextStyle(
       fontSize: fontSize,
@@ -45,12 +46,12 @@ class AuthCheckboxRow extends StatelessWidget {
       onTap: () => onChanged(!value),
       borderRadius: BorderRadius.circular(4.r),
       child: Padding(
-        padding: EdgeInsets.symmetric(vertical: 4.h),
+        padding: EdgeInsets.symmetric(vertical: 5.h),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             SizedBox(
-              height: lineHeight,
+              height: rowHeight,
               width: boxSize + 2.w,
               child: Align(
                 alignment: Alignment.centerLeft,

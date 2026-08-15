@@ -28,9 +28,7 @@ class CommunityDiscoveryFields extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final subjects = (categories?.subjects ?? [])
-        .where((c) => c.communityCount > 0 || c.key == 'general')
-        .toList();
+    final subjects = categories?.subjects ?? [];
     final purposes = categories?.purposes ?? [];
 
     return Column(

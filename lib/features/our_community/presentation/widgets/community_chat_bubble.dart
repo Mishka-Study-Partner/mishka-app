@@ -2,11 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import 'package:mishka_app/core/utils/app_colors.dart';
+import 'package:mishka_app/features/our_community/community_chat_layout_metrics.dart';
 import 'package:mishka_app/l10n/app_localizations.dart';
 import 'package:mishka_app/core/utils/app_sizes.dart';
 
 import '../../community_styles.dart';
 import '../../data/community_models.dart';
+import 'community_shared_material_preview.dart';
+import 'package:mishka_app/features/chat_with_mishka/presentation/widgets/tool_preview_renderer.dart';
 
 class CommunityChatBubble extends StatelessWidget {
   const CommunityChatBubble({
@@ -78,7 +81,11 @@ class CommunityChatBubble extends StatelessWidget {
             child: Container(
               margin: EdgeInsets.symmetric(horizontal: 12.w),
               padding: EdgeInsets.all(14.r),
-              constraints: BoxConstraints(maxWidth: 280.w),
+              constraints: BoxConstraints(
+                maxWidth: message.hasSharedMaterial
+                    ? CommunityChatLayoutMetrics.materialBubbleMaxWidth(context)
+                    : CommunityChatLayoutMetrics.bubbleMaxWidth(context),
+              ),
               decoration: BoxDecoration(
                 color: AppColors.white,
                 borderRadius: BorderRadius.only(
@@ -94,30 +101,56 @@ class CommunityChatBubble extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    message.text,
-                    style: CommunityStyles.body.copyWith(height: 1.4),
-                  ),
-                  if (message.isShared) ...[
-                    SizedBox(height: 8.h),
-                    Container(
-                      width: double.infinity,
-                      padding: EdgeInsets.symmetric(
-                        horizontal: 10.w,
-                        vertical: 8.h,
+                  if (message.materialRef != null)
+                    CommunitySharedMaterialPreview(
+                      materialRef: message.materialRef!,
+                      note: message.text.isNotEmpty ? message.text : null,
+                    )
+                  else if (message.inlineToolData != null)
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        Text(
+                          l10n.communityChatSharedFromMishka,
+                          style: CommunityStyles.bodySemiBold.copyWith(
+                            fontSize: AppSizes.fontSizeSmall,
+                          ),
+                        ),
+                        SizedBox(height: 8.h),
+                        ToolPreviewRenderer(
+                          toolData: message.inlineToolData!,
+                          layout: ToolPreviewLayout.communityChat,
+                        ),
+                      ],
+                    )
+                  else ...[
+                    if (message.text.isNotEmpty)
+                      Text(
+                        message.text,
+                        style: CommunityStyles.body.copyWith(height: 1.4),
                       ),
-                      decoration: BoxDecoration(
-                        color: AppColors.mainGold.withValues(alpha: 0.12),
-                        borderRadius: BorderRadius.circular(AppSizes.radiusSmall),
-                        border: Border.all(color: AppColors.mainGold),
-                      ),
-                      child: Text(
-                        l10n.communityChatSharedFromMishka,
-                        style: CommunityStyles.bodySemiBold.copyWith(
-                          fontSize: AppSizes.fontSizeSmall,
+                    if (message.isShared && message.text.isNotEmpty) ...[
+                      SizedBox(height: 8.h),
+                      Container(
+                        width: double.infinity,
+                        padding: EdgeInsets.symmetric(
+                          horizontal: 10.w,
+                          vertical: 8.h,
+                        ),
+                        decoration: BoxDecoration(
+                          color: AppColors.mainGold.withValues(alpha: 0.12),
+                          borderRadius:
+                              BorderRadius.circular(AppSizes.radiusSmall),
+                          border: Border.all(color: AppColors.mainGold),
+                        ),
+                        child: Text(
+                          l10n.communityChatSharedFromMishka,
+                          style: CommunityStyles.bodySemiBold.copyWith(
+                            fontSize: AppSizes.fontSizeSmall,
+                          ),
                         ),
                       ),
-                    ),
+                    ],
                   ],
                 ],
               ),

@@ -1,16 +1,19 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:mishka_app/core/network/api_exception.dart';
 import 'package:mishka_app/core/network/api_service.dart';
+import 'package:mishka_app/core/utils/app_colors.dart';
 import 'package:mishka_app/core/utils/app_sizes.dart';
+import 'package:mishka_app/core/widgets/screen_end_spacer.dart';
 import 'package:mishka_app/core/widgets/app_settings_scope.dart';
 import 'package:mishka_app/core/widgets/custom_app_bar.dart';
 import 'package:mishka_app/features/settings/data/data_sources/user_preferences_remote_data_source.dart';
-import 'package:mishka_app/features/settings/data/models/report_email_preferences_model.dart';
 import 'package:mishka_app/features/settings/data/models/user_preferences_model.dart';
-import 'package:mishka_app/core/preferences/app_preferences.dart';
-import 'package:mishka_app/features/settings/presentation/screens/report_email_recipient_screen.dart';
+import 'package:mishka_app/features/student_subjects/presentation/screens/student_subjects_screen.dart';
 import 'package:mishka_app/features/settings/presentation/widgets/settings_preference_controls.dart';
+import 'package:mishka_app/features/settings/data/user_preferences_applier.dart';
 import 'package:mishka_app/l10n/app_localizations.dart';
 
 class SettingsScreen extends StatefulWidget {
@@ -32,8 +35,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
       UserPreferencesRemoteDataSource(ApiService());
 
   UserPreferencesModel? _serverPrefs;
-  ReportEmailPreferencesModel _reportEmailPrefs =
-      const ReportEmailPreferencesModel();
   bool _loading = true;
   bool _saving = false;
 
@@ -41,6 +42,38 @@ class _SettingsScreenState extends State<SettingsScreen> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) => _loadFromServer());
+  }
+
+  Future<void> _applyResolvedPreferences(UserPreferencesModel? server) async {
+    final effective = UserPreferencesApplier.resolve(server);
+    final scope = AppSettingsScope.of(context);
+
+    if (scope.locale.languageCode != effective.languageCode) {
+      await scope.onLocaleChanged(effective.locale);
+    }
+    if (scope.themeMode != effective.themeMode) {
+      await scope.onThemeModeChanged(effective.themeMode);
+    }
+    if (scope.notificationsEnabled != effective.notificationsEnabled) {
+      await scope.onNotificationsChanged(effective.notificationsEnabled);
+    }
+
+    if (server != null &&
+        (server.languageCode != effective.languageCode ||
+            server.themeMode != effective.themeMode ||
+            server.notificationsEnabled != effective.notificationsEnabled)) {
+      unawaited(_syncDevicePreferencesToServer(effective));
+    }
+  }
+
+  Future<void> _syncDevicePreferencesToServer(UserPreferencesModel prefs) async {
+    try {
+      final saved = await _remote.upsertForUser(widget.userId, prefs);
+      if (!mounted) return;
+      setState(() => _serverPrefs = saved);
+    } catch (_) {
+      // Local device prefs remain authoritative; retry on next settings visit.
+    }
   }
 
   Future<void> _loadFromServer() async {
@@ -52,35 +85,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
       if (me != null) {
         if (me.core != null) {
           _serverPrefs = me.core;
-          final scope = AppSettingsScope.of(context);
-          final remote = me.core!;
-          if (scope.locale.languageCode != remote.languageCode) {
-            await scope.onLocaleChanged(remote.locale);
-          }
-          if (scope.themeMode != remote.themeMode) {
-            await scope.onThemeModeChanged(remote.themeMode);
-          }
-          if (scope.notificationsEnabled != remote.notificationsEnabled) {
-            await scope.onNotificationsChanged(remote.notificationsEnabled);
-          }
+          await _applyResolvedPreferences(me.core);
         }
-        _reportEmailPrefs = me.reportEmail;
-        await _syncReportRecipientFromServer(me.reportEmail);
       } else {
         final remote = await _remote.fetchForUser(widget.userId);
         if (!mounted) return;
         if (remote != null) {
           _serverPrefs = remote;
-          final scope = AppSettingsScope.of(context);
-          if (scope.locale.languageCode != remote.languageCode) {
-            await scope.onLocaleChanged(remote.locale);
-          }
-          if (scope.themeMode != remote.themeMode) {
-            await scope.onThemeModeChanged(remote.themeMode);
-          }
-          if (scope.notificationsEnabled != remote.notificationsEnabled) {
-            await scope.onNotificationsChanged(remote.notificationsEnabled);
-          }
+          await _applyResolvedPreferences(remote);
         } else {
           final scope = AppSettingsScope.of(context);
           final seeded = await _remote.upsertForUser(
@@ -104,52 +116,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
       languageCode: scope.locale.languageCode,
       themeMode: scope.themeMode,
       notificationsEnabled: scope.notificationsEnabled,
-    );
-  }
-
-  Future<void> _syncReportRecipientFromServer(
-    ReportEmailPreferencesModel prefs,
-  ) async {
-    final effective = prefs.displayRecipientEmail;
-    if (effective != null && effective.isNotEmpty) {
-      await AppPreferences.setReportEmailRecipient(
-        prefs.usingCustomRecipient ? effective : null,
-      );
-      if (prefs.usingCustomRecipient) {
-        _reportEmailPrefs = prefs;
-      } else {
-        _reportEmailPrefs = prefs.copyWith(recipientEmail: null);
-      }
-      return;
-    }
-    if (prefs.hasRecipientEmail) {
-      await AppPreferences.setReportEmailRecipient(prefs.recipientEmail);
-      return;
-    }
-    final local = AppPreferences.reportEmailRecipient;
-    if (local != null && local.isNotEmpty) {
-      _reportEmailPrefs = prefs.copyWith(recipientEmail: local);
-    }
-  }
-
-  String? get _effectiveRecipientEmail =>
-      _reportEmailPrefs.displayRecipientEmail ??
-      AppPreferences.reportEmailRecipient;
-
-  Future<void> _openRecipientScreen() async {
-    final saved = await Navigator.of(context).push<String>(
-      MaterialPageRoute(
-        builder: (_) => ReportEmailRecipientScreen(
-          initialEmail: _effectiveRecipientEmail,
-          accountEmail: widget.accountEmail,
-        ),
-      ),
-    );
-    if (!mounted || saved == null) return;
-    setState(
-      () => _reportEmailPrefs = _reportEmailPrefs.copyWith(
-        recipientEmail: saved,
-      ),
     );
   }
 
@@ -197,55 +163,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
     await _persistToServer();
   }
 
-  Future<void> _onReportAutoEmailChanged(bool enabled) async {
-    if (!mounted || _saving) return;
-    final locale = Localizations.localeOf(context).languageCode;
-    setState(() => _saving = true);
-    try {
-      final saved = await _remote.patchMe(
-        _reportEmailPrefs.toPatchJson(
-          autoEnabled: enabled,
-          locale: locale,
-        ),
-      );
-      if (!mounted) return;
-      setState(() => _reportEmailPrefs = saved.reportEmail);
-    } on ApiException catch (e) {
-      if (!mounted) return;
-      final l10n = AppLocalizations.of(context)!;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('${l10n.settingsSyncFailed}\n${e.message}')),
-      );
-    } finally {
-      if (mounted) setState(() => _saving = false);
-    }
-  }
-
-  Future<void> _onReportFrequencyChanged(String frequency) async {
-    if (!mounted || _saving || !_reportEmailPrefs.autoEnabled) return;
-    final locale = Localizations.localeOf(context).languageCode;
-    setState(() => _saving = true);
-    try {
-      final saved = await _remote.patchMe(
-        _reportEmailPrefs.toPatchJson(
-          autoEnabled: true,
-          frequency: frequency,
-          locale: locale,
-        ),
-      );
-      if (!mounted) return;
-      setState(() => _reportEmailPrefs = saved.reportEmail);
-    } on ApiException catch (e) {
-      if (!mounted) return;
-      final l10n = AppLocalizations.of(context)!;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('${l10n.settingsSyncFailed}\n${e.message}')),
-      );
-    } finally {
-      if (mounted) setState(() => _saving = false);
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
@@ -266,9 +183,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
               physics: const AlwaysScrollableScrollPhysics(
                 parent: BouncingScrollPhysics(),
               ),
-              padding: EdgeInsets.symmetric(
+              padding: AppScrollInsets.page(
                 horizontal: AppSizes.paddingLarge,
-                vertical: 20.h,
+                top: 20.h,
               ),
               children: [
                 SettingsPreferencesCard(
@@ -277,14 +194,17 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   onNotificationsChanged: _onNotificationsChanged,
                 ),
                 SizedBox(height: 16.h),
-                SettingsReportEmailCard(
-                  autoEnabled: _reportEmailPrefs.autoEnabled,
-                  frequency: _reportEmailPrefs.frequency,
-                  recipientEmail: _effectiveRecipientEmail,
-                  recipientNotSetLabel: l10n.settingsReportRecipientNotSet,
-                  onAutoEnabledChanged: _onReportAutoEmailChanged,
-                  onFrequencyChanged: _onReportFrequencyChanged,
-                  onRecipientTap: _openRecipientScreen,
+                _SettingsLinkTile(
+                  icon: Icons.menu_book_outlined,
+                  title: l10n.studentSubjectsTitle,
+                  subtitle: l10n.studentSubjectsSettingsHint,
+                  onTap: () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (_) => const StudentSubjectsScreen(),
+                      ),
+                    );
+                  },
                 ),
               ],
             ),
@@ -301,6 +221,67 @@ class _SettingsScreenState extends State<SettingsScreen> {
               ),
             ),
         ],
+      ),
+    );
+  }
+}
+
+class _SettingsLinkTile extends StatelessWidget {
+  const _SettingsLinkTile({
+    required this.icon,
+    required this.title,
+    required this.subtitle,
+    required this.onTap,
+  });
+
+  final IconData icon;
+  final String title;
+  final String subtitle;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: Theme.of(context).cardColor,
+      borderRadius: BorderRadius.circular(12.r),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(12.r),
+        onTap: onTap,
+        child: Padding(
+          padding: EdgeInsets.all(16.w),
+          child: Row(
+            children: [
+              Icon(icon, color: const Color(0xFFC9A227), size: 24.w),
+              SizedBox(width: 14.w),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      title,
+                      style: TextStyle(
+                        fontFamily: 'Pridi',
+                        fontSize: 15.sp,
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.mainDark,
+                      ),
+                    ),
+                    SizedBox(height: 4.h),
+                    Text(
+                      subtitle,
+                      style: TextStyle(
+                        fontFamily: 'Pridi',
+                        fontSize: 12.sp,
+                        color: AppColors.lightText,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Icon(Icons.chevron_right, color: AppColors.greyText, size: 22.w),
+            ],
+          ),
+        ),
       ),
     );
   }

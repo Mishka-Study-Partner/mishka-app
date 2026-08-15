@@ -1,3 +1,4 @@
+import 'package:mishka_app/core/widgets/screen_end_spacer.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
@@ -11,6 +12,7 @@ import 'data/timer_model.dart';
 import 'presentation/screens/camera_mode_screen.dart';
 import 'presentation/screens/custom_timer_screen.dart';
 import 'presentation/screens/timer_session_screen.dart';
+import 'package:mishka_app/features/student_subjects/study_subject_launch.dart';
 
 class StudyWithMishka extends StatefulWidget {
   final VoidCallback? onBack;
@@ -60,7 +62,7 @@ class _StudyWithMishkaState extends State<StudyWithMishka> {
         onBackTap: widget.onBack,
       ),
       body: SingleChildScrollView(
-        padding: EdgeInsets.all(AppSizes.paddingMedium),
+        padding: AppScrollInsets.page(horizontal: AppSizes.paddingMedium, top: AppSizes.paddingMedium),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -92,8 +94,19 @@ class _StudyWithMishkaState extends State<StudyWithMishka> {
       title: l10n.cameraMode,
       trailing: Icon(Icons.arrow_forward_ios, size: 16.w, color: AppColors.mainGold),
       onTap: () {
-        Navigator.of(context).push(
-          MaterialPageRoute(builder: (_) => const CameraModeScreen()),
+        StudySubjectLaunch.pickSubjectAndStart(
+          context,
+          onStart: (subjectId, subjectName) async {
+            if (!context.mounted) return;
+            Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (_) => CameraModeScreen(
+                  studentSubjectId: subjectId,
+                  studentSubjectName: subjectName,
+                ),
+              ),
+            );
+          },
         );
       },
     );
@@ -112,7 +125,8 @@ class _StudyWithMishkaState extends State<StudyWithMishka> {
         ? regularPresets
             .map((p) => _PresetDisplay(
                   title: p.label,
-                  studyMinutes: p.studyMinutes,
+                  modeId: p.id,
+                  studyMinutes: p.id == 'flowtime' ? 0 : p.studyMinutes,
                   shortBreakMinutes: p.shortBreakMinutes,
                   longBreakMinutes: p.longBreakMinutes,
                   tagline: p.tagline,
@@ -122,6 +136,7 @@ class _StudyWithMishkaState extends State<StudyWithMishka> {
         : StudyTimerModel.presets
             .map((p) => _PresetDisplay(
                   title: p.title,
+                  modeId: p.modeId,
                   studyMinutes: p.studyMinutes,
                   shortBreakMinutes: p.shortBreakMinutes,
                   longBreakMinutes: p.longBreakMinutes,
@@ -218,16 +233,25 @@ class _StudyWithMishkaState extends State<StudyWithMishka> {
   }
 
   void _startPresetTimer(StudyTimerModel model) {
-    Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (_) => TimerSessionScreen(model: model),
-      ),
+    StudySubjectLaunch.pickSubjectAndStart(
+      context,
+      onStart: (subjectId, subjectName) async {
+        if (!context.mounted) return;
+        Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (_) => TimerSessionScreen(
+              model: model.withStudentSubject(subjectId, name: subjectName),
+            ),
+          ),
+        );
+      },
     );
   }
 }
 
 class _PresetDisplay {
   final String title;
+  final String? modeId;
   final int studyMinutes;
   final int shortBreakMinutes;
   final int longBreakMinutes;
@@ -236,6 +260,7 @@ class _PresetDisplay {
 
   const _PresetDisplay({
     required this.title,
+    this.modeId,
     required this.studyMinutes,
     required this.shortBreakMinutes,
     required this.longBreakMinutes,
@@ -243,7 +268,7 @@ class _PresetDisplay {
     required this.onTap,
   });
 
-  bool get isCountUp => studyMinutes == 0;
+  bool get isCountUp => studyMinutes == 0 || modeId == 'flowtime';
 }
 
 class _PresetTile extends StatelessWidget {
@@ -314,14 +339,18 @@ class _PresetTile extends StatelessWidget {
                 fontSize: AppSizes.fontSizeSmall,
                 color: AppColors.mainDark,
               ),
+              overflow: TextOverflow.ellipsis,
             ),
           ),
-          Text(
-            label,
-            style: TextStyle(
-              fontFamily: 'Pridi',
-              fontSize: AppSizes.fontSizeSmall,
-              color: AppColors.greyText,
+          Expanded(
+            child: Text(
+              label,
+              style: TextStyle(
+                fontFamily: 'Pridi',
+                fontSize: AppSizes.fontSizeSmall,
+                color: AppColors.greyText,
+              ),
+              overflow: TextOverflow.ellipsis,
             ),
           ),
         ],

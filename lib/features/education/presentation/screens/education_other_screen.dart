@@ -4,7 +4,9 @@ import 'package:iconify_flutter/icons/fa.dart';
 import 'package:iconify_flutter/icons/fluent_emoji_high_contrast.dart';
 import 'package:iconify_flutter/icons/ic.dart';
 
+import 'package:mishka_app/core/layout/form_screen_body.dart';
 import 'package:mishka_app/core/utils/app_colors.dart';
+import 'package:mishka_app/core/widgets/screen_end_spacer.dart';
 import 'package:mishka_app/core/utils/app_sizes.dart';
 import 'package:mishka_app/core/widgets/custom_app_bar.dart';
 import 'package:mishka_app/features/education/education_flow_config.dart';
@@ -72,12 +74,14 @@ class _EducationOtherScreenState extends State<EducationOtherScreen> {
         showBack: true,
         showBottomBar: false,
       ),
-      body: Column(
+      body: FormScreenBody.constrain(
+        context,
+        Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Expanded(
             child: SingleChildScrollView(
-              padding: EdgeInsets.symmetric(horizontal: AppSizes.paddingLarge),
+              padding: AppScrollInsets.page(horizontal: AppSizes.paddingLarge),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -180,6 +184,7 @@ class _EducationOtherScreenState extends State<EducationOtherScreen> {
             onPressed: _submit,
           ),
         ],
+      ),
       ),
     );
   }

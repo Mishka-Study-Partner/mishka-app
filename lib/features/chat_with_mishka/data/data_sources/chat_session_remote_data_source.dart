@@ -139,13 +139,13 @@ class ChatSessionRemoteDataSource {
         );
   }
 
-  Future<void> createMessage({
+  Future<String?> createMessage({
     required String sessionId,
     required String senderType,
     required String messageContent,
     String inputType = 'text',
   }) async {
-    await _api.post<void>(
+    final env = await _api.post<Map<String, dynamic>>(
       ApiEndpoints.chatMessages,
       data: {
         'sessionId': sessionId,
@@ -153,6 +153,38 @@ class ChatSessionRemoteDataSource {
         'messageContent': messageContent,
         if (inputType.isNotEmpty) 'inputType': inputType,
       },
+      dataFromJson: (raw) {
+        if (raw is Map) {
+          return Map<String, dynamic>.from(raw);
+        }
+        throw const FormatException('Invalid chat message response');
+      },
     );
+    final id = env.data?['id']?.toString();
+    return id != null && id.isNotEmpty ? id : null;
+  }
+
+  Future<bool> updateMessageContent({
+    required String messageId,
+    required String messageContent,
+  }) async {
+    final payload = {'messageContent': messageContent};
+    try {
+      await _api.put<void>(
+        ApiEndpoints.chatMessageById(messageId),
+        data: payload,
+      );
+      return true;
+    } catch (_) {
+      try {
+        await _api.patch<void>(
+          ApiEndpoints.chatMessageById(messageId),
+          data: payload,
+        );
+        return true;
+      } catch (_) {
+        return false;
+      }
+    }
   }
 }

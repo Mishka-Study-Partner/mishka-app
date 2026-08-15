@@ -1,14 +1,16 @@
 # Mishka AI Service Implementation Summary
 
+> **Updated 2026:** The app uses **`mishka_ai_service.dart`** (real REST client) with **`ai_service_config.dart`** (ngrok default). The dummy service files were removed. See **`SERVICE_SWITCHING_GUIDE.md`** and **`docs/CHAT_WITH_MISHKA_AI_E2E_TEST.md`**.
+
 ## Overview
-This document describes the complete implementation of the dummy AI service and chat UI fixes for the Mishka app.
+This document describes an earlier dummy AI service implementation. Historical reference only.
 
 ---
 
-## TASK 1: Dummy AI Service ✅
+## TASK 1: Dummy AI Service ✅ (removed — see note above)
 
 ### Created File
-**`lib/features/chat_with_mishka/data/service/mishka_dummy_ai_service.dart`**
+**`lib/features/chat_with_mishka/data/service/mishka_dummy_ai_service.dart`** *(deleted)*
 
 ### Service Class: `MishkaAiService` (Dummy Implementation)
 

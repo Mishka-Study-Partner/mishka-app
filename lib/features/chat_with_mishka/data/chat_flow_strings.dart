@@ -1,4 +1,5 @@
 import 'package:mishka_app/features/chat_with_mishka/data/controller/chat_flow_controller.dart';
+import 'package:mishka_app/features/chat_with_mishka/data/ai_response_helpers.dart';
 import 'package:mishka_app/l10n/app_localizations.dart';
 
 /// Localized copy + label matching for [ChatFlowController] (supports restored EN labels).
@@ -37,7 +38,6 @@ class ChatFlowStrings {
         toolQuiz,
         toolFlashcards,
         toolMindMap,
-        toolSummarize,
       ];
 
   List<String> get postToolOptions => [regenerate, anotherTool];
@@ -54,19 +54,49 @@ class ChatFlowStrings {
     };
   }
 
-  String errorRegenerationFailed(Object error) =>
-      l10n.chatRegenerationFailed(error.toString());
+  String errorRegenerationFailed(Object error) => _aiOrGeneric(
+        l10n.chatRegenerationFailed,
+        error,
+      );
 
-  String errorAnalyzePdfFailed(Object error) =>
-      l10n.chatAnalyzePdfFailed(error.toString());
+  String errorAnalyzePdfFailed(Object error) => _aiOrGeneric(
+        l10n.chatAnalyzePdfFailed,
+        error,
+      );
 
-  String errorToolGenerationFailed(Object error) =>
-      l10n.chatToolGenerationFailed(error.toString());
+  String errorToolGenerationFailed(Object error) => _aiOrGeneric(
+        l10n.chatToolGenerationFailed,
+        error,
+      );
 
-  String errorChatFailed(Object error) => l10n.chatMessageFailed(error.toString());
+  String errorChatFailed(Object error) => _aiOrGeneric(
+        l10n.chatMessageFailed,
+        error,
+      );
 
-  String errorSessionStartFailed(Object error) =>
-      l10n.chatSessionStartFailed(error.toString());
+  String errorSessionStartFailed(Object error) => _aiOrGeneric(
+        l10n.chatSessionStartFailed,
+        error,
+      );
+
+  String _aiOrGeneric(String Function(String error) template, Object error) {
+    if (error is AiSessionNotFoundException ||
+        error is ChatSessionNotFoundException) {
+      return l10n.chatAiSessionExpired;
+    }
+    if (AiResponseHelpers.looksLikeConnectionFailure(error)) {
+      return l10n.chatAiServerUnreachable;
+    }
+    if (error is AiServiceException ||
+        AiResponseHelpers.looksLikeProviderError(error.toString())) {
+      return l10n.chatAiServiceUnavailable;
+    }
+    return template(error.toString());
+  }
+
+  /// For explanation bubbles restored from history or returned before validation.
+  String sanitizeExplanation(String text) =>
+      AiResponseHelpers.displayText(text, l10n.chatAiServiceUnavailable);
 
   String get newChatTitle => l10n.chatNewChatTitle;
   String get newChatMessage => l10n.chatNewChatMessage;

@@ -16,7 +16,11 @@ class SmartTimerController extends ChangeNotifier {
   /// Lifecycle callbacks for backend sync.
   VoidCallback? onPause;
   VoidCallback? onResume;
-  void Function(TimerMode nextPhase)? onPhaseAdvance;
+  void Function(
+    TimerMode nextPhase, {
+    int? actualFocusMinutes,
+    bool? completedFocusCycle,
+  })? onPhaseAdvance;
 
   SmartTimerController(StudyTimerModel model) : _model = model {
     _remaining = model.durationFor(TimerMode.study);
@@ -30,7 +34,8 @@ class SmartTimerController extends ChangeNotifier {
   StudyTimerModel get model => _model;
 
   /// Whether the current mode counts up (stopwatch) instead of down.
-  bool get isCountUp => _model.durationFor(_currentMode).inSeconds == 0;
+  bool get isCountUp =>
+      _currentMode == TimerMode.study && _model.isOpenEndedStudy;
 
   String get formattedTime {
     final duration = isCountUp ? _elapsed : _remaining;
@@ -52,14 +57,22 @@ class SmartTimerController extends ChangeNotifier {
     return 1.0 - (_remaining.inSeconds / total);
   }
 
-  void setMode(TimerMode mode) {
+  void setMode(
+    TimerMode mode, {
+    int? actualFocusMinutes,
+    bool? completedFocusCycle,
+  }) {
     _timer?.cancel();
     _isRunning = false;
     _wasPausedByUser = false;
     _currentMode = mode;
     _remaining = _model.durationFor(mode);
     _elapsed = Duration.zero;
-    onPhaseAdvance?.call(mode);
+    onPhaseAdvance?.call(
+      mode,
+      actualFocusMinutes: actualFocusMinutes,
+      completedFocusCycle: completedFocusCycle,
+    );
     notifyListeners();
   }
 
@@ -97,19 +110,37 @@ class SmartTimerController extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// For count-up modes: manually finish the study phase and move to break.
-  void finishStudy() {
-    if (_currentMode == TimerMode.study && isCountUp) {
-      _timer?.cancel();
-      _isRunning = false;
-      _completedCycles++;
-      if (_completedCycles % 4 == 0) {
-        setMode(TimerMode.longBreak);
-      } else {
-        setMode(TimerMode.shortBreak);
-      }
+  /// End the current study block and move to break (count-up or count-down).
+  void skipToBreak() {
+    if (_currentMode != TimerMode.study) return;
+    _timer?.cancel();
+    _isRunning = false;
+    final focusMinutes = isCountUp
+        ? (_elapsed.inSeconds / 60).round()
+        : _model.studyMinutes > 0
+            ? ((_model.durationFor(TimerMode.study).inSeconds -
+                    _remaining.inSeconds) /
+                60)
+                .round()
+            : 0;
+    _completedCycles++;
+    if (_completedCycles % 4 == 0) {
+      setMode(
+        TimerMode.longBreak,
+        actualFocusMinutes: focusMinutes,
+        completedFocusCycle: true,
+      );
+    } else {
+      setMode(
+        TimerMode.shortBreak,
+        actualFocusMinutes: focusMinutes,
+        completedFocusCycle: true,
+      );
     }
   }
+
+  /// For count-up modes: manually finish the study phase and move to break.
+  void finishStudy() => skipToBreak();
 
   void stop() {
     _timer?.cancel();
@@ -124,10 +155,21 @@ class SmartTimerController extends ChangeNotifier {
     _isRunning = false;
     if (_currentMode == TimerMode.study) {
       _completedCycles++;
+      final focusMinutes = isCountUp
+          ? (_elapsed.inSeconds / 60).round()
+          : _model.studyMinutes;
       if (_completedCycles % 4 == 0) {
-        setMode(TimerMode.longBreak);
+        setMode(
+          TimerMode.longBreak,
+          actualFocusMinutes: focusMinutes,
+          completedFocusCycle: true,
+        );
       } else {
-        setMode(TimerMode.shortBreak);
+        setMode(
+          TimerMode.shortBreak,
+          actualFocusMinutes: focusMinutes,
+          completedFocusCycle: true,
+        );
       }
     } else {
       setMode(TimerMode.study);
@@ -143,6 +185,24 @@ class SmartTimerController extends ChangeNotifier {
     _timer?.cancel();
     _isRunning = false;
     notifyListeners();
+  }
+
+  /// Copies tick state from a pre-registration local controller so play does
+  /// not reset the countdown to the full preset duration.
+  void adoptStateFrom(SmartTimerController other) {
+    _timer?.cancel();
+    _currentMode = other._currentMode;
+    _remaining = other._remaining;
+    _elapsed = other._elapsed;
+    _completedCycles = other._completedCycles;
+    _wasPausedByUser = other._wasPausedByUser;
+    final wasRunning = other._isRunning;
+    _isRunning = false;
+    if (wasRunning) {
+      start();
+    } else {
+      notifyListeners();
+    }
   }
 
   @override

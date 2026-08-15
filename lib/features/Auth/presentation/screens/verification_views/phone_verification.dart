@@ -25,7 +25,7 @@ class PhoneVerification extends StatelessWidget {
         padding: EdgeInsetsDirectional.only(
           start: AppSizes.paddingMedium,
           end: AppSizes.paddingMedium,
-          bottom: AppSizes.paddingMedium,
+          bottom: AppSizes.paddingMedium + AppSizes.screenEndPadding,
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,

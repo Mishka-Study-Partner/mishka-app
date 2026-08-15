@@ -71,79 +71,116 @@ class StudyRemoteDataSource {
   }
 
   /// Starts a backend session. Returns the session ID or null on failure.
+  ///
+  /// Subject is linked via PATCH after start — not on the POST body (strict
+  /// backend validation rejects undocumented start fields).
   Future<String?> startSession({
     required String topLevelMode,
     String? concentrationPreset,
     String? customPresetId,
+    String? studentSubjectId,
     int? focusMinutes,
     int? shortBreakMinutes,
     int? longBreakMinutes,
   }) async {
+    final args = _StartSessionArgs(
+      topLevelMode: topLevelMode,
+      concentrationPreset: concentrationPreset,
+      customPresetId: customPresetId,
+      studentSubjectId: studentSubjectId,
+      focusMinutes: focusMinutes,
+      shortBreakMinutes: shortBreakMinutes,
+      longBreakMinutes: longBreakMinutes,
+    );
+
+    await _abandonActiveSessions();
+
+    for (var attempt = 0; attempt < 2; attempt++) {
+      try {
+        final id = await _postStartSession(args);
+        if (id != null) {
+          await _attachStudentSubject(id, args.studentSubjectId?.trim());
+        }
+        return id;
+      } on ApiException catch (e) {
+        if (kDebugMode) {
+          debugPrint(
+            '📚 StudySession start failed (attempt ${attempt + 1}): '
+            '${e.statusCode} ${e.error} ${e.message}',
+          );
+        }
+        if (e.statusCode == 400 && attempt == 0) {
+          if (kDebugMode) {
+            debugPrint('📚 StudySession: clearing stuck sessions and retrying…');
+          }
+          await _abandonActiveSessions();
+          continue;
+        }
+        return null;
+      } catch (e) {
+        if (kDebugMode) debugPrint('📚 StudySession start error: $e');
+        return null;
+      }
+    }
+    return null;
+  }
+
+  Future<void> _attachStudentSubject(
+    String sessionId,
+    String? studentSubjectId,
+  ) async {
+    if (studentSubjectId == null || studentSubjectId.isEmpty) return;
+    await patchStudentSubject(sessionId, studentSubjectId: studentSubjectId);
+  }
+
+  /// Assign or clear the course for an active session (handoff PATCH).
+  Future<void> patchStudentSubject(
+    String sessionId, {
+    String? studentSubjectId,
+  }) async {
     try {
-      return await _postStartSession(
-        topLevelMode: topLevelMode,
-        concentrationPreset: concentrationPreset,
-        customPresetId: customPresetId,
-        focusMinutes: focusMinutes,
-        shortBreakMinutes: shortBreakMinutes,
-        longBreakMinutes: longBreakMinutes,
+      await _api.patch<void>(
+        ApiEndpoints.studyWithMishkaSessionById(sessionId),
+        data: {'studentSubjectId': studentSubjectId},
       );
+      if (kDebugMode) {
+        debugPrint(
+          '📚 StudySession subject linked: $sessionId → $studentSubjectId',
+        );
+      }
     } on ApiException catch (e) {
       if (kDebugMode) {
         debugPrint(
-          '📚 StudySession start failed: ${e.statusCode} ${e.error} ${e.message}',
+          '📚 StudySession subject patch failed: ${e.statusCode} ${e.error} ${e.message}',
         );
       }
-      // Active session blocks a new start — end stuck sessions and retry once.
-      if (e.statusCode == 400 && _isActiveSessionConflict(e)) {
-        await _abandonActiveSessions();
-        try {
-          return await _postStartSession(
-            topLevelMode: topLevelMode,
-            concentrationPreset: concentrationPreset,
-            customPresetId: customPresetId,
-            focusMinutes: focusMinutes,
-            shortBreakMinutes: shortBreakMinutes,
-            longBreakMinutes: longBreakMinutes,
-          );
-        } on ApiException catch (retryError) {
-          if (kDebugMode) {
-            debugPrint(
-              '📚 StudySession start retry failed: ${retryError.message}',
-            );
-          }
-        }
-      }
-      return null;
     } catch (e) {
-      if (kDebugMode) debugPrint('📚 StudySession start error: $e');
-      return null;
+      if (kDebugMode) {
+        debugPrint('📚 StudySession subject patch failed: $e');
+      }
     }
   }
 
-  Future<String?> _postStartSession({
-    required String topLevelMode,
-    String? concentrationPreset,
-    String? customPresetId,
-    int? focusMinutes,
-    int? shortBreakMinutes,
-    int? longBreakMinutes,
-  }) async {
+  Future<String?> _postStartSession(_StartSessionArgs args) async {
     final data = <String, dynamic>{
-      'topLevelMode': topLevelMode,
-      if (concentrationPreset != null) 'concentrationPreset': concentrationPreset,
-      if (customPresetId != null && customPresetId.isNotEmpty)
-        'customPresetId': customPresetId,
+      'topLevelMode': args.topLevelMode,
+      if (args.concentrationPreset != null)
+        'concentrationPreset': args.concentrationPreset,
+      if (args.customPresetId != null && args.customPresetId!.isNotEmpty)
+        'customPresetId': args.customPresetId,
       'platform': Platform.isIOS ? 'ios' : 'android',
     };
-    if (concentrationPreset == 'custom' &&
-        (customPresetId == null || customPresetId.isEmpty) &&
-        focusMinutes != null) {
+    if (args.concentrationPreset == 'custom' &&
+        (args.customPresetId == null || args.customPresetId!.isEmpty) &&
+        args.focusMinutes != null) {
       data['customOverrides'] = {
-        'focusMinutes': focusMinutes,
-        'shortBreakMinutes': shortBreakMinutes,
-        'longBreakMinutes': longBreakMinutes,
+        'focusMinutes': args.focusMinutes,
+        'shortBreakMinutes': args.shortBreakMinutes,
+        'longBreakMinutes': args.longBreakMinutes,
       };
+    }
+    if (kDebugMode) {
+      debugPrint('📚 StudySession start body: $data');
     }
     final env = await _api.post<String?>(
       ApiEndpoints.studyWithMishkaSessionStart,
@@ -163,18 +200,16 @@ class StudyRemoteDataSource {
     return id;
   }
 
-  bool _isActiveSessionConflict(ApiException e) {
-    final msg = e.message.toLowerCase();
-    return msg.contains('current session') ||
-        msg.contains('active') && msg.contains('session');
-  }
-
   Future<void> _abandonActiveSessions() async {
+    if (kDebugMode) {
+      debugPrint('📚 StudySession: ending any active/paused backend sessions…');
+    }
     final env = await _api.get<List<dynamic>>(
       ApiEndpoints.studyWithMishkaSessions,
       dataFromJson: (raw) => (raw as List?) ?? const [],
     );
     final sessions = env.data ?? const [];
+    var ended = 0;
     for (final item in sessions) {
       if (item is! Map) continue;
       final map = Map<String, dynamic>.from(item);
@@ -183,10 +218,13 @@ class StudyRemoteDataSource {
       final id = (map['id'] ?? map['sessionId'] ?? '').toString();
       if (id.isEmpty) continue;
       await endSession(id, outcome: 'abandoned');
+      ended++;
+    }
+    if (kDebugMode && ended > 0) {
+      debugPrint('📚 StudySession: abandoned $ended stuck session(s)');
     }
   }
 
-  /// Ends a backend session.
   Future<void> endSession(String sessionId, {String outcome = 'completed'}) async {
     try {
       await _api.post<void>(
@@ -230,11 +268,22 @@ class StudyRemoteDataSource {
   }
 
   /// Notify backend of phase transition.
-  Future<void> advancePhase(String sessionId, {required String nextPhase}) async {
+  Future<void> advancePhase(
+    String sessionId, {
+    required String nextPhase,
+    int? actualFocusMinutes,
+    bool? completedFocusCycle,
+  }) async {
     try {
       await _api.post<void>(
         ApiEndpoints.studyWithMishkaSessionAdvancePhase(sessionId),
-        data: {'nextPhase': nextPhase},
+        data: {
+          'nextPhase': nextPhase,
+          if (actualFocusMinutes != null)
+            'actualFocusMinutes': actualFocusMinutes,
+          if (completedFocusCycle != null)
+            'completedFocusCycle': completedFocusCycle,
+        },
       );
     } catch (_) {}
   }
@@ -259,6 +308,46 @@ class StudyRemoteDataSource {
       );
     } catch (_) {}
   }
+
+  /// Persists ML posture/focus summary from Camera With Mishka session.
+  Future<void> submitMlReport({
+    required String sessionId,
+    required Map<String, dynamic> payload,
+  }) async {
+    try {
+      await _api.post<void>(
+        ApiEndpoints.studyWithMishkaSessionMlReports(sessionId),
+        data: payload,
+      );
+      if (kDebugMode) {
+        debugPrint('📚 StudySession ml-report submitted for $sessionId');
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        debugPrint('📚 StudySession ml-report failed: $e');
+      }
+    }
+  }
+}
+
+class _StartSessionArgs {
+  const _StartSessionArgs({
+    required this.topLevelMode,
+    this.concentrationPreset,
+    this.customPresetId,
+    this.studentSubjectId,
+    this.focusMinutes,
+    this.shortBreakMinutes,
+    this.longBreakMinutes,
+  });
+
+  final String topLevelMode;
+  final String? concentrationPreset;
+  final String? customPresetId;
+  final String? studentSubjectId;
+  final int? focusMinutes;
+  final int? shortBreakMinutes;
+  final int? longBreakMinutes;
 }
 
 /// Parsed catalog from GET /study-with-mishka/catalog
@@ -355,13 +444,17 @@ class ConcentrationPreset {
     this.totalCycles,
   });
 
-  StudyTimerModel toTimerModel() => StudyTimerModel(
-        label,
-        studyMinutes,
-        shortBreakMinutes,
-        longBreakMinutes,
-        modeId: id,
-      );
+  StudyTimerModel toTimerModel() {
+    // Flowtime = open-ended focus; user ends study manually, then timed break.
+    final focus = id == 'flowtime' ? 0 : studyMinutes;
+    return StudyTimerModel(
+      label,
+      focus,
+      shortBreakMinutes,
+      longBreakMinutes,
+      modeId: id,
+    );
+  }
 
   factory ConcentrationPreset.fromJson(Map<String, dynamic> json) {
     final name = (json['name'] ?? json['label'] ?? json['title'] ?? '').toString();

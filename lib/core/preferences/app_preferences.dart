@@ -11,13 +11,16 @@ class AppPreferences {
   static const _onboardingIntroKey = 'mishka_onboarding_intro_completed';
   static const _educationSetupKey = 'mishka_education_setup_completed';
   static const _lastStreakPingUtcDateKey = 'mishka_last_streak_ping_utc_date';
+  static const _cachedDailyStreakJsonKey = 'mishka_cached_daily_streak_json';
+  static const _pendingCommunityInviteKey = 'mishka_pending_community_invite';
   static const _chatBackendSessionIdKey = 'mishka_chat_backend_session_id';
   static const _chatAiSessionIdKey = 'mishka_chat_ai_session_id';
   static const _cachedUserJsonKey = 'mishka_cached_user_json';
   static const _reportEmailRecipientKey = 'mishka_report_email_recipient';
-  static const _pinnedCommunityIdsKey = 'mishka_pinned_community_ids';
 
   static SharedPreferences? _prefs;
+
+  static SharedPreferences? get sharedPreferences => _prefs;
 
   static Future<void> init() async {
     _prefs ??= await SharedPreferences.getInstance();
@@ -25,6 +28,14 @@ class AppPreferences {
 
   /// Call after [init].
   static String get localeCode => _prefs?.getString(_localeKey) ?? 'en';
+
+  static bool get hasStoredLocale =>
+      _prefs?.containsKey(_localeKey) ?? false;
+
+  static bool get hasStoredTheme => _prefs?.containsKey(_themeKey) ?? false;
+
+  static bool get hasStoredNotifications =>
+      _prefs?.containsKey(_notificationsKey) ?? false;
 
   static ThemeMode get themeMode => _parseThemeMode(_prefs?.getString(_themeKey));
 
@@ -71,6 +82,34 @@ class AppPreferences {
     await _prefs?.setString(_lastStreakPingUtcDateKey, utcDate);
   }
 
+  /// Last successful streak payload from `GET /daily-streaks` (or ping/freeze).
+  static String? get cachedDailyStreakJson =>
+      _prefs?.getString(_cachedDailyStreakJsonKey);
+
+  static Future<void> setCachedDailyStreakJson(String? json) async {
+    if (json == null || json.isEmpty) {
+      await _prefs?.remove(_cachedDailyStreakJsonKey);
+      return;
+    }
+    await _prefs?.setString(_cachedDailyStreakJsonKey, json);
+  }
+
+  /// Queued invite from a universal link before sign-in completes.
+  static String? get pendingCommunityInviteJson =>
+      _prefs?.getString(_pendingCommunityInviteKey);
+
+  static Future<void> setPendingCommunityInviteLink(String? json) async {
+    if (json == null || json.isEmpty) {
+      await _prefs?.remove(_pendingCommunityInviteKey);
+      return;
+    }
+    await _prefs?.setString(_pendingCommunityInviteKey, json);
+  }
+
+  static Future<void> clearPendingCommunityInviteLink() async {
+    await _prefs?.remove(_pendingCommunityInviteKey);
+  }
+
   static String? get chatBackendSessionId =>
       _prefs?.getString(_chatBackendSessionIdKey);
 
@@ -107,20 +146,6 @@ class AppPreferences {
   /// Report PDF / auto-email recipient; synced from Settings.
   static String? get reportEmailRecipient =>
       _prefs?.getString(_reportEmailRecipientKey);
-
-  /// Community ids the user saved via `POST /communities/:id/pin`.
-  static Set<String> get pinnedCommunityIds {
-    final list = _prefs?.getStringList(_pinnedCommunityIdsKey);
-    if (list == null || list.isEmpty) return {};
-    return list.map((e) => e.trim()).where((e) => e.isNotEmpty).toSet();
-  }
-
-  static Future<void> setPinnedCommunityIds(Set<String> ids) async {
-    await _prefs?.setStringList(
-      _pinnedCommunityIdsKey,
-      ids.toList()..sort(),
-    );
-  }
 
   static Future<void> setReportEmailRecipient(String? email) async {
     final trimmed = email?.trim();

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:mishka_app/core/network/api_service.dart';
+import 'package:mishka_app/core/layout/form_screen_body.dart';
 import 'package:mishka_app/core/utils/app_colors.dart';
 import 'package:mishka_app/core/utils/app_sizes.dart';
 import 'package:mishka_app/core/widgets/custom_app_bar.dart';
@@ -94,15 +95,9 @@ class _NewPasswordViewState extends State<NewPasswordView> {
         showBottomBar: false,
         showBack: true,
       ),
-      body: Padding(
-        padding: EdgeInsetsDirectional.only(
-          start: AppSizes.paddingMedium,
-          end: AppSizes.paddingMedium,
-          bottom: AppSizes.paddingMedium,
-        ),
-        child: Form(
-          key: _formKey,
-          child: SingleChildScrollView(
+      body: FormScreenBody(
+          child: Form(
+            key: _formKey,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
@@ -157,7 +152,6 @@ class _NewPasswordViewState extends State<NewPasswordView> {
               ],
             ),
           ),
-        ),
       ),
     );
   }

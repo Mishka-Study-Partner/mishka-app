@@ -43,20 +43,38 @@ class SavedLibraryDetail {
   String? tutorEntityId(SavedContentKind kind) {
     switch (kind) {
       case SavedContentKind.quiz:
-        return _readId(raw['quizId'], raw['quiz']);
+        return _readId(raw['quizId'], raw['quiz']) ?? _readId(raw['id'], null);
       case SavedContentKind.flashcards:
         return _readId(
-          raw['flashcardSetId'] ?? raw['flashcard_set_id'],
-          raw['flashcardSet'] ?? raw['flashcard_set'] ?? raw['set'],
-        );
+              raw['flashcardSetId'] ?? raw['flashcard_set_id'],
+              raw['flashcardSet'] ?? raw['flashcard_set'] ?? raw['set'],
+            ) ??
+            _setIdFromInlineFlashcards(raw) ??
+            _readId(raw['id'], null);
       case SavedContentKind.summary:
-        return _readId(raw['summaryId'] ?? raw['summary_id'], raw['summary']);
+        return _readId(raw['summaryId'] ?? raw['summary_id'], raw['summary']) ??
+            _readId(raw['id'], null);
       case SavedContentKind.mindmap:
         return _readId(
-          raw['mindMapId'] ?? raw['mind_map_id'],
-          raw['mindMap'] ?? raw['mind_map'],
-        );
+              raw['mindMapId'] ?? raw['mind_map_id'],
+              raw['mindMap'] ?? raw['mind_map'],
+            ) ??
+            _readId(raw['id'], null);
     }
+  }
+
+  static String? _setIdFromInlineFlashcards(Map<String, dynamic> raw) {
+    final cards = raw['flashcards'] ?? raw['cards'];
+    if (cards is! List || cards.isEmpty) return null;
+    final first = cards.first;
+    if (first is! Map) return null;
+    final setId = first['setId'] ??
+        first['flashcardSetId'] ??
+        first['flashcard_set_id'];
+    if (setId != null && setId.toString().trim().isNotEmpty) {
+      return setId.toString();
+    }
+    return null;
   }
 
   static String? _readId(Object? direct, Object? nested) {

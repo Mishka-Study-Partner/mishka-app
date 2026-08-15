@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 
+import 'package:mishka_app/core/navigation/safe_navigation.dart';
 import 'package:mishka_app/core/widgets/custom_nav_bar.dart';
 import 'package:mishka_app/features/chat_with_mishka/presentation/screens/chat_with_mishka_screen.dart';
 import 'package:mishka_app/features/ctegory/presentation/view/ai_tools_screen.dart';
 import 'package:mishka_app/features/ctegory/presentation/view/category_screen.dart';
 import 'package:mishka_app/features/gamification/gamification.dart';
+import 'package:mishka_app/features/gamification/my_progress.dart';
 import 'package:mishka_app/features/home/presentation/screens/home_screen.dart';
 import 'package:mishka_app/features/our_community/our_community.dart';
 import 'package:mishka_app/features/profile/presentation/screens/profile_screen.dart';
@@ -27,7 +29,8 @@ enum CategoryScreenType {
   aiTools,
   studyWithMe,
   ourCommunity,
-  gamefaction,
+  myProgress,
+  gamification,
   chatWithMishka,
 }
 
@@ -102,16 +105,18 @@ class _MainScreenState extends State<MainScreen> {
         break;
     }
 
-    return Scaffold(
-      body: Column(
-        children: [
-          Expanded(child: body),
-          const FloatingTimerBar(),
-        ],
-      ),
-      bottomNavigationBar: MishkaBottomNav(
-        currentIndex: currentTab.index,
-        onTap: (i) => switchTab(MainTab.values[i]),
+    return RootBackGuard(
+      child: Scaffold(
+        body: Column(
+          children: [
+            Expanded(child: body),
+            const FloatingTimerBar(),
+          ],
+        ),
+        bottomNavigationBar: MishkaBottomNav(
+          currentIndex: currentTab.index,
+          onTap: (i) => switchTab(MainTab.values[i]),
+        ),
       ),
     );
   }
@@ -160,7 +165,12 @@ class CategoryContainer extends StatelessWidget {
           scrollToSaved: scrollCommunityToSaved,
         );
 
-      case CategoryScreenType.gamefaction:
+      case CategoryScreenType.myProgress:
+        return MyProgress(
+          onBack: () => onNavigate(CategoryScreenType.main),
+        );
+
+      case CategoryScreenType.gamification:
         return Gamification(
           onBack: () => onNavigate(CategoryScreenType.main),
         );

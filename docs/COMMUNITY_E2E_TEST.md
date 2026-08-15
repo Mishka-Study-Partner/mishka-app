@@ -39,6 +39,7 @@ Do **not** use `dart run tool/verify_community_backend_fixes.dart` from the Flut
 ## 4. Create community (discovery fields)
 
 - [ ] **Create New Community** → Public → subject/purpose chips visible
+- [ ] **Category (optional)** — pick suggestion or type new title
 - [ ] Create with name → success → community home
 - [ ] New public community can appear in discover (after backend indexing)
 
@@ -48,6 +49,18 @@ Do **not** use `dart run tool/verify_community_backend_fixes.dart` from the Flut
 - [ ] Own messages: **Me · Owner/Admin/Member** (role from API or membership)
 - [ ] Others: name · role when API sends `senderDisplay` / `senderRole`
 - [ ] Send text → appears with correct label
+- [ ] Pull-to-refresh reloads messages
+- [ ] New messages from another member appear within ~12s (background poll) or after resume
+
+## 5b. Share Mishka material to group chat
+
+- [ ] **Saved** → share → pick community groups → optional note → success dialog
+- [ ] **Open group** on success dialog → lands in that group chat with material visible
+- [ ] **Chat with Mishka** → share generated tool → same success flow
+- [ ] **In group chat** → attach/share → pick saved flashcards/quiz/summary/mind map → material bubble appears
+- [ ] Material message shows inline preview + **Tap to open full screen**
+- [ ] Full screen: quiz / flashcards / summary / mind map loads and is interactive
+- [ ] Re-share same item to same channel → no duplicate material bubble
 
 ## 6. Manage members (owner/admin)
 

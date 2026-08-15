@@ -3,7 +3,10 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:iconify_flutter/iconify_flutter.dart';
 import 'package:iconify_flutter/icons/ion.dart';
 import 'package:iconify_flutter/icons/tabler.dart';
-import 'package:iconify_flutter/icons/zondicons.dart';
+
+import 'package:mishka_app/core/layout/app_breakpoints.dart';
+import 'package:mishka_app/core/layout/app_scale.dart';
+import 'package:mishka_app/core/utils/app_sizes.dart';
 
 import '../../../../core/utils/app_colors.dart';
 import '../../data/model/uploaded_item.dart';
@@ -42,29 +45,56 @@ class _ChatInputBarState extends State<ChatInputBar>
     with TickerProviderStateMixin {
   bool get hasMaterial => widget.uploads.isNotEmpty;
 
+  void _sendMessage() {
+    if (!widget.typingEnabled) return;
+    final text = widget.controller.text.trim();
+    if (text.isEmpty) return;
+    widget.onSend(text);
+    widget.controller.clear();
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Center(
+    final isTablet = AppBreakpoints.isTablet(context);
+    final horizontalInset =
+        isTablet ? AppScale.w(24) : AppSizes.paddingMedium;
+    final iconSize = isTablet ? AppScale.w(26) : 24.w;
+    final inputMinHeight = isTablet ? AppScale.h(44) : 40.h;
+    final textStyle = TextStyle(
+      fontFamily: 'Pridi',
+      fontSize: isTablet ? AppSizes.fontSizeMedium : AppSizes.fontSizeSmall,
+      fontWeight: FontWeight.w500,
+      color: AppColors.mainDark,
+    );
+
+    return Padding(
+      padding: EdgeInsets.symmetric(horizontal: horizontalInset),
       child: AnimatedSize(
         duration: const Duration(milliseconds: 250),
         curve: Curves.easeOut,
         alignment: Alignment.bottomCenter,
         child: Container(
-          width: 358.w,
-          padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
+          width: double.infinity,
+          padding: EdgeInsets.symmetric(
+            horizontal: isTablet ? AppScale.w(14) : AppSizes.paddingSmall,
+            vertical: isTablet ? AppScale.h(10) : AppScale.h(8),
+          ),
           decoration: BoxDecoration(
             color: AppColors.white,
-            borderRadius: BorderRadius.circular(28.r),
+            borderRadius: BorderRadius.circular(
+              isTablet ? AppScale.r(32) : AppScale.r(28),
+            ),
             border: Border.all(color: AppColors.greyText),
           ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              /// 🔹 UPLOADED FILES (max 2 rows)
               if (widget.uploads.isNotEmpty) ...[
                 ConstrainedBox(
-                  constraints: BoxConstraints(maxHeight: 120.h),
+                  constraints: BoxConstraints(
+                    maxHeight: isTablet ? AppScale.h(130) : 120.h,
+                  ),
                   child: SingleChildScrollView(
                     physics: widget.uploads.length > 3
                         ? const BouncingScrollPhysics()
@@ -75,66 +105,67 @@ class _ChatInputBarState extends State<ChatInputBar>
                       children: widget.uploads
                           .map(
                             (item) => UploadedFileCard(
-                          item: item,
-                          onRemove: () =>
-                              widget.onRemoveUpload(item),
-                        ),
-                      )
+                              item: item,
+                              onRemove: () => widget.onRemoveUpload(item),
+                            ),
+                          )
                           .toList(),
                     ),
                   ),
                 ),
                 SizedBox(height: 8.h),
               ],
-
-              /// 🔹 INPUT ROW (UNCHANGED LOOK)
-              Row(
-                children: [
-                  Iconify(Zondicons.mic,
-                      size: 24, color: AppColors.mainDark),
-                  const SizedBox(width: 10),
-
-                  GestureDetector(
-                    onTap: widget.onPickFile,
-                    child: Iconify(
-                      Ion.options_sharp,
-                      size: 24,
-                      color: AppColors.mainDark,
-                    ),
-                  ),
-                  const SizedBox(width: 10),
-
-                  Expanded(
-                    child: TextField(
-                      controller: widget.controller,
-                      enabled: widget.typingEnabled,
-                      decoration: InputDecoration(
-                        hintText: _hintText(),
-                        border: InputBorder.none,
-                        isDense: true,
+              ConstrainedBox(
+                constraints: BoxConstraints(minHeight: inputMinHeight),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    GestureDetector(
+                      onTap: widget.onPickFile,
+                      child: Iconify(
+                        Ion.options_sharp,
+                        size: iconSize,
+                        color: AppColors.mainDark,
                       ),
                     ),
-                  ),
-
-                  GestureDetector(
-                    onTap: widget.typingEnabled
-                        ? () {
-                      final text =
-                      widget.controller.text.trim();
-                      if (text.isEmpty) return;
-                      widget.onSend(text);
-                      widget.controller.clear();
-                    }
-                        : null,
-                    child: Iconify(
-                      Tabler.send,
-                      size: 24,
-                      color: widget.typingEnabled
-                          ? AppColors.mainDark
-                          : AppColors.greyText,
+                    SizedBox(width: isTablet ? 12.w : 10.w),
+                    Expanded(
+                      child: TextField(
+                        controller: widget.controller,
+                        enabled: widget.typingEnabled,
+                        textInputAction: TextInputAction.send,
+                        minLines: 1,
+                        maxLines: 4,
+                        style: textStyle,
+                        onSubmitted:
+                            widget.typingEnabled ? (_) => _sendMessage() : null,
+                        decoration: InputDecoration(
+                          hintText: _hintText(),
+                          hintStyle: textStyle.copyWith(
+                            color: AppColors.greyText,
+                            fontWeight: FontWeight.w400,
+                          ),
+                          border: InputBorder.none,
+                          isDense: true,
+                          contentPadding: EdgeInsets.symmetric(
+                            vertical: isTablet ? AppScale.h(10) : 8.h,
+                          ),
+                        ),
+                      ),
                     ),
-                  ),
-                ],
+                    SizedBox(width: isTablet ? 8.w : 4.w),
+                    GestureDetector(
+                      onTap: widget.typingEnabled ? _sendMessage : null,
+                      child: Iconify(
+                        Tabler.send,
+                        size: iconSize,
+                        color: widget.typingEnabled
+                            ? AppColors.mainDark
+                            : AppColors.greyText,
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ],
           ),

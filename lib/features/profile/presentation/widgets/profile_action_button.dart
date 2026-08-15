@@ -1,16 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+
+import 'package:mishka_app/core/layout/app_breakpoints.dart';
+import 'package:mishka_app/core/utils/app_sizes.dart';
+import 'package:mishka_app/features/profile/presentation/widgets/profile_field_metrics.dart';
+
 import '../../../../core/utils/app_colors.dart';
 
 class ProfileActionButton extends StatelessWidget {
   final String text;
   final bool selected;
   final VoidCallback? onTap;
-
-  /// When true, expands to fill [Row]/[Expanded] width (omit fixed [width]).
   final bool expand;
-
-  /// Fixed width when [expand] is false; defaults to `118.w`.
   final double? width;
 
   const ProfileActionButton({
@@ -24,15 +25,17 @@ class ProfileActionButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isTablet = AppBreakpoints.isTablet(context);
     final scheme = Theme.of(context).colorScheme;
     final idleBg = Theme.of(context).brightness == Brightness.dark
         ? scheme.surfaceContainerHighest.withValues(alpha: 0.45)
         : AppColors.white;
-    final borderColor = Theme.of(context).dividerColor;
-    final radius = BorderRadius.circular(8);
+    final borderColor = ProfileFieldMetrics.fieldBorder(context);
+    final radius = BorderRadius.circular(isTablet ? 10.r : 8);
+    final height = ProfileFieldMetrics.fieldHeight(context);
 
     final child = Container(
-      height: 28.h,
+      height: height,
       width: expand ? double.infinity : (width ?? 118.w),
       alignment: Alignment.center,
       decoration: BoxDecoration(
@@ -49,8 +52,8 @@ class ProfileActionButton extends StatelessWidget {
             textAlign: TextAlign.center,
             maxLines: 2,
             style: TextStyle(
-              fontFamily: "Pridi",
-              fontSize: 11.sp,
+              fontFamily: 'Pridi',
+              fontSize: isTablet ? AppSizes.fontSizeSmall : 11.sp,
               fontWeight: FontWeight.w500,
               color: selected ? AppColors.white : scheme.onSurface,
             ),

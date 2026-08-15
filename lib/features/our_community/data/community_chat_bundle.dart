@@ -1,13 +1,13 @@
 import 'community_models.dart';
 
-/// Single fetch result for group chat (community + members + messages).
+/// Messages + optional community refresh for group chat (no members fetch).
 class CommunityChatBundle {
   const CommunityChatBundle({
     required this.community,
-    required this.members,
     required this.messages,
-    required this.memberNamesByUserId,
-    required this.memberRolesByUserId,
+    this.members = const [],
+    this.memberNamesByUserId = const {},
+    this.memberRolesByUserId = const {},
   });
 
   final CommunityModel community;

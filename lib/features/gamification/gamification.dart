@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 
-import 'package:mishka_app/features/report/presentation/screens/your_report_screen.dart';
+import 'package:mishka_app/features/gamification/presentation/screens/gamification_hub_screen.dart';
 
-/// Progress report screen (replaces gamification placeholder).
+/// Badges, rewards, points, and challenges hub.
 class Gamification extends StatelessWidget {
   const Gamification({super.key, this.onBack});
 
@@ -10,6 +10,6 @@ class Gamification extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return YourReportScreen(onBack: onBack);
+    return GamificationHubScreen(onBack: onBack);
   }
 }

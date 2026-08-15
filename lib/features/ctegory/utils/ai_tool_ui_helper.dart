@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:mishka_app/features/chat_with_mishka/presentation/screens/direct_tool_generator_screen.dart';
 import 'package:mishka_app/features/ctegory/data/models/ai_tool_api_model.dart';
 import 'package:mishka_app/features/home/presentation/widgets/ai_tool_card.dart';
@@ -6,6 +7,24 @@ import 'package:mishka_app/generated/assets.dart';
 /// Shared mapping for AI tool cards (home grid + category AI tools screen).
 class AiToolUiHelper {
   AiToolUiHelper._();
+
+  /// Bump after replacing home card PNGs so widgets reload fresh assets.
+  static const int homeCardAssetRevision = 4;
+
+  static const List<String> homeCardAssetPaths = [
+    Assets.imagesHomeChatCard,
+    Assets.imagesHomeFlashcardsCard,
+    Assets.imagesHomeSumaryQuizzesCard,
+  ];
+
+  /// Clears decoded image cache for home AI tool card assets.
+  static Future<void> evictHomeCardImages() async {
+    PaintingBinding.instance.imageCache.clear();
+    PaintingBinding.instance.imageCache.clearLiveImages();
+    for (final path in homeCardAssetPaths) {
+      await AssetImage(path).evict();
+    }
+  }
 
   static String imageForTitle(String text) {
     final t = text.toLowerCase();

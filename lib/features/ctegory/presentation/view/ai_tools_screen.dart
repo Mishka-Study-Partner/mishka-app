@@ -8,6 +8,7 @@ import 'package:mishka_app/features/ctegory/data/models/ai_tool_api_model.dart';
 import 'package:mishka_app/features/ctegory/data/repositories/category_repository.dart';
 import 'package:mishka_app/l10n/app_localizations.dart';
 
+import 'package:mishka_app/core/widgets/screen_end_spacer.dart';
 import '../../../../core/widgets/custom_app_bar.dart';
 import '../widgets/ai_tools_cards.dart';
 import '../widgets/chat_card.dart';
@@ -36,6 +37,7 @@ class _AiToolsScreenState extends State<AiToolsScreen> {
   @override
   void initState() {
     super.initState();
+    AiToolUiHelper.evictHomeCardImages();
     _loadAiTools();
   }
 
@@ -81,18 +83,21 @@ class _AiToolsScreenState extends State<AiToolsScreen> {
         onBackTap: widget.onBack,
       ),
       body: SingleChildScrollView(
-        padding: EdgeInsets.all(AppSizes.paddingMedium),
+        padding: AppScrollInsets.page(
+          horizontal: AppSizes.paddingMedium,
+          top: AppSizes.paddingMedium,
+        ),
         child: Column(
           children: [
-            SizedBox(height: 16.h),
+            SizedBox(height: 8.h),
             MishkaSearchBar(hintText: l10n.search),
-            SizedBox(height: 16.h),
+            SizedBox(height: 8.h),
             MishkaChatCard(
               onNavigate: widget.onNavigate != null
                   ? () => widget.onNavigate!(CategoryScreenType.chatWithMishka)
                   : null,
             ),
-            SizedBox(height: 16.h),
+            SizedBox(height: 8.h),
             if (_isLoading)
               const Center(child: CircularProgressIndicator())
             else if (_aiTools.isEmpty) ...[
@@ -102,33 +107,27 @@ class _AiToolsScreenState extends State<AiToolsScreen> {
                 (DirectToolKind.summarize, l10n.summarize),
                 (DirectToolKind.mindmap, l10n.mindMap),
               ])
-                Padding(
-                  padding: EdgeInsets.only(bottom: 12.h),
-                  child: FeatureAiSectionCard(
-                    imagePath: AiToolUiHelper.imageForTitle(entry.$2),
-                    title: entry.$2,
-                    subtitle: '',
-                    onTap: () => _openDirectTool(entry.$1, entry.$2),
-                  ),
+                FeatureAiSectionCard(
+                  imagePath: AiToolUiHelper.imageForTitle(entry.$2),
+                  title: entry.$2,
+                  subtitle: '',
+                  onTap: () => _openDirectTool(entry.$1, entry.$2),
                 ),
             ] else
               ..._aiTools.map((tool) {
                 final kind = AiToolUiHelper.directKindForTitle(tool.title);
-                return Padding(
-                  padding: EdgeInsets.only(bottom: 12.h),
-                  child: FeatureAiSectionCard(
-                    imagePath: _imageForTool(tool.title),
-                    title: tool.title,
-                    subtitle: tool.subtitle ?? '',
-                    onTap: kind == null
-                        ? (widget.onNavigate != null
-                            ? () => widget.onNavigate!(CategoryScreenType.chatWithMishka)
-                            : null)
-                        : () => _openDirectTool(kind, tool.title),
-                  ),
+                return FeatureAiSectionCard(
+                  imagePath: _imageForTool(tool.title),
+                  title: tool.title,
+                  subtitle: tool.subtitle ?? '',
+                  onTap: kind == null
+                      ? (widget.onNavigate != null
+                          ? () => widget.onNavigate!(CategoryScreenType.chatWithMishka)
+                          : null)
+                      : () => _openDirectTool(kind, tool.title),
                 );
               }),
-            SizedBox(height: 24.h),
+            SizedBox(height: 16.h),
           ],
         ),
       ),

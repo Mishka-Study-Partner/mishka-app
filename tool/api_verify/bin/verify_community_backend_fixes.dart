@@ -8,7 +8,7 @@ import 'dart:io';
 
 const _base = String.fromEnvironment(
   'API_BASE_URL',
-  defaultValue: 'https://fleshy-lemon-persevere.ngrok-free.dev',
+  defaultValue: 'https://mishka-backend-production-3f6f.up.railway.app',
 );
 
 void main() async {

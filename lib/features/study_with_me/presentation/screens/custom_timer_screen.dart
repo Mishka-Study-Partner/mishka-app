@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:mishka_app/core/network/api_service.dart';
+import 'package:mishka_app/core/widgets/screen_end_spacer.dart';
 import 'package:mishka_app/core/utils/app_colors.dart';
 import 'package:mishka_app/core/utils/app_sizes.dart';
 import 'package:mishka_app/core/widgets/custom_app_bar.dart';
@@ -12,6 +13,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../../data/study_remote_data_source.dart';
 import '../../data/timer_model.dart';
 import 'timer_session_screen.dart';
+import 'package:mishka_app/features/student_subjects/study_subject_launch.dart';
 
 const _kLocalTimersKey = 'custom_timers_local';
 
@@ -145,13 +147,27 @@ class _CustomTimerScreenState extends State<CustomTimerScreen> {
       final study = int.tryParse(_studyController.text.trim()) ?? 25;
       final short = int.tryParse(_shortController.text.trim()) ?? 5;
       final long = int.tryParse(_longController.text.trim()) ?? 15;
-      timer = StudyTimerModel('Custom', study, short, long);
+      timer = StudyTimerModel(
+        'Custom',
+        study,
+        short,
+        long,
+        modeId: 'custom',
+      );
     }
 
-    Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (_) => TimerSessionScreen(model: timer),
-      ),
+    StudySubjectLaunch.pickSubjectAndStart(
+      context,
+      onStart: (subjectId, subjectName) async {
+        if (!context.mounted) return;
+        Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (_) => TimerSessionScreen(
+              model: timer.withStudentSubject(subjectId, name: subjectName),
+            ),
+          ),
+        );
+      },
     );
   }
 
@@ -167,7 +183,7 @@ class _CustomTimerScreenState extends State<CustomTimerScreen> {
         showBottomBar: false,
       ),
       body: SingleChildScrollView(
-        padding: EdgeInsets.all(AppSizes.paddingMedium),
+        padding: AppScrollInsets.page(horizontal: AppSizes.paddingMedium, top: AppSizes.paddingMedium),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [

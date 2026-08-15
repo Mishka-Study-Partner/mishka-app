@@ -1,8 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
+import 'package:mishka_app/features/chat_with_mishka/presentation/chat_layout_metrics.dart';
+
 import '../../../../core/utils/app_colors.dart';
+import '../../data/ai_response_helpers.dart';
 import '../../data/controller/chat_flow_controller.dart';
+import 'package:mishka_app/l10n/app_localizations.dart';
+import 'formatted_study_text.dart';
+import 'study_text_utils.dart';
 
 class ChatBubble extends StatelessWidget {
   final ChatMessage message;
@@ -29,7 +35,12 @@ class ChatBubble extends StatelessWidget {
           isFromMishka: message.isFromMishka,
         );
       case MessageType.explanation:
-        return _ExplanationBubble(text: message.text ?? "");
+        final l10n = AppLocalizations.of(context)!;
+        final text = AiResponseHelpers.displayText(
+          message.text ?? '',
+          l10n.chatAiServiceUnavailable,
+        );
+        return _ExplanationBubble(text: text);
       case MessageType.file:
         return _FileBubble(
           fileName: message.fileName ?? "PDF",
@@ -108,14 +119,16 @@ class _TextBubble extends StatelessWidget {
       child: Align(
         alignment: alignment,
         child: Container(
-          constraints: BoxConstraints(maxWidth: 280.w),
+          constraints: BoxConstraints(
+            maxWidth: ChatLayoutMetrics.bubbleMaxWidth(context),
+          ),
           padding: EdgeInsets.all(14.r),
           decoration: BoxDecoration(
             color: AppColors.white,
             borderRadius: BorderRadius.circular(14.r),
             border: Border.all(color: AppColors.mainDark),
           ),
-          child: Text(
+          child: StudyText(
             text,
             style: TextStyle(
               fontFamily: "Pridi",
@@ -145,20 +158,23 @@ class _ExplanationBubble extends StatelessWidget {
       child: Align(
         alignment: Alignment.centerLeft,
         child: Container(
-          constraints: BoxConstraints(maxWidth: 300.w),
+          constraints: BoxConstraints(
+            maxWidth: ChatLayoutMetrics.bubbleMaxWidth(context, designWidth: 300),
+          ),
           padding: EdgeInsets.all(14.r),
           decoration: BoxDecoration(
             color: AppColors.white,
             borderRadius: BorderRadius.circular(14.r),
             border: Border.all(color: AppColors.mainDark),
           ),
-          child: Text(
-            text,
-            style: TextStyle(
+          child: FormattedStudyText(
+            text: text,
+            textAlign: TextAlign.justify,
+            baseStyle: TextStyle(
               fontFamily: "Pridi",
               fontSize: 14.sp,
               fontWeight: FontWeight.w500,
-              height: 1.45,
+              height: 1.5,
               color: AppColors.mainDark,
             ),
           ),
@@ -235,7 +251,9 @@ class _SelectionBubble extends StatelessWidget {
       child: Align(
         alignment: Alignment.centerRight,
         child: Container(
-          constraints: BoxConstraints(maxWidth: 260.w),
+          constraints: BoxConstraints(
+            maxWidth: ChatLayoutMetrics.bubbleMaxWidth(context, designWidth: 260),
+          ),
           padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 10.h),
           decoration: BoxDecoration(
             color: AppColors.white,
@@ -295,7 +313,9 @@ class _OptionsBubble extends StatelessWidget {
       child: Align(
         alignment: Alignment.centerLeft,
         child: Container(
-          constraints: BoxConstraints(maxWidth: 320.w),
+          constraints: BoxConstraints(
+            maxWidth: ChatLayoutMetrics.bubbleMaxWidth(context, designWidth: 320),
+          ),
           padding: EdgeInsets.all(12.r),
           decoration: BoxDecoration(
             color: AppColors.white,
@@ -412,7 +432,9 @@ class ChatBubble extends StatelessWidget {
         children: [
           /// BUBBLE
           Container(
-            constraints: BoxConstraints(maxWidth: 260.w),
+            constraints: BoxConstraints(
+            maxWidth: ChatLayoutMetrics.bubbleMaxWidth(context, designWidth: 260),
+          ),
             padding: EdgeInsets.all(14.r),
             decoration: BoxDecoration(
               color: Colors.white,

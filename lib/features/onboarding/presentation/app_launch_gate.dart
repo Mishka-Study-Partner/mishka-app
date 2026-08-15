@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import 'package:mishka_app/core/navigation/safe_navigation.dart';
 import 'package:mishka_app/core/network/token_storage.dart';
 import 'package:mishka_app/core/preferences/app_preferences.dart';
 import 'package:mishka_app/features/Auth/view/bloc/auth_bloc.dart';
@@ -9,6 +10,8 @@ import 'package:mishka_app/features/education/presentation/screens/education_sta
 import 'package:mishka_app/features/onboarding/presentation/screens/onboarding_intro_screen.dart';
 import 'package:mishka_app/features/onboarding/presentation/screens/splash_screen.dart';
 import 'package:mishka_app/features/onboarding/presentation/screens/welcome_screen.dart';
+// Deep links disabled — wrap MainScreen with CommunityInviteDeepLinkHost when re-enabled.
+// import 'package:mishka_app/features/our_community/presentation/community_invite_deep_link_host.dart';
 
 /// Splash on every cold start, then route by auth + onboarding state.
 class AppLaunchGate extends StatefulWidget {
@@ -49,9 +52,10 @@ class _AppLaunchGateState extends State<AppLaunchGate> {
       builder: (context, state) {
         if (state is AuthSuccess) {
           if (!AppPreferences.hasCompletedEducationSetup) {
-            return const EducationStatusScreen();
+            return const RootBackGuard(child: EducationStatusScreen());
           }
-          return const MainScreen();
+          return const RootBackGuard(child: MainScreen());
+          // return const CommunityInviteDeepLinkHost(child: MainScreen());
         }
 
         if (state is AuthLoading) {
@@ -70,8 +74,8 @@ class _AppLaunchGateState extends State<AppLaunchGate> {
 
   Widget _unauthenticatedDestination() {
     if (!AppPreferences.hasCompletedOnboardingIntro) {
-      return const OnboardingIntroScreen();
+      return const RootBackGuard(child: OnboardingIntroScreen());
     }
-    return const WelcomeScreen();
+    return const RootBackGuard(child: WelcomeScreen());
   }
 }

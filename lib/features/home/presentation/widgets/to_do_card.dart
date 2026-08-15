@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:mishka_app/l10n/app_localizations.dart';
 
 import '../../../../core/utils/app_colors.dart';
 import '../../../../core/utils/app_sizes.dart';
@@ -49,6 +50,7 @@ class TodoTaskCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final textTheme = Theme.of(context).textTheme;
 
     return Container(
@@ -102,7 +104,7 @@ class TodoTaskCard extends StatelessWidget {
               children: [
                 // Task
                 Text(
-                  'Task:',
+                  l10n.task,
                   style: textTheme.titleSmall,
                 ),
                 SizedBox(height: 4.h),
@@ -122,7 +124,7 @@ class TodoTaskCard extends StatelessWidget {
 
                 // List
                 Text(
-                  'List:',
+                  l10n.list,
                   style: textTheme.titleSmall,
                 ),
                 SizedBox(height: 4.h),
@@ -137,7 +139,7 @@ class TodoTaskCard extends StatelessWidget {
 
                 // Deadline
                 Text(
-                  'Deadline:',
+                  l10n.deadline,
                   style: textTheme.titleSmall,
                 ),
                 SizedBox(height: 4.h),

@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -5,6 +7,8 @@ import 'package:iconify_flutter/icons/mdi.dart';
 import 'package:iconify_flutter/iconify_flutter.dart';
 import 'package:intl/intl.dart';
 
+import 'package:mishka_app/core/layout/app_breakpoints.dart';
+import 'package:mishka_app/core/preferences/app_preferences.dart';
 import 'package:mishka_app/core/utils/app_colors.dart';
 import 'package:mishka_app/core/utils/app_sizes.dart';
 import 'package:mishka_app/core/widgets/custom_app_bar.dart';
@@ -13,13 +17,18 @@ import 'package:mishka_app/features/chat_with_mishka/presentation/screens/direct
 import 'package:mishka_app/features/ctegory/data/models/ai_tool_api_model.dart';
 import 'package:mishka_app/features/ctegory/data/repositories/category_repository.dart';
 import 'package:mishka_app/features/ctegory/utils/ai_tool_ui_helper.dart';
+import 'package:mishka_app/core/network/api_exception.dart';
 import 'package:mishka_app/features/home/data/models/daily_streak_model.dart';
+import 'package:mishka_app/features/home/data/daily_streak_ping.dart';
 import 'package:mishka_app/features/home/data/repositories/home_repository.dart';
+import 'package:mishka_app/features/todo_lists/data/task_due_fields.dart';
 import 'package:mishka_app/features/todo_lists/data/models/task_api_model.dart';
+import 'package:mishka_app/features/todo_lists/data/repositories/todo_repository.dart';
 import 'package:mishka_app/generated/assets.dart';
 import 'package:mishka_app/main.dart';
 
 import '../../../../l10n/app_localizations.dart';
+import 'package:mishka_app/core/widgets/screen_end_spacer.dart';
 import '../widgets/daily_streak_week_row.dart';
 import '../widgets/tip_of_the_day_card.dart';
 import '../widgets/ai_tool_card.dart';
@@ -47,9 +56,11 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   final HomeRepository _homeRepository = HomeRepository();
   final CategoryRepository _categoryRepository = CategoryRepository();
+  final TodoRepository _todoRepository = TodoRepository();
   int _streakDays = 0;
   int _freezesRemaining = 0;
   List<DailyStreakDayModel> _streakWeek = const [];
+  bool _streakLoaded = false;
   String? _tipText;
   List<TaskApiModel> _upcomingTasks = const [];
   List<AiToolApiModel> _aiTools = const [];
@@ -58,33 +69,74 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
-    _loadHomeData();
+    AiToolUiHelper.evictHomeCardImages();
+    _restoreCachedStreak();
+    _initHome();
+  }
+
+  void _restoreCachedStreak() {
+    final raw = AppPreferences.cachedDailyStreakJson;
+    if (raw == null || raw.isEmpty) return;
+    try {
+      final model = DailyStreakModel.fromJson(jsonDecode(raw));
+      _streakDays = model.currentStreak;
+      _freezesRemaining = model.freezesRemaining;
+      _streakWeek = model.week;
+      _streakLoaded = true;
+    } catch (_) {}
+  }
+
+  Future<void> _applyStreakModel(DailyStreakModel model) async {
+    if (!mounted) return;
+    setState(() {
+      _streakDays = model.currentStreak;
+      _freezesRemaining = model.freezesRemaining;
+      _streakWeek = model.week;
+      _streakLoaded = true;
+    });
+    await AppPreferences.setCachedDailyStreakJson(
+      jsonEncode(model.toJson()),
+    );
+  }
+
+  Future<void> _initHome() async {
+    await DailyStreakPing.whenPingSettled();
+    final pingResult = await DailyStreakPing().recordAppOpenIfNeeded();
+    if (pingResult != null) {
+      await _applyStreakModel(pingResult);
+    }
+    await _loadHomeData();
+  }
+
+  Future<void> _loadStreak() async {
+    try {
+      final streakModel = await _homeRepository.getDailyStreak();
+      await _applyStreakModel(streakModel);
+    } catch (_) {
+      // Keep cached streak when the streak endpoint fails.
+    }
   }
 
   Future<void> _loadHomeData() async {
     setState(() => _isLoading = true);
+    await _loadStreak();
     try {
       final results = await Future.wait([
-        _homeRepository.getDailyStreak(),
         _homeRepository.getTips(),
         _homeRepository.getUpcomingTasks(),
         _categoryRepository.getAiTools(),
       ]);
       if (!mounted) return;
-      final tasks = (results[2] as List<TaskApiModel>).toList()
+      final tasks = (results[1] as List<TaskApiModel>).toList()
         ..sort((a, b) {
           final ad = a.deadline ?? DateTime(9999);
           final bd = b.deadline ?? DateTime(9999);
           return ad.compareTo(bd);
         });
-      final streakModel = results[0] as DailyStreakModel;
-      final apiTools = results[3] as List<AiToolApiModel>;
+      final apiTools = results[2] as List<AiToolApiModel>;
       setState(() {
-        _streakDays = streakModel.currentStreak;
-        _freezesRemaining = streakModel.freezesRemaining;
-        _streakWeek = streakModel.week;
-        _tipText = (results[1] as dynamic).isNotEmpty
-            ? (results[1] as dynamic).first.text as String
+        _tipText = (results[0] as dynamic).isNotEmpty
+            ? (results[0] as dynamic).first.text as String
             : null;
         _upcomingTasks = tasks.take(2).toList();
         _aiTools = apiTools;
@@ -95,6 +147,35 @@ class _HomeScreenState extends State<HomeScreen> {
       if (mounted) {
         setState(() => _isLoading = false);
       }
+    }
+  }
+
+  String _apiErrorMessage(Object error) {
+    if (error is ApiException) return error.message;
+    return error.toString();
+  }
+
+  Future<void> _toggleTask(TaskApiModel task) async {
+    final l10n = AppLocalizations.of(context)!;
+    final wasCompleted = task.completed ?? false;
+    final newStatus = wasCompleted ? 'pending' : 'completed';
+
+    try {
+      await _todoRepository.patchTask(id: task.id, status: newStatus);
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            wasCompleted ? l10n.taskMarkedPending : l10n.taskMarkedComplete,
+          ),
+        ),
+      );
+      await _loadHomeData();
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('${l10n.errorPrefix}: ${_apiErrorMessage(e)}')),
+      );
     }
   }
 
@@ -153,7 +234,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 padding: EdgeInsets.only(bottom: 24.h),
                 child: const Center(child: CircularProgressIndicator()),
               ),
-            SizedBox(height: 80.h), // Space before end of screen
+            const ScreenEndSpacer(),
           ],
         ),
       ),
@@ -180,8 +261,8 @@ class _HomeScreenState extends State<HomeScreen> {
               children: [
                 Text(
                   firstName == null || firstName.isEmpty
-                      ? l10n.welcomeBackSara
-                      : 'Welcome back, $firstName',
+                      ? l10n.welcomeBackToMishka
+                      : l10n.welcomeBackName(firstName),
                   style: TextStyle(
                     fontFamily: "Pridi",
                     fontSize: AppSizes.fontSizeLarge,
@@ -240,11 +321,7 @@ class _HomeScreenState extends State<HomeScreen> {
     try {
       final updated = await _homeRepository.freezeStreakDay(date: day.date);
       if (!mounted) return;
-      setState(() {
-        _streakDays = updated.currentStreak;
-        _freezesRemaining = updated.freezesRemaining;
-        _streakWeek = updated.week;
-      });
+      await _applyStreakModel(updated);
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(l10n.streakFreezeSuccess)),
       );
@@ -261,10 +338,15 @@ class _HomeScreenState extends State<HomeScreen> {
     AppLocalizations l10n,
     int streakDays,
   ) {
+    final compact = AppBreakpoints.isTablet(context);
+
     return Padding(
-      padding: EdgeInsets.all(AppSizes.paddingMedium),
+      padding: EdgeInsets.symmetric(
+        horizontal: AppSizes.paddingMedium,
+        vertical: compact ? 8.h : AppSizes.paddingMedium,
+      ),
       child: Container(
-        padding: EdgeInsets.all(AppSizes.paddingMedium),
+        padding: EdgeInsets.all(compact ? 12.w : AppSizes.paddingMedium),
         decoration: BoxDecoration(
           color: AppColors.white,
           borderRadius: BorderRadius.circular(AppSizes.radiusMedium),
@@ -279,39 +361,38 @@ class _HomeScreenState extends State<HomeScreen> {
                 Text(
                   l10n.dailyStreaks,
                   style: TextStyle(
-                    fontFamily: "Pridi",
-                    fontSize: AppSizes.fontSizeLarge,
+                    fontFamily: 'Pridi',
+                    fontSize: compact
+                        ? AppSizes.fontSizeMedium
+                        : AppSizes.fontSizeLarge,
                     fontWeight: FontWeight.w500,
                     color: AppColors.mainDark,
                   ),
                 ),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.end,
+                Row(
                   children: [
-                    Row(
-                      children: [
-                        Iconify(
-                          Mdi.fire,
-                          size: 18.w,
-                          color: AppColors.mainGold,
-                        ),
-                        SizedBox(width: 4.w),
-                        Text(
-                          l10n.days(streakDays),
-                          style: TextStyle(
-                            fontFamily: "Pridi",
-                            fontSize: AppSizes.fontSizeLarge,
-                            fontWeight: FontWeight.w600,
-                            color: AppColors.mainGold,
-                          ),
-                        ),
-                      ],
+                    Iconify(
+                      Mdi.fire,
+                      size: compact ? 16.w : 18.w,
+                      color: AppColors.mainGold,
+                    ),
+                    SizedBox(width: 4.w),
+                    Text(
+                      _streakLoaded ? l10n.days(streakDays) : '—',
+                      style: TextStyle(
+                        fontFamily: 'Pridi',
+                        fontSize: compact
+                            ? AppSizes.fontSizeMedium
+                            : AppSizes.fontSizeLarge,
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.mainGold,
+                      ),
                     ),
                   ],
                 ),
               ],
             ),
-            SizedBox(height: 16.h),
+            SizedBox(height: compact ? 10.h : 16.h),
             DailyStreakWeekRow(
               week: _streakWeek,
               freezesRemaining: _freezesRemaining,
@@ -389,23 +470,26 @@ class _HomeScreenState extends State<HomeScreen> {
                 separatorBuilder: (_, __) => SizedBox(width: 8.w),
                 itemBuilder: (context, index) {
                   final task = tasks[index];
-                  final deadline = task.deadline;
-                  final dateText = deadline == null
-                      ? '-'
-                      : DateFormat('EEE, MMM d, yyyy').format(deadline);
-                  final timeText = deadline == null
-                      ? '--:--'
-                      : DateFormat('hh:mm a').format(deadline);
+                  final localeName = Localizations.localeOf(context).toString();
+                  final dateText = TaskDueFields.formatDate(task.deadline, localeName);
+                  final timeText = TaskDueFields.formatTime(
+                    deadline: task.deadline,
+                    hasDueTime: task.hasDueTime,
+                    locale: localeName,
+                    empty: '--:--',
+                  );
+                  final screenW = MediaQuery.sizeOf(context).width;
+                  final cardWidth = AppBreakpoints.isTablet(context)
+                      ? screenW * 0.38
+                      : screenW * 0.55;
                   return SizedBox(
-                    width: MediaQuery.of(context).size.width * 0.55,
+                    width: cardWidth,
                     child: _buildTaskCard(
                       context,
                       l10n,
-                      task.title,
-                      task.todoListTitle ?? l10n.yourList,
+                      task,
                       dateText,
                       timeText,
-                      task.completed ?? false,
                     ),
                   );
                 },
@@ -419,12 +503,11 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget _buildTaskCard(
     BuildContext context,
     AppLocalizations l10n,
-    String task,
-    String list,
-    String deadline,
-    String time,
-    bool isCompleted,
+    TaskApiModel task,
+    String deadlineText,
+    String timeText,
   ) {
+    final isCompleted = task.completed ?? false;
     final deadlineColor = isCompleted ? const Color(0xFF4A7C59) : AppColors.blue;
     final bgColor = isCompleted ? const Color(0xFFFFFDF5) : AppColors.white;
     final checkboxBorder = isCompleted ? AppColors.mainGold : AppColors.greyText;
@@ -460,21 +543,25 @@ class _HomeScreenState extends State<HomeScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   // Checkbox
-                  Container(
-                    width: 26.w,
-                    height: 26.w,
-                    decoration: BoxDecoration(
-                      color: checkboxFill,
-                      borderRadius: BorderRadius.circular(6.r),
-                      border: Border.all(color: checkboxBorder),
+                  InkWell(
+                    onTap: () => _toggleTask(task),
+                    borderRadius: BorderRadius.circular(6.r),
+                    child: Container(
+                      width: 26.w,
+                      height: 26.w,
+                      decoration: BoxDecoration(
+                        color: checkboxFill,
+                        borderRadius: BorderRadius.circular(6.r),
+                        border: Border.all(color: checkboxBorder),
+                      ),
+                      child: isCompleted
+                          ? Icon(
+                              Icons.check,
+                              size: 16.w,
+                              color: AppColors.mainGold,
+                            )
+                          : null,
                     ),
-                    child: isCompleted
-                        ? Icon(
-                            Icons.check,
-                            size: 16.w,
-                            color: AppColors.mainGold,
-                          )
-                        : null,
                   ),
                   SizedBox(height: 10.h),
                   // Task label
@@ -488,7 +575,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                   ),
                   Text(
-                    task,
+                    task.title,
                     style: TextStyle(
                       fontFamily: "Pridi",
                       fontSize: 12.sp,
@@ -510,7 +597,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                   ),
                   Text(
-                    list,
+                    task.todoListTitle ?? l10n.yourList,
                     style: TextStyle(
                       fontFamily: "Pridi",
                       fontSize: 12.sp,
@@ -532,7 +619,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                   ),
                   Text(
-                    deadline,
+                    deadlineText,
                     style: TextStyle(
                       fontFamily: "Pridi",
                       fontSize: 12.sp,
@@ -542,7 +629,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                   SizedBox(height: 2.h),
                   Text(
-                    time,
+                    timeText,
                     style: TextStyle(
                       fontFamily: "Pridi",
                       fontSize: 12.sp,
@@ -620,23 +707,22 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
           SizedBox(height: 12.h),
           GridView.count(
-          crossAxisCount: 2,
-          crossAxisSpacing: 12.w,
-          mainAxisSpacing: 12.h,
-      childAspectRatio: 1.6,
-
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          children: [
-            for (var i = 0; i < tools.length; i++)
-              AiToolCard(
-                title: tools[i].title,
-                imagePath: AiToolUiHelper.imageForTitle(tools[i].title),
-                onTap: () => _openAiTool(context, tools[i]),
-                cornerPosition: AiToolUiHelper.cornerForIndex(i),
-              ),
-          ],
-      )
+            crossAxisCount: 2,
+            crossAxisSpacing: 12.w,
+            mainAxisSpacing: 12.h,
+            childAspectRatio: AppBreakpoints.isTablet(context) ? 1.75 : 1.6,
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            children: [
+              for (var i = 0; i < tools.length; i++)
+                AiToolCard(
+                  title: tools[i].title,
+                  imagePath: AiToolUiHelper.imageForTitle(tools[i].title),
+                  onTap: () => _openAiTool(context, tools[i]),
+                  cornerPosition: AiToolUiHelper.cornerForIndex(i),
+                ),
+            ],
+          ),
 
       ],
       ),
@@ -808,7 +894,7 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
               TextButton(
                 onPressed: () {
-                  widget.onCategoryNavigate?.call(CategoryScreenType.gamefaction);
+                  widget.onCategoryNavigate?.call(CategoryScreenType.gamification);
                 },
                 child: Text(
                   "${l10n.exploreMore} >",
@@ -828,16 +914,14 @@ class _HomeScreenState extends State<HomeScreen> {
               Expanded(
                 child: SupportBadgeCard(
                   imagePath: Assets.imagesMiskaSupport1,
-                  title1: "Count Your daily study hours with Mishka",
-
+                  title1: l10n.supportStudyHoursBadge,
                 ),
               ),
               SizedBox(width: 8.w),
               Expanded(
                 child: SupportBadgeCard(
                   imagePath: Assets.imagesMishkaSupport2,
-                  title1: "Win Mishka’s Challenges and get your PrizeL",
-
+                  title1: l10n.supportChallengesBadge,
                 ),
               ),
             ],

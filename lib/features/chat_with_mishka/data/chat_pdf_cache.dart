@@ -24,6 +24,27 @@ class ChatPdfCache {
 
   static File _metaFile(Directory dir) => File('${dir.path}/index.json');
 
+  /// Copies a picked PDF into app storage immediately so Android content URIs
+  /// cannot expire before upload (common on Samsung / scoped storage).
+  static Future<String> stagePickedPdf({
+    String? sourcePath,
+    List<int>? bytes,
+  }) async {
+    final dir = await _cacheDir();
+    final stagingId = 'staging_${DateTime.now().microsecondsSinceEpoch}';
+    final dest = _pdfFile(dir, stagingId);
+
+    if (sourcePath != null && sourcePath.isNotEmpty) {
+      await File(sourcePath).copy(dest.path);
+    } else if (bytes != null && bytes.isNotEmpty) {
+      await dest.writeAsBytes(bytes, flush: true);
+    } else {
+      throw ArgumentError('stagePickedPdf requires sourcePath or bytes');
+    }
+
+    return dest.path;
+  }
+
   /// Copies [sourcePath] into app storage keyed by [sessionId].
   static Future<String> persistForSession({
     required String sessionId,

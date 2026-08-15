@@ -4,7 +4,7 @@ import 'package:mishka_app/core/utils/app_colors.dart';
 
 import '../../data/study_session_manager.dart';
 import '../../data/timer_model.dart';
-import '../screens/timer_session_screen.dart';
+import '../study_session_navigation.dart';
 
 /// A small floating bar that shows when a study session is active.
 /// Tap it to navigate back to the timer screen.
@@ -26,15 +26,7 @@ class FloatingTimerBar extends StatelessWidget {
             : AppColors.mainGold;
 
         return GestureDetector(
-          onTap: () {
-            Navigator.of(context).push(
-              MaterialPageRoute(
-                builder: (_) => TimerSessionScreen(
-                  model: controller.model,
-                ),
-              ),
-            );
-          },
+          onTap: () => openActiveStudySessionScreen(context),
           child: Container(
             margin: EdgeInsets.symmetric(horizontal: 16.w, vertical: 4.h),
             padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 8.h),

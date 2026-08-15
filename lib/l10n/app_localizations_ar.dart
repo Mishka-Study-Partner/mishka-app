@@ -15,7 +15,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get createAccount => 'إنشاء حساب';
 
   @override
-  String get createAccountAtMishka => 'أنشئ حسابك في MISHKA';
+  String get createAccountAtMishka => 'أنشئ حسابك في ميشكا';
 
   @override
   String get firstName => 'الاسم الأول';
@@ -48,7 +48,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get agreeToTerms => 'الموافقة على الشروط والأحكام وسياسة الخصوصية';
 
   @override
-  String get alreadyHaveAccount => 'هل لديك حساب بالفعل؟ تسجيل الدخول';
+  String get alreadyHaveAccount => 'هل لديك حساب بالفعل؟';
 
   @override
   String get orSignUpWith => 'أو سجل مع';
@@ -57,13 +57,13 @@ class AppLocalizationsAr extends AppLocalizations {
   String get signIn => 'تسجيل الدخول';
 
   @override
-  String get welcomeBackToMishka => 'مرحباً بعودتك إلى MISHKA';
+  String get welcomeBackToMishka => 'مرحباً بعودتك إلى ميشكا';
 
   @override
   String get email => 'البريد الإلكتروني';
 
   @override
-  String get dontHaveAccount => 'ليس لديك حساب؟ إنشاء حساب';
+  String get dontHaveAccount => 'ليس لديك حساب؟';
 
   @override
   String get resetPassword => 'إعادة تعيين كلمة المرور';
@@ -153,6 +153,11 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get welcomeBackSara => 'مرحباً بعودتك، زياد!';
+
+  @override
+  String welcomeBackName(String name) {
+    return 'مرحباً بعودتك، $name';
+  }
 
   @override
   String get sundayJan26 => 'الأحد، 26 يناير 2026';
@@ -266,7 +271,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get pm200 => '02:00 م';
 
   @override
-  String get mishkasAiTools => 'أدوات MISHKA الذكية:';
+  String get mishkasAiTools => 'أدوات ميشكا الذكية:';
 
   @override
   String get viewMore => 'عرض المزيد';
@@ -367,6 +372,18 @@ class AppLocalizationsAr extends AppLocalizations {
   }
 
   @override
+  String get chatAiServiceUnavailable =>
+      'خدمة الذكاء الاصطناعي لـ ميشكا غير متاحة مؤقتاً. تعذّر على خادم النموذج الاتصال بـ OpenRouter — اطلب من الفريق التحقق من مفتاح OpenRouter API على خادم نموذج ميشكا (Railway)، ثم أعد المحاولة.';
+
+  @override
+  String get chatAiServerUnreachable =>
+      'خادم الذكاء الاصطناعي لـ ميشكا لا يستجيب. تحقق من أن نشر Railway AI يعمل بشكل سليم، ثم أعد المحاولة.';
+
+  @override
+  String get chatAiSessionExpired =>
+      'انتهت صلاحية جلسة الدراسة هذه. ابدأ محادثة جديدة وارفع ملف PDF مرة أخرى.';
+
+  @override
   String chatToolGenerationFailed(String error) {
     return 'فشل إنشاء الأداة.\n$error';
   }
@@ -439,6 +456,12 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get mishkasSupport => 'دعم ميشكا:';
+
+  @override
+  String get supportStudyHoursBadge => 'احسب ساعات دراستك اليومية مع ميشكا';
+
+  @override
+  String get supportChallengesBadge => 'اربح تحديات ميشكا واحصل على جائزتك';
 
   @override
   String get exploreMore => 'استكشف المزيد';
@@ -541,6 +564,25 @@ class AppLocalizationsAr extends AppLocalizations {
   String get gamificationSubtitle => 'النقاط، السلاسل، الشارات، التحديات.';
 
   @override
+  String get gamificationPoints => 'النقاط';
+
+  @override
+  String get gamificationBadges => 'الشارات';
+
+  @override
+  String get gamificationRewards => 'المكافآت';
+
+  @override
+  String get gamificationChallenges => 'التحديات';
+
+  @override
+  String get myProgress => 'تقدّمي';
+
+  @override
+  String get myProgressSubtitle =>
+      'وقت الدراسة، السلاسل، المهام، واستخدام أدوات الذكاء الاصطناعي أسبوعياً أو شهرياً.';
+
+  @override
   String get accountSetting => 'إعدادات الحساب:';
 
   @override
@@ -617,7 +659,7 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get settingsDescription =>
-      'اختر شكل تطبيق Mishka وكيف نتواصل معك. تُطبَّق التغييرات على هذا الجهاز وتُزامَن مع حسابك عند تسجيل الدخول.';
+      'اختر شكل تطبيق ميشكا وكيف نتواصل معك. تُطبَّق التغييرات على هذا الجهاز وتُزامَن مع حسابك عند تسجيل الدخول.';
 
   @override
   String get settingsPreferencesSection => 'التفضيلات';
@@ -628,11 +670,11 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get privacyPolicyBody =>
-      'يحترم Mishka خصوصيتك. نجمع فقط المعلومات اللازمة لتشغيل حسابك وتخصيص ميزات الدراسة وتحسين التطبيق.\n\nنستخدم بريدك الإلكتروني وبيانات ملفك للمصادقة والتواصل بشأن حسابك. يُخزَّن نشاط الدراسة والمهام وتفاعلات الذكاء الاصطناعي لتوفير السجل والسلاسل وميزات التدريس التي تستخدمها.\n\nلا نبيع بياناتك الشخصية. قد نشارك بيانات محدودة مع مزودي البنية التحتية والإشعارات بموجب سرية صارمة.\n\nيمكنك تحديث ملفك وتعليمك وتفضيلاتك من التطبيق. تواصل مع الدعم إذا احتجت الوصول أو التصحيح أو الحذف.\n\nهذا ملخص للتيسير. قد تُنشر سياسة قانونية كاملة لاحقًا على موقعنا.';
+      'يحترم ميشكا خصوصيتك. نجمع فقط المعلومات اللازمة لتشغيل حسابك وتخصيص ميزات الدراسة وتحسين التطبيق.\n\nنستخدم بريدك الإلكتروني وبيانات ملفك للمصادقة والتواصل بشأن حسابك. يُخزَّن نشاط الدراسة والمهام وتفاعلات الذكاء الاصطناعي لتوفير السجل والسلاسل وميزات التدريس التي تستخدمها.\n\nلا نبيع بياناتك الشخصية. قد نشارك بيانات محدودة مع مزودي البنية التحتية والإشعارات بموجب سرية صارمة.\n\nيمكنك تحديث ملفك وتعليمك وتفضيلاتك من التطبيق. تواصل مع الدعم إذا احتجت الوصول أو التصحيح أو الحذف.\n\nهذا ملخص للتيسير. قد تُنشر سياسة قانونية كاملة لاحقًا على موقعنا.';
 
   @override
   String get helpSupportIntro =>
-      'تحتاج مساعدة في Mishka؟ تواصل معنا عبر بيانات الاتصال أدناه.';
+      'تحتاج مساعدة في ميشكا؟ تواصل معنا عبر بيانات الاتصال أدناه.';
 
   @override
   String get helpSupportContactsTitle => 'تواصل معنا';
@@ -662,7 +704,7 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get helpSupportBody =>
-      'تحتاج مساعدة في Mishka؟ إليك خطوات سريعة.\n\nالحساب وتسجيل الدخول: استخدم «نسيت كلمة المرور» من شاشة الدخول. تأكد أن البريد أو الهاتف يطابق ما سجّلت به.\n\nالدراسة مع Mishka: ابدأ جلسة من الرئيسية، اختر مؤقتًا، وابقَ على شاشة الجلسة حتى تنهي أو تتوقف مبكرًا. إن فشل البدء، تحقق من الاتصال وأعد المحاولة.\n\nالمهام والقوائم: أنشئ قوائم من قسم المهام، ثم أضف مهامًا بمواعيد. اسحب للتحديث في الرئيسية لرؤية المهام القادمة.\n\nالملف والتعليم: افتح الملف الشخصي لتعديل الاسم والاتصال والجنس والمستوى التعليمي. استخدم الإعدادات للغة والمظهر والإشعارات.\n\nما زلت بحاجة لمساعدة؟ راسلنا على support@mishka.app مع وصف مختصر ولقطات إن أمكن. نرد عادة خلال أيام عمل.';
+      'تحتاج مساعدة في ميشكا؟ إليك خطوات سريعة.\n\nالحساب وتسجيل الدخول: استخدم «نسيت كلمة المرور» من شاشة الدخول. تأكد أن البريد أو الهاتف يطابق ما سجّلت به.\n\nالدراسة مع ميشكا: ابدأ جلسة من الرئيسية، اختر مؤقتًا، وابقَ على شاشة الجلسة حتى تنهي أو تتوقف مبكرًا. إن فشل البدء، تحقق من الاتصال وأعد المحاولة.\n\nالمهام والقوائم: أنشئ قوائم من قسم المهام، ثم أضف مهامًا بمواعيد. اسحب للتحديث في الرئيسية لرؤية المهام القادمة.\n\nالملف والتعليم: افتح الملف الشخصي لتعديل الاسم والاتصال والجنس والمستوى التعليمي. استخدم الإعدادات للغة والمظهر والإشعارات.\n\nما زلت بحاجة لمساعدة؟ راسلنا على support@mishka.app مع وصف مختصر ولقطات إن أمكن. نرد عادة خلال أيام عمل.';
 
   @override
   String get privacyPolicy => 'سياسة الخصوصية';
@@ -677,7 +719,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get search => 'بحث ...';
 
   @override
-  String get chatWithMishkaTitle => 'الدردشة مع MISHKA';
+  String get chatWithMishkaTitle => 'الدردشة مع ميشكا';
 
   @override
   String get flashCards => 'البطاقات التعليمية';
@@ -695,7 +737,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get helloSara => 'مرحباً، سارة!';
 
   @override
-  String get askMishka => 'اسأل MISHKA ....';
+  String get askMishka => 'اسأل ميشكا ....';
 
   @override
   String get apologizeNotUnderstand => 'أعتذر، لكنني لم أفهم هذا الإدخال';
@@ -704,7 +746,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get pleaseClarify => 'هل يمكنك توضيح طلبك.';
 
   @override
-  String get tellMeMoreAboutMishkaApp => 'أخبرني المزيد عن تطبيق MISHKA؟';
+  String get tellMeMoreAboutMishkaApp => 'أخبرني المزيد عن تطبيق ميشكا؟';
 
   @override
   String get mishkaDescription =>
@@ -712,7 +754,7 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get whatMakesMishkaBetter =>
-      'لكن ما الذي يجعل MISHKA أفضل من التطبيقات الأخرى؟';
+      'لكن ما الذي يجعل ميشكا أفضل من التطبيقات الأخرى؟';
 
   @override
   String get mishkaBetterDescription =>
@@ -781,6 +823,10 @@ class AppLocalizationsAr extends AppLocalizations {
   @override
   String get successfullyReviewedFlashcards =>
       'لقد راجعت جميع بطاقاتنا التعليمية بنجاح، عمل رائع!';
+
+  @override
+  String get flashcardsFinishedMessage =>
+      'لقد أنهيت جميع بطاقاتك التعليمية بنجاح';
 
   @override
   String get eyeOfHorus => 'عين حورس';
@@ -896,13 +942,100 @@ class AppLocalizationsAr extends AppLocalizations {
   String get savedFlashCards => 'البطاقات التعليمية المحفوظة';
 
   @override
+  String get savedFlashCardTitle => 'بطاقة تعليمية محفوظة';
+
+  @override
+  String get savedFlashcardSourcePrompt =>
+      'أنشئ لي بطاقات تعليمية لهذا الملف المرفوع';
+
+  @override
+  String get savedFlashcardFileTypePdf => 'النوع: ملف pdf';
+
+  @override
+  String savedCreatedOnDate(String date) {
+    return 'تم الإنشاء في $date';
+  }
+
+  @override
   String get view => 'عرض';
 
   @override
   String get savedQuizes => 'الاختبارات المحفوظة';
 
   @override
+  String get savedQuizzes => 'الاختبارات المحفوظة';
+
+  @override
+  String get savedQuizTitle => 'اختبار محفوظ';
+
+  @override
+  String get savedQuizSearchHint => 'بحث...';
+
+  @override
+  String get savedQuizUploadedFileLabel => 'هذا هو الملف المرفوع:';
+
+  @override
+  String get savedQuizTypeMcq => 'النوع: أسئلة اختيار من متعدد';
+
+  @override
+  String savedQuizQuestionsCount(int count) {
+    return 'الأسئلة: $count سؤال';
+  }
+
+  @override
+  String savedQuizCreatedOn(String date) {
+    return 'تاريخ الإنشاء: $date';
+  }
+
+  @override
+  String get viewDetails => 'عرض التفاصيل';
+
+  @override
+  String savedQuizQuestionLabel(int current, int total) {
+    return 'السؤال $current/$total';
+  }
+
+  @override
+  String savedQuizCorrectWrong(int correct, int wrong) {
+    return '$correct صحيحة / $wrong خاطئة';
+  }
+
+  @override
+  String savedQuizPreviousScore(int percent) {
+    return 'نتيجتك السابقة: $percent٪';
+  }
+
+  @override
+  String get savedQuizSolveAgain => 'حل مرة أخرى';
+
+  @override
+  String get focusBeforeAnswering => 'ركّز قبل الإجابة';
+
+  @override
+  String flashcardProgress(int current, int total) {
+    return 'البطاقة $current من $total';
+  }
+
+  @override
   String get savedSummary => 'الملخص المحفوظ';
+
+  @override
+  String get savedSummaryTitle => 'الملخص المحفوظ';
+
+  @override
+  String get savedMindMap => 'الخريطة الذهنية المحفوظة';
+
+  @override
+  String get savedMindMapTitle => 'الخريطة الذهنية المحفوظة';
+
+  @override
+  String get summaryFinishedMessage => 'لقد أنهيت فقرة الملخص بنجاح';
+
+  @override
+  String get mindMapFinishedMessage => 'لقد أنهيت الخريطة الذهنية بنجاح';
+
+  @override
+  String get savedSnippetMore => 'المزيد';
 
   @override
   String get savedSearchHint => 'ابحث في المحفوظات...';
@@ -954,6 +1087,14 @@ class AppLocalizationsAr extends AppLocalizations {
   String get collectBadge => 'اجمع الشارة';
 
   @override
+  String quizYouHaveAnsweredPercent(int percent) {
+    return 'لقد أجبت على $percent%';
+  }
+
+  @override
+  String get correctAnswers => 'إجابات صحيحة';
+
+  @override
   String get answered100Percent => 'لقد أجبت على 100% من الإجابات الصحيحة';
 
   @override
@@ -985,6 +1126,10 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get errorPrefix => 'خطأ';
+
+  @override
+  String get networkConnectionError =>
+      'تعذّر الاتصال بـ ميشكا. تحقق من اتصال الإنترنت وحاول مرة أخرى.';
 
   @override
   String get pleaseFillAllRequiredFields => 'يرجى ملء جميع الحقول المطلوبة';
@@ -1084,6 +1229,12 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get shareOpenGroup => 'فتح المجموعة';
+
+  @override
+  String get shareOptionalNote => 'أضف ملاحظة (اختياري)';
+
+  @override
+  String get communitySharedMaterialTapToOpen => 'اضغط لفتح الشاشة الكاملة';
 
   @override
   String get noCommunityChannelsFound => 'لا توجد قنوات مجتمع متاحة';
@@ -1241,13 +1392,57 @@ class AppLocalizationsAr extends AppLocalizations {
   String get cameraOn => 'الكاميرا مفعلة';
 
   @override
-  String get videoCallWithMishka => 'مكالمة فيديو مع مشكا';
+  String get callMishka => 'اتصل بميشكا';
+
+  @override
+  String get startCallWithMishka => 'ابدأ مكالمة مع ميشكا';
+
+  @override
+  String get videoCallWithMishka => 'مكالمة فيديو مع ميشكا';
 
   @override
   String get cameraIsOn => 'الكاميرا مفعلة';
 
   @override
   String get cameraIsOff => 'الكاميرا مغلقة';
+
+  @override
+  String get studyFocusConnecting => 'جاري الاتصال بمراقب التركيز…';
+
+  @override
+  String get studyFocusFocused => 'مركّز';
+
+  @override
+  String get studyFocusDistracted => 'تحقق من وضعية جلوسك';
+
+  @override
+  String get studyFocusUnknown => 'جاري التحليل…';
+
+  @override
+  String get studyFocusOffline => 'مراقب التركيز غير متاح';
+
+  @override
+  String get studyPostureCalibration =>
+      'استرخي واقعد على طبيعتك… ميشكا بتعمل فحص سريع بطريقتها القططية القديمة عشان تفهم نمط جلوسك وتركيزك';
+
+  @override
+  String get studyMlCalibrating =>
+      'استريح في وضع جلوسك الطبيعي بينما ميشكا تضبط مساحة عملك…';
+
+  @override
+  String get studyMlFocusing => 'مركّز — كمّل!';
+
+  @override
+  String get studyMlBadPosture => 'ميشكا تقول: اجلس مستقيمًا لتحافظ على طاقتك!';
+
+  @override
+  String get studyMlLookingAway => 'رجّع عينك على مادتك!';
+
+  @override
+  String get studyMlNoUser => 'ميشكا فقدتك. تأكد أن الكاميرا غير مغطاة.';
+
+  @override
+  String get studyMlError => 'حدثت مشكلة بسيطة — ابقَ جالسًا وسنعيد المحاولة.';
 
   @override
   String get timer => 'المؤقت';
@@ -1332,10 +1527,31 @@ class AppLocalizationsAr extends AppLocalizations {
   String get schoolStageQuestion => 'في أي مرحلة مدرسية أنت الآن؟';
 
   @override
+  String get primarySchoolColon => 'المرحلة الابتدائية:';
+
+  @override
   String get middleSchoolColon => 'المرحلة الإعدادية:';
 
   @override
   String get highSchoolColon => 'المرحلة الثانوية:';
+
+  @override
+  String get firstPrimary => 'الابتدائي الأول';
+
+  @override
+  String get secondPrimary => 'الابتدائي الثاني';
+
+  @override
+  String get thirdPrimary => 'الابتدائي الثالث';
+
+  @override
+  String get fourthPrimary => 'الابتدائي الرابع';
+
+  @override
+  String get fifthPrimary => 'الابتدائي الخامس';
+
+  @override
+  String get sixthPrimary => 'الابتدائي السادس';
 
   @override
   String get firstPreparatory => 'الإعدادي الأول';
@@ -1416,7 +1632,13 @@ class AppLocalizationsAr extends AppLocalizations {
   String get reportCreatePdfEmail => 'إنشاء PDF ومشاركته';
 
   @override
-  String get reportEmailMyReport => 'إرسال التقرير بالبريد';
+  String get reportEmailMyReport => 'إنشاء PDF وإرسال الرابط بالبريد';
+
+  @override
+  String get reportOpenSettings => 'فتح إعدادات تقريرك';
+
+  @override
+  String get reportSettingsTitle => 'إعدادات التقرير';
 
   @override
   String reportPdfEmailSent(String email) {
@@ -1427,8 +1649,11 @@ class AppLocalizationsAr extends AppLocalizations {
   String get reportPdfOpenFailed => 'تعذر فتح رابط PDF للتقرير.';
 
   @override
-  String get reportPdfSharedLocally =>
-      'تعذر التصدير من الخادم — تمت مشاركة نسخة PDF محلية.';
+  String get reportExportNoData => 'لا يوجد نشاط في هذه الفترة للتصدير بعد.';
+
+  @override
+  String get reportExportEmailNotConfigured =>
+      'إرسال البريد غير متاح حالياً. حاول لاحقاً أو تواصل مع الدعم.';
 
   @override
   String get reportUsingLegacyData =>
@@ -1439,7 +1664,7 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get reportDuringConcentrationMode =>
-      'إجمالي وقت الدراسة (وضع التركيز + الكاميرا):';
+      'إجمالي وقت الدراسة (جميع الأوضاع):';
 
   @override
   String get reportAiTools => 'استخدام أدوات ميشكا الذكية';
@@ -1550,6 +1775,16 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get communityCreateDescHint => 'وصف المجتمع';
+
+  @override
+  String get communityCreateCategoryLabel => 'الفئة (اختياري):';
+
+  @override
+  String get communityCreateCategoryHint => 'مثال: فيزياء، تحضير للامتحان';
+
+  @override
+  String get communityCreateCategoryHelper =>
+      'اختر اقتراحًا أو اكتب اسم فئة جديد';
 
   @override
   String get communityCreateDiscoverSection => 'الاكتشاف (مجتمعات عامة)';
@@ -1804,8 +2039,8 @@ class AppLocalizationsAr extends AppLocalizations {
   }
 
   @override
-  String get communityHubJoinFailedOpenAnyway =>
-      'تعذّر الانضمام. سيتم فتح المجتمع على أي حال…';
+  String get communityAccessDenied =>
+      'ليس لديك صلاحية للوصول إلى هذا المجتمع. انضم لعرض القنوات والمجموعات.';
 
   @override
   String get communityHubNoneYet => 'لا يوجد بعد.';
@@ -1920,7 +2155,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get communityChatMemberFallback => 'عضو';
 
   @override
-  String get communityChatSharedFromMishka => 'مشارَك من Mishka';
+  String get communityChatSharedFromMishka => 'مشارَك من ميشكا';
 
   @override
   String get communityMemberAddToGroup => 'إضافة إلى مجموعة';
@@ -1949,7 +2184,15 @@ class AppLocalizationsAr extends AppLocalizations {
   String get communityDiscoverySubjectsOptional => 'المواد (اختياري)';
 
   @override
+  String get communityDiscoverySubjectsHelper =>
+      'اختر واحدة أو أكثر من وسوم المواد للاكتشاف';
+
+  @override
   String get communityDiscoveryPurposeOptional => 'الغرض (اختياري)';
+
+  @override
+  String get communityDiscoveryPurposeHelper =>
+      'اختر وسماً واحداً — مثل مجموعة دراسة أو تحضير للامتحان';
 
   @override
   String get communityInviteEmailHint => 'عنوان البريد الإلكتروني';
@@ -1977,7 +2220,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get communityFallbackMemberName => 'عضو';
 
   @override
-  String get communityBrandMishka => 'Mishka';
+  String get communityBrandMishka => 'ميشكا';
 
   @override
   String get reportCommunitySection => 'مجتمعنا';
@@ -1990,4 +2233,265 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get reportCommunityChannelJoins => 'انضمامات القنوات';
+
+  @override
+  String get studySubjectPickerTitle => 'ماذا تدرس؟';
+
+  @override
+  String get studySubjectPickerSubtitle =>
+      'اختياري — اختر مادة أو تابع بدون تحديد.';
+
+  @override
+  String get studySubjectNone => 'بدون مادة محددة';
+
+  @override
+  String get studySubjectManage => 'إدارة موادي';
+
+  @override
+  String get studySubjectStartSession => 'بدء الجلسة';
+
+  @override
+  String get studentSubjectsTitle => 'موادي الدراسية';
+
+  @override
+  String get studentSubjectsSettingsHint =>
+      'أضف مواد لتتبع وقت الدراسة لكل مادة.';
+
+  @override
+  String get studentSubjectsDescription =>
+      'أنشئ حتى 20 مادة (فيزياء، عربي، …). اختر واحدة عند بدء جلسة الدراسة، أو اتركها غير محددة.';
+
+  @override
+  String get studentSubjectsEmpty =>
+      'لا توجد مواد بعد. اضغط + لإضافة أول مادة.';
+
+  @override
+  String get studentSubjectsAddTitle => 'إضافة مادة';
+
+  @override
+  String get studentSubjectsEditTitle => 'تعديل المادة';
+
+  @override
+  String get studentSubjectsEditMenu => 'تعديل';
+
+  @override
+  String get studentSubjectsNameLabel => 'اسم المادة';
+
+  @override
+  String get studentSubjectsColorLabel => 'اللون';
+
+  @override
+  String get studentSubjectsDeleteTitle => 'حذف المادة؟';
+
+  @override
+  String studentSubjectsDeleteBody(String name) {
+    return 'إزالة \"$name\" من قائمتك؟ جلسات الدراسة السابقة تبقى في التقارير.';
+  }
+
+  @override
+  String get studentSubjectsNameInUse => 'لديك مادة بهذا الاسم بالفعل.';
+
+  @override
+  String get studentSubjectsSaveFailed => 'تعذّر حفظ المادة. حاول مرة أخرى.';
+
+  @override
+  String studentSubjectsMaxReached(int count) {
+    return 'يمكنك إضافة حتى $count مادة.';
+  }
+
+  @override
+  String get reportStudyBySubject => 'الدراسة حسب المادة';
+
+  @override
+  String reportTotalStudyMinutes(int minutes) {
+    return '$minutes دقيقة إجمالاً';
+  }
+
+  @override
+  String get reportMinutesSuffix => 'د';
+
+  @override
+  String get reportNoStudyBySubject =>
+      'لا يوجد تفصيل حسب المادة في هذه الفترة بعد.';
+
+  @override
+  String get gamificationHubTitle => 'التلعيب';
+
+  @override
+  String get gamificationWeekly => 'أسبوعي';
+
+  @override
+  String get gamificationMonthly => 'شهري';
+
+  @override
+  String get gamificationLoadFailed => 'تعذّر تحميل بيانات التلعيب.';
+
+  @override
+  String gamificationStreakDaysPerWeek(int count) {
+    return '$count أيام متتالية/ أسبوع';
+  }
+
+  @override
+  String get gamificationTodoSection => 'قائمة المهام :';
+
+  @override
+  String get gamificationTodoGoalWeekly =>
+      'إنهاء جميع المهام/أسبوع == شارة واحدة';
+
+  @override
+  String gamificationTasksPerWeek(int count) {
+    return '$count مهمة/ أسبوع';
+  }
+
+  @override
+  String gamificationTasksAwayFromBadge(int count) {
+    return 'متبقٍ $count مهمة للحصول على الشارة';
+  }
+
+  @override
+  String gamificationTasksProgress(int done, int total) {
+    return '$done مهمة/ $total منجزة...';
+  }
+
+  @override
+  String gamificationBadgesEarnedMonth(int count) {
+    return 'حصلت على $count شارات هذا الشهر';
+  }
+
+  @override
+  String get gamificationAiToolsSection => 'أدوات الذكاء الاصطناعي :';
+
+  @override
+  String get gamificationStudySection => 'الدراسة مع ميشكا :';
+
+  @override
+  String get gamificationStudyGoalWeekly =>
+      'حساب دقائق الدراسة (3 ساعات/يوم == 21 ساعة/أسبوع)';
+
+  @override
+  String gamificationStudyHoursPerWeek(int hours) {
+    return '$hours ساعة / أسبوع';
+  }
+
+  @override
+  String gamificationStudyHoursAway(int hours) {
+    return 'متبقٍ $hours ساعة للحصول على الشارة';
+  }
+
+  @override
+  String gamificationStudyProgress(int done, int total) {
+    return '$done ساعة/ $total منجزة...';
+  }
+
+  @override
+  String get gamificationCommunitySection => 'مجتمع ميشكا :';
+
+  @override
+  String get gamificationCommunityGoalWeekly =>
+      'النشاط في المجتمع 700%/أسبوع (شارة واحدة == >500%/أسبوع)';
+
+  @override
+  String gamificationCommunityPercentWeek(int percent) {
+    return '$percent% / أسبوع';
+  }
+
+  @override
+  String gamificationCommunityPercentAway(int percent) {
+    return 'متبقٍ $percent% للحصول على الشارة';
+  }
+
+  @override
+  String gamificationCommunityProgress(int done, int total) {
+    return '$done%/ $total منجزة...';
+  }
+
+  @override
+  String get gamificationBadgeQuizPerfect => '10 / 10 في الاختبارات';
+
+  @override
+  String get gamificationBadgeQuizScore80 => '8 / 10 في الاختبارات';
+
+  @override
+  String get gamificationBadgeQuizKeepLearning => '<5 / 10 في الاختبارات';
+
+  @override
+  String get gamificationBadgeFlashcards => 'إنهاء جميع البطاقات';
+
+  @override
+  String get gamificationBadgeSummary => 'إنهاء الملخص';
+
+  @override
+  String get gamificationBadgeMindMap => 'إنهاء خريطة الذهن';
+
+  @override
+  String get gamificationBadgeChat => 'الدردشة مع ميشكا (كل رسالة = نقطة)';
+
+  @override
+  String get gamificationChatBadgeFootnote => '(10 نقاط = شارة واحدة)';
+
+  @override
+  String gamificationBadgeEarnedCount(int count) {
+    return 'حصلت على هذه الشارة $count مرات';
+  }
+
+  @override
+  String gamificationMonthlyTitle(String section) {
+    return '$section — شهري';
+  }
+
+  @override
+  String get gamificationMonthlyPlaceholder =>
+      'سيظهر التفصيل الشهري هنا بعد توفير البيانات من الخادم. شارك تصميم Figma للشاشة الشهرية عندما يكون جاهزاً.';
+
+  @override
+  String get gamificationStreakCalendarTitle => 'تقويم سلسلتك الشهرية';
+
+  @override
+  String gamificationStreakDaysPerMonth(int count) {
+    return '$count أيام متتالية/ شهر';
+  }
+
+  @override
+  String get gamificationStreakOpenedApp => 'فتح التطبيق';
+
+  @override
+  String get gamificationStreakMissedApp => 'لم يفتح التطبيق';
+
+  @override
+  String gamificationWeekLabel(int week) {
+    return 'الأسبوع $week';
+  }
+
+  @override
+  String get gamificationDetailsLabel => 'التفاصيل:';
+
+  @override
+  String get gamificationMonthlyBadgesHighlight => 'الشارات الشهرية';
+
+  @override
+  String get gamificationTodoMonthlyAppBar => 'شارات قائمة المهام الشهرية';
+
+  @override
+  String get gamificationTodoMonthlyTitle => 'قائمة المهام';
+
+  @override
+  String get gamificationStudyGoalWeeklyShort => '21 ساعة/ أسبوع == شارة واحدة';
+
+  @override
+  String get gamificationStudyMonthlyAppBar => 'شارات الدراسة مع ميشكا الشهرية';
+
+  @override
+  String get gamificationStudyMonthlyTitle => 'الدراسة مع ميشكا';
+
+  @override
+  String get gamificationCommunityMonthlyAppBar => 'شارات مجتمع ميشكا الشهرية';
+
+  @override
+  String get gamificationCommunityMonthlyTitle => 'مجتمع ميشكا';
+
+  @override
+  String get gamificationAiToolsMonthlyAppBar => 'شارات أدوات ميشكا الشهرية';
+
+  @override
+  String get gamificationAiToolsMonthlyTitle => 'أدوات ميشكا الذكية';
 }

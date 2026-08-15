@@ -4,6 +4,7 @@ import 'package:mishka_app/core/network/api_exception.dart';
 import 'package:mishka_app/core/utils/app_colors.dart';
 import 'package:mishka_app/core/utils/app_sizes.dart';
 import 'package:iconify_flutter/icons/mdi.dart';
+import 'package:mishka_app/features/todo_lists/data/todo_list_icon_preferences.dart';
 import 'package:mishka_app/features/todo_lists/data/models/icon_api_model.dart';
 import 'package:mishka_app/features/todo_lists/data/models/todo_list_api_model.dart';
 import 'package:mishka_app/features/todo_lists/data/repositories/todo_repository.dart';
@@ -42,11 +43,16 @@ class _TodoScreenState extends State<TodoScreen> {
   TodoListItemModel _mapRemoteList(
     TodoListApiModel remote,
     Map<int, TodoIconOption> iconsById,
+    Map<String, String> iconLabelsByListId,
   ) {
     return TodoListItemModel(
       id: remote.id,
       title: remote.title,
-      icon: TodoIconCatalog.resolve(iconId: remote.iconId, byId: iconsById),
+      icon: TodoIconCatalog.resolve(
+        iconId: remote.iconId,
+        byId: iconsById,
+        localLabel: iconLabelsByListId[remote.id],
+      ),
     );
   }
 
@@ -56,14 +62,18 @@ class _TodoScreenState extends State<TodoScreen> {
       final results = await Future.wait([
         _repository.getTodoLists(),
         _repository.getIcons(),
+        TodoListIconPreferences.allLabels(),
       ]);
       if (!mounted) return;
       final remoteLists = results[0] as List<TodoListApiModel>;
       final apiIcons = results[1] as List<IconApiModel>;
+      final iconLabelsByListId = results[2] as Map<String, String>;
       final iconsById = TodoIconCatalog.indexById(
         TodoIconCatalog.merge(apiIcons),
       );
-      final mapped = remoteLists.map((e) => _mapRemoteList(e, iconsById)).toList();
+      final mapped = remoteLists
+          .map((e) => _mapRemoteList(e, iconsById, iconLabelsByListId))
+          .toList();
       setState(() {
         lists = mapped;
       });
@@ -109,7 +119,17 @@ class _TodoScreenState extends State<TodoScreen> {
     final selectedIcon = result['icon'];
     final iconId = selectedIcon is TodoIconOption ? selectedIcon.id : null;
     try {
-      await _repository.createTodoList(listName: title, iconId: iconId);
+      final created = await _repository.createTodoList(
+        listName: title,
+        iconId: iconId,
+      );
+      if (selectedIcon is TodoIconOption) {
+        if (selectedIcon.id != null) {
+          await TodoListIconPreferences.removeLabel(created.id);
+        } else {
+          await TodoListIconPreferences.setLabel(created.id, selectedIcon.label);
+        }
+      }
       await _loadLists();
     } catch (e) {
       if (!mounted) return;
@@ -381,6 +401,7 @@ class _TodoScreenState extends State<TodoScreen> {
 
     try {
       await _repository.deleteTodoList(id: item.id);
+      await TodoListIconPreferences.removeLabel(item.id);
     } catch (e) {
       if (!mounted) return;
       setState(() {
@@ -442,6 +463,9 @@ class _TodoScreenState extends State<TodoScreen> {
               child: _isLoading
                   ? const Center(child: CircularProgressIndicator())
                   : ListView(
+                      padding: EdgeInsets.only(
+                        bottom: AppSizes.screenEndPadding,
+                      ),
                       children: [
                         Padding(
                           padding: EdgeInsets.only(bottom: 8.h),

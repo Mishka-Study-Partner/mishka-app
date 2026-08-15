@@ -195,15 +195,22 @@ abstract final class CommunityStyles {
       ElevatedButton.styleFrom(
         backgroundColor: AppColors.mainGold,
         foregroundColor: AppColors.white,
-        padding: EdgeInsets.symmetric(vertical: verticalPadding ?? 14.h),
+        padding: EdgeInsets.symmetric(
+          horizontal: 16.w,
+          vertical: verticalPadding ?? 14.h,
+        ),
+        minimumSize: Size(0, AppSizes.buttonHeightSmall),
+        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(AppSizes.radiusSmall),
         ),
         elevation: 0,
         textStyle: TextStyle(
           fontFamily: _fontFamily,
-          fontSize: AppSizes.fontSizeMedium,
+          fontSize: AppSizes.fontSizeLarge,
           fontWeight: FontWeight.w600,
+          height: 1.2,
+          leadingDistribution: TextLeadingDistribution.even,
         ),
       );
 

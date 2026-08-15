@@ -17,12 +17,12 @@
   "rememberMe": "Remember me",
   "forgetPassword": "Forget Password?",
   "agreeToTerms": "Agree to terms and conditions & privacy policy",
-  "alreadyHaveAccount": "Already have account? Sign In",
+  "alreadyHaveAccount": "Already have account?",
   "orSignUpWith": "or sign up with",
   "signIn": "Sign In",
   "welcomeBackToMishka": "Welcome back to MISHKA",
   "email": "Email",
-  "dontHaveAccount": "Don't have account? create account",
+  "dontHaveAccount": "Don't have account?",
   "resetPassword": "Reset Password",
   "resetPasswordUsing": "Reset your password using:",
   "writeEmailForCode": "write your email to receive your confirmation code to create your new password",
@@ -77,6 +77,14 @@
     }
   },
   "welcomeBackSara": "Welcome, Back Ziad!",
+  "welcomeBackName": "Welcome back, {name}",
+  "@welcomeBackName": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
   "sundayJan26": "Sunday, Jan 26, 2026",
   "dailyStreaks": "Daily Streaks:",
   "days": "{count} days",
@@ -181,6 +189,9 @@
       "error": { "type": "String" }
     }
   },
+  "chatAiServiceUnavailable": "Mishka's AI service is temporarily unavailable. The model server could not reach OpenRouter — ask your team to check the OpenRouter API key on the Mishka AI model server (Railway), then try again.",
+  "chatAiServerUnreachable": "Mishka's AI server is not responding. Check that the Railway AI deployment is running and healthy, then try again.",
+  "chatAiSessionExpired": "This study session expired. Please start a new chat and upload your PDF again.",
   "chatToolGenerationFailed": "Tool generation failed.\n{error}",
   "@chatToolGenerationFailed": {
     "placeholders": {
@@ -218,6 +229,8 @@
   "youCanRejoinSavedCommunity": "You can rejoin your saved Community",
   "exploreCommunitiesByMajor": "Explore Our communities based on your major",
   "mishkasSupport": "Mishka's Support:",
+  "supportStudyHoursBadge": "Count your daily study hours with Mishka",
+  "supportChallengesBadge": "Win Mishka's challenges and get your prize",
   "exploreMore": "Explore more",
   "countDailyStudyHours": "Count Your daily study hours with Mishka",
   "winMishkasChallenges": "Win Mishka's Challenges and get your Prize",
@@ -250,6 +263,12 @@
   "ourCommunitySubtitle": "Mentor Library, Events community, Mentorship History.",
   "gamification": "Gamification",
   "gamificationSubtitle": "points, streaks, Badges, Challenges.",
+  "gamificationPoints": "Points",
+  "gamificationBadges": "Badges",
+  "gamificationRewards": "Rewards",
+  "gamificationChallenges": "Challenges",
+  "myProgress": "My Progress",
+  "myProgressSubtitle": "Study time, streaks, tasks, and AI usage by week or month.",
   "accountSetting": "Account Setting:",
   "fullName": "Full Name:",
   "yourFullName": "Your Full Name",
@@ -326,6 +345,7 @@
   "pleaseEnterMaterialSummarize": "please enter your material so I can Summarize them for you.",
   "thisIsYourFlashcards": "This is your flashcards:",
   "successfullyReviewedFlashcards": "You successfully reviewed all our flashcards great job!",
+  "flashcardsFinishedMessage": "You Have Successfully Finished All Your Flashcards",
   "eyeOfHorus": "the eye of Horus",
   "wedjitEye": "(wedjit eye)",
   "ancientEgyptian": "Ancient Egyptian",
@@ -373,9 +393,71 @@
   "no": "No",
   "yes": "Yes",
   "savedFlashCards": "Saved Flash Cards",
+  "savedFlashCardTitle": "Saved Flash Card",
+  "savedFlashcardSourcePrompt": "Make me FLASHCARDS for this uploaded file",
+  "savedFlashcardFileTypePdf": "Type: pdf file",
+  "savedCreatedOnDate": "Created on {date}",
+  "@savedCreatedOnDate": {
+    "placeholders": {
+      "date": { "type": "String" }
+    }
+  },
   "view": "View",
   "savedQuizes": "Saved Quizes",
+  "savedQuizzes": "Saved Quizzes",
+  "savedQuizTitle": "Saved Quiz",
+  "savedQuizSearchHint": "Search...",
+  "savedQuizUploadedFileLabel": "This is the uploaded file:",
+  "savedQuizTypeMcq": "Type: Multiple choice questions",
+  "savedQuizQuestionsCount": "Questions: {count} mcq",
+  "@savedQuizQuestionsCount": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "savedQuizCreatedOn": "Created on: {date}",
+  "@savedQuizCreatedOn": {
+    "placeholders": {
+      "date": { "type": "String" }
+    }
+  },
+  "viewDetails": "View Details",
+  "savedQuizQuestionLabel": "Question {current}/{total}",
+  "@savedQuizQuestionLabel": {
+    "placeholders": {
+      "current": { "type": "int" },
+      "total": { "type": "int" }
+    }
+  },
+  "savedQuizCorrectWrong": "{correct} Correct / {wrong} Wrong",
+  "@savedQuizCorrectWrong": {
+    "placeholders": {
+      "correct": { "type": "int" },
+      "wrong": { "type": "int" }
+    }
+  },
+  "savedQuizPreviousScore": "Your previous score: {percent}%",
+  "@savedQuizPreviousScore": {
+    "placeholders": {
+      "percent": { "type": "int" }
+    }
+  },
+  "savedQuizSolveAgain": "Solve again",
+  "focusBeforeAnswering": "Focus before answering",
+  "flashcardProgress": "Card {current} of {total}",
+  "@flashcardProgress": {
+    "placeholders": {
+      "current": { "type": "int" },
+      "total": { "type": "int" }
+    }
+  },
   "savedSummary": "Saved Summary",
+  "savedSummaryTitle": "Saved Summary",
+  "savedMindMap": "Saved Mind Map",
+  "savedMindMapTitle": "Saved Mind Map",
+  "summaryFinishedMessage": "You Have Successfully Finished Your Summarized Paragraph",
+  "mindMapFinishedMessage": "You Have Successfully Finished Your Mind Map",
+  "savedSnippetMore": "More",
   "savedSearchHint": "Search saved items...",
   "savedDetailPlaceholder": "Your saved content will load here when the library is connected.",
   "savedNoSearchResults": "No saved items match your search.",
@@ -389,12 +471,19 @@
   "savedLibraryShared": "Shared to your channels.",
   "result": "Result",
   "congratulation": "Congratulation!",
-  "keepItUp": "Keep it up",
+  "keepItUp": "Keep It Up",
   "collectBadge": "Collect Badge",
+  "quizYouHaveAnsweredPercent": "You Have Answered {percent}%",
+  "@quizYouHaveAnsweredPercent": {
+    "placeholders": {
+      "percent": { "type": "int" }
+    }
+  },
+  "correctAnswers": "Correct Answers",
   "answered100Percent": "you have answered 100% correct answers",
   "answered80Percent": "you have answered 80% correct answers",
   "answered40Percent": "you have answered 40% correct answers",
-  "keepGoing": "Keep going"
+  "keepGoing": "Keep Going"
   ,"delete": "Delete"
   ,"undo": "Undo"
   ,"deleteThisListQuestion": "Delete this list?"
@@ -402,6 +491,7 @@
   ,"renameList": "Rename List"
   ,"listRenamed": "List renamed"
   ,"errorPrefix": "Error"
+  ,"networkConnectionError": "Can't reach Mishka right now. Check your internet connection and try again."
   ,"pleaseFillAllRequiredFields": "Please fill all required fields"
   ,"pleaseEnterVerificationCode": "Please enter verification code"
   ,"pleaseEnterBothPasswordFields": "Please enter both password fields"
@@ -433,6 +523,8 @@
   ,"shareSuccessTitle": "Successfully Shared to the group"
   ,"shareSuccessContinue": "Continue"
   ,"shareOpenGroup": "Open group"
+  ,"shareOptionalNote": "Add a note (optional)"
+  ,"communitySharedMaterialTapToOpen": "Tap to open full screen"
   ,"noCommunityChannelsFound": "No community channels found"
   ,"failedToLoadChannels": "Failed to load channels: {error}"
   ,"shareFailed": "Share failed: {error}"
@@ -539,9 +631,23 @@
   ,"customYourOwnTimer": "Custom Your Own Timer:"
   ,"recentlyCustomizedTimers": "Recently customized Timers:"
   ,"cameraOn": "Camera On"
+  ,"callMishka": "Call Mishka"
+  ,"startCallWithMishka": "Start call with Mishka"
   ,"videoCallWithMishka": "Video call with Mishka"
   ,"cameraIsOn": "Camera is On"
   ,"cameraIsOff": "Camera is Off"
+  ,"studyFocusConnecting": "Connecting to focus monitor…"
+  ,"studyFocusFocused": "Focused"
+  ,"studyFocusDistracted": "Check your posture"
+  ,"studyFocusUnknown": "Analyzing…"
+  ,"studyFocusOffline": "Focus monitor unavailable"
+  ,"studyPostureCalibration": "Breathe softly and sit as you naturally do. My ancient whiskers are adjusting to your unique aura."
+  ,"studyMlCalibrating": "Settle into your natural stance while Mishka calibrates your workspace…"
+  ,"studyMlFocusing": "Focused — keep going!"
+  ,"studyMlBadPosture": "Mishka says: Sit up straight to protect your energy!"
+  ,"studyMlLookingAway": "Eyes back on your material!"
+  ,"studyMlNoUser": "Mishka lost track of you. Ensure your camera isn't obstructed."
+  ,"studyMlError": "Focus monitor had a hiccup — stay seated and we'll retry."
   ,"timer": "Timer"
   ,"yourStudyLink": "Your study link:"
   ,"linkCopied": "Link copied!"
@@ -556,8 +662,8 @@
   ,"backToCall": "Back to Call"
   ,"breakTime": "Break Time"
   ,"cameraPermissionRequired": "Camera permission is required for video call mode."
-  ,"onboardingIntroLine1": "I am Mishka, custodian of"
-  ,"onboardingIntroLine2": "knowledge our quest for glory"
+  ,"onboardingIntroLine1": "I am Mishka, custodian of knowledge,"
+  ,"onboardingIntroLine2": "our quest for glory"
   ,"onboardingIntroLine3": "begins now!"
   ,"welcomeToMishka": "Welcome to Mishka!"
   ,"welcomeToMishkaSubtitle": "Let the guardian of knowledge guide your path to discovery."
@@ -568,8 +674,15 @@
   ,"university": "University"
   ,"otherColon": "Other:"
   ,"schoolStageQuestion": "Which School Stage Are You Currently In?"
+  ,"primarySchoolColon": "Primary School:"
   ,"middleSchoolColon": "Middle School:"
   ,"highSchoolColon": "High School:"
+  ,"firstPrimary": "1st Primary"
+  ,"secondPrimary": "2nd Primary"
+  ,"thirdPrimary": "3rd Primary"
+  ,"fourthPrimary": "4th Primary"
+  ,"fifthPrimary": "5th Primary"
+  ,"sixthPrimary": "6th Primary"
   ,"firstPreparatory": "1st Preparatory"
   ,"secondPreparatory": "2nd Preparatory"
   ,"thirdPreparatory": "3rd Preparatory"
@@ -596,7 +709,9 @@
   ,"reportPeriodMonthlySuffix": "/month"
   ,"reportPeriodYearlySuffix": "/year"
   ,"reportCreatePdfEmail": "Create PDF and share"
-  ,"reportEmailMyReport": "Email my report"
+  ,"reportEmailMyReport": "Create PDF and send link to email"
+  ,"reportOpenSettings": "Open your report's settings"
+  ,"reportSettingsTitle": "Report settings"
   ,"reportPdfEmailSent": "Report sent to {email}"
   ,"@reportPdfEmailSent": {
     "placeholders": {
@@ -606,10 +721,11 @@
     }
   }
   ,"reportPdfOpenFailed": "Could not open the report PDF link."
-  ,"reportPdfSharedLocally": "Server export unavailable — shared a local PDF copy instead."
+  ,"reportExportNoData": "No activity in this period to export yet."
+  ,"reportExportEmailNotConfigured": "Email delivery is not available right now. Try again later or contact support."
   ,"reportUsingLegacyData": "Using classic report APIs until the new bundle is deployed."
   ,"reportStudyWithMishka": "Study with Mishka"
-  ,"reportDuringConcentrationMode": "Total study time (Concentration + Camera modes):"
+  ,"reportDuringConcentrationMode": "Total study time (all modes):"
   ,"reportAiTools": "Using Mishka's AI tools"
   ,"reportDailyStreak": "Daily Streak"
   ,"reportDailyStreakChartHint": "Each bar is one day: 100% = streak kept, 0% = missed."
@@ -656,6 +772,9 @@
   ,"communityCreateNameHint": "Community name"
   ,"communityCreateDescLabel": "Description (optional):"
   ,"communityCreateDescHint": "Community description"
+  ,"communityCreateCategoryLabel": "Category (optional):"
+  ,"communityCreateCategoryHint": "e.g. Physics, Exam prep"
+  ,"communityCreateCategoryHelper": "Pick a suggestion or type a new category name"
   ,"communityCreateDiscoverSection": "Discovery (public communities)"
   ,"communityCreateDiscoverSubtitle": "Help others find your community in Discover and recommendations."
   ,"communityCreateNameRequired": "Please enter a community name"
@@ -750,7 +869,7 @@
       "username": {"type": "String"}
     }
   }
-  ,"communityHubJoinFailedOpenAnyway": "Could not join community. Opening anyway…"
+  ,"communityAccessDenied": "You do not have access to this community. Join to see channels and groups."
   ,"communityHubNoneYet": "None yet."
   ,"communityHomeTypeLabel": "Community"
   ,"communityHomeAnnouncements": "Announcements"
@@ -815,7 +934,9 @@
   ,"communityShareChooseMaterial": "Choose saved AI material to share with this group."
   ,"communityShareNoSavedInCategory": "No saved items in this category yet."
   ,"communityDiscoverySubjectsOptional": "Subjects (optional)"
+  ,"communityDiscoverySubjectsHelper": "Tap one or more subject tags for discover"
   ,"communityDiscoveryPurposeOptional": "Purpose (optional)"
+  ,"communityDiscoveryPurposeHelper": "Tap one purpose tag — e.g. study group or exam prep"
   ,"communityInviteEmailHint": "Email address"
   ,"communityErrorServerUnreachable": "Could not reach the server. Check that the backend is running."
   ,"communityRoleOwner": "Owner"
@@ -829,4 +950,145 @@
   ,"reportCommunityMessages": "Messages posted"
   ,"reportCommunityMaterialShares": "Materials shared"
   ,"reportCommunityChannelJoins": "Channel joins"
+  ,"studySubjectPickerTitle": "What are you studying?"
+  ,"studySubjectPickerSubtitle": "Optional — pick a course or continue without one."
+  ,"studySubjectNone": "No specific subject"
+  ,"studySubjectManage": "Manage my subjects"
+  ,"studySubjectStartSession": "Start session"
+  ,"studentSubjectsTitle": "My subjects"
+  ,"studentSubjectsSettingsHint": "Add courses to track study time per subject."
+  ,"studentSubjectsDescription": "Create up to 20 subjects (Physics, Arabic, …). Pick one when you start a study session, or leave it unassigned."
+  ,"studentSubjectsEmpty": "No subjects yet. Tap + to add your first course."
+  ,"studentSubjectsAddTitle": "Add subject"
+  ,"studentSubjectsEditTitle": "Edit subject"
+  ,"studentSubjectsEditMenu": "Edit"
+  ,"studentSubjectsNameLabel": "Subject name"
+  ,"studentSubjectsColorLabel": "Color"
+  ,"studentSubjectsDeleteTitle": "Delete subject?"
+  ,"studentSubjectsDeleteBody": "Remove \"{name}\" from your list? Past study sessions keep their history in reports."
+  ,"@studentSubjectsDeleteBody": {
+    "placeholders": {
+      "name": {"type": "String"}
+    }
+  }
+  ,"studentSubjectsNameInUse": "You already have a subject with this name."
+  ,"studentSubjectsSaveFailed": "Could not save subject. Try again."
+  ,"studentSubjectsMaxReached": "You can have up to {count} subjects."
+  ,"@studentSubjectsMaxReached": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  }
+  ,"reportStudyBySubject": "Study by subject"
+  ,"reportTotalStudyMinutes": "{minutes} min total"
+  ,"@reportTotalStudyMinutes": {
+    "placeholders": {
+      "minutes": {"type": "int"}
+    }
+  }
+  ,"reportMinutesSuffix": "m"
+  ,"reportNoStudyBySubject": "No subject breakdown for this period yet."
+  ,"gamificationHubTitle": "Gamifications"
+  ,"gamificationWeekly": "weekly"
+  ,"gamificationMonthly": "monthly"
+  ,"gamificationLoadFailed": "Could not load gamification data."
+  ,"gamificationStreakDaysPerWeek": "{count} days streak/ week"
+  ,"@gamificationStreakDaysPerWeek": {
+    "placeholders": { "count": { "type": "int" } }
+  }
+  ,"gamificationTodoSection": "To Do List :"
+  ,"gamificationTodoGoalWeekly": "Finishing all tasks/week == 1 Badge"
+  ,"gamificationTasksPerWeek": "{count} Tasks/ week"
+  ,"@gamificationTasksPerWeek": {
+    "placeholders": { "count": { "type": "int" } }
+  }
+  ,"gamificationTasksAwayFromBadge": "{count} Tasks away to get Badge"
+  ,"@gamificationTasksAwayFromBadge": {
+    "placeholders": { "count": { "type": "int" } }
+  }
+  ,"gamificationTasksProgress": "{done} tasks/ {total} done..."
+  ,"@gamificationTasksProgress": {
+    "placeholders": {
+      "done": { "type": "int" },
+      "total": { "type": "int" }
+    }
+  }
+  ,"gamificationBadgesEarnedMonth": "Got {count} badges this month"
+  ,"@gamificationBadgesEarnedMonth": {
+    "placeholders": { "count": { "type": "int" } }
+  }
+  ,"gamificationAiToolsSection": "AI Tools :"
+  ,"gamificationStudySection": "Study with Mishka :"
+  ,"gamificationStudyGoalWeekly": "Counting total study minutes (3hrs/Day == 21hr/week)"
+  ,"gamificationStudyHoursPerWeek": "{hours} hrs / week"
+  ,"@gamificationStudyHoursPerWeek": {
+    "placeholders": { "hours": { "type": "int" } }
+  }
+  ,"gamificationStudyHoursAway": "{hours} hr away to get Badge"
+  ,"@gamificationStudyHoursAway": {
+    "placeholders": { "hours": { "type": "int" } }
+  }
+  ,"gamificationStudyProgress": "{done} hrs/ {total} done..."
+  ,"@gamificationStudyProgress": {
+    "placeholders": {
+      "done": { "type": "int" },
+      "total": { "type": "int" }
+    }
+  }
+  ,"gamificationCommunitySection": "Mishka's Community :"
+  ,"gamificationCommunityGoalWeekly": "Active in community 700% /week (1 Badge == >500% /week)"
+  ,"gamificationCommunityPercentWeek": "{percent}% / week"
+  ,"@gamificationCommunityPercentWeek": {
+    "placeholders": { "percent": { "type": "int" } }
+  }
+  ,"gamificationCommunityPercentAway": "{percent}% away to get Badge"
+  ,"@gamificationCommunityPercentAway": {
+    "placeholders": { "percent": { "type": "int" } }
+  }
+  ,"gamificationCommunityProgress": "{done}%/ {total} done..."
+  ,"@gamificationCommunityProgress": {
+    "placeholders": {
+      "done": { "type": "int" },
+      "total": { "type": "int" }
+    }
+  }
+  ,"gamificationBadgeQuizPerfect": "Get 10 / 10 in Quizzes"
+  ,"gamificationBadgeQuizScore80": "Get 8 / 10 in Quizzes"
+  ,"gamificationBadgeQuizKeepLearning": "Get <5 / 10 in Quizzes"
+  ,"gamificationBadgeFlashcards": "Finishing all your Flashcards"
+  ,"gamificationBadgeSummary": "Finishing your Summarized"
+  ,"gamificationBadgeMindMap": "Finishing your Mind Map"
+  ,"gamificationBadgeChat": "Chat with Mishka (Every 1 Text = 1 point)"
+  ,"gamificationChatBadgeFootnote": "(10 point = 1 badge)"
+  ,"gamificationBadgeEarnedCount": "Got this Badge {count} times"
+  ,"@gamificationBadgeEarnedCount": {
+    "placeholders": { "count": { "type": "int" } }
+  }
+  ,"gamificationMonthlyTitle": "{section} — Monthly"
+  ,"@gamificationMonthlyTitle": {
+    "placeholders": { "section": { "type": "String" } }
+  }
+  ,"gamificationMonthlyPlaceholder": "Monthly breakdown for this section will appear here once the backend ships aggregated data. Share the Figma monthly screen when ready and we will match it."
+  ,"gamificationStreakCalendarTitle": "Your Monthly Streak Calendar"
+  ,"gamificationStreakDaysPerMonth": "{count} days streak/month"
+  ,"@gamificationStreakDaysPerMonth": {
+    "placeholders": { "count": { "type": "int" } }
+  }
+  ,"gamificationStreakOpenedApp": "Opened The App"
+  ,"gamificationStreakMissedApp": "Didn't Open The App"
+  ,"gamificationWeekLabel": "Week {week}"
+  ,"@gamificationWeekLabel": {
+    "placeholders": { "week": { "type": "int" } }
+  }
+  ,"gamificationDetailsLabel": "Details:"
+  ,"gamificationMonthlyBadgesHighlight": "Monthly Badges"
+  ,"gamificationTodoMonthlyAppBar": "To Do List Monthly Badges"
+  ,"gamificationTodoMonthlyTitle": "To Do List"
+  ,"gamificationStudyGoalWeeklyShort": "21 hr/ week == 1 badge"
+  ,"gamificationStudyMonthlyAppBar": "Study With Mishka Monthly Badges"
+  ,"gamificationStudyMonthlyTitle": "Study With Mishka"
+  ,"gamificationCommunityMonthlyAppBar": "Mishka's Community Monthly Badges"
+  ,"gamificationCommunityMonthlyTitle": "Mishka's Community"
+  ,"gamificationAiToolsMonthlyAppBar": "Mishka's AI Tool's Monthly Badges"
+  ,"gamificationAiToolsMonthlyTitle": "Mishka's AI Tool's"
 }

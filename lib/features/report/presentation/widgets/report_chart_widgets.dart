@@ -139,6 +139,91 @@ class ReportProgressRing extends StatelessWidget {
   }
 }
 
+class ReportStudyBySubjectChart extends StatelessWidget {
+  const ReportStudyBySubjectChart({
+    super.key,
+    required this.rows,
+    required this.minutesSuffix,
+  });
+
+  final List<StudySubjectReportRow> rows;
+  final String minutesSuffix;
+
+  @override
+  Widget build(BuildContext context) {
+    if (rows.isEmpty) return const SizedBox.shrink();
+
+    final peak = math.max(
+      1.0,
+      rows.map((r) => r.studyMinutes).fold<double>(0, math.max),
+    );
+
+    return Column(
+      children: rows.map((row) {
+        final ratio = (row.studyMinutes / peak).clamp(0.0, 1.0);
+        final barColor = row.displayColor ?? AppColors.blue;
+        final minutesLabel = '${row.studyMinutes.toStringAsFixed(0)}$minutesSuffix';
+        return Padding(
+          padding: EdgeInsets.only(bottom: 12.h),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      row.name,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontFamily: 'Pridi',
+                        fontSize: 12.sp,
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.mainDark,
+                      ),
+                    ),
+                  ),
+                  Text(
+                    '$minutesLabel · ${row.percentOfTotal}%',
+                    style: TextStyle(
+                      fontFamily: 'Pridi',
+                      fontSize: 10.sp,
+                      color: AppColors.lightText,
+                    ),
+                  ),
+                ],
+              ),
+              SizedBox(height: 6.h),
+              Stack(
+                alignment: Alignment.centerLeft,
+                children: [
+                  Container(
+                    height: 22.h,
+                    decoration: BoxDecoration(
+                      color: AppColors.lightFrameBackground,
+                      borderRadius: BorderRadius.circular(4.r),
+                    ),
+                  ),
+                  FractionallySizedBox(
+                    widthFactor: ratio,
+                    child: Container(
+                      height: 22.h,
+                      decoration: BoxDecoration(
+                        color: barColor,
+                        borderRadius: BorderRadius.circular(4.r),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        );
+      }).toList(),
+    );
+  }
+}
+
 class ReportHorizontalBars extends StatelessWidget {
   const ReportHorizontalBars({
     super.key,

@@ -1,4 +1,5 @@
 import 'package:mishka_app/core/preferences/app_preferences.dart';
+import 'package:mishka_app/features/home/data/models/daily_streak_model.dart';
 import 'package:mishka_app/features/home/data/repositories/home_repository.dart';
 
 /// Records app-open streak activity at most once per UTC calendar day.
@@ -8,6 +9,7 @@ class DailyStreakPing {
 
   final HomeRepository _repository;
   static bool _inFlight = false;
+  static Future<DailyStreakModel?>? _lastPingFuture;
 
   static String utcDateString(DateTime utc) {
     final y = utc.year.toString().padLeft(4, '0');
@@ -16,20 +18,40 @@ class DailyStreakPing {
     return '$y-$m-$d';
   }
 
-  Future<void> recordAppOpenIfNeeded() async {
+  /// Waits until the current or most recent daily ping finishes (if any).
+  static Future<void> whenPingSettled() async {
+    await (_lastPingFuture ?? Future<DailyStreakModel?>.value(null));
+  }
+
+  /// Returns the ping response when a new ping runs; otherwise `null`.
+  Future<DailyStreakModel?> recordAppOpenIfNeeded() async {
     final todayUtc = utcDateString(DateTime.now().toUtc());
-    if (AppPreferences.lastDailyStreakPingUtcDate == todayUtc || _inFlight) {
-      return;
+    if (AppPreferences.lastDailyStreakPingUtcDate == todayUtc) {
+      await whenPingSettled();
+      return null;
+    }
+    if (_inFlight) {
+      await whenPingSettled();
+      return null;
     }
 
     _inFlight = true;
-    await AppPreferences.setLastDailyStreakPingUtcDate(todayUtc);
+    final pingFuture = _runPing(todayUtc);
+    _lastPingFuture = pingFuture;
     try {
-      await _repository.pingDailyStreak();
-    } catch (_) {
-      await AppPreferences.setLastDailyStreakPingUtcDate(null);
+      return await pingFuture;
     } finally {
       _inFlight = false;
+    }
+  }
+
+  Future<DailyStreakModel?> _runPing(String todayUtc) async {
+    await AppPreferences.setLastDailyStreakPingUtcDate(todayUtc);
+    try {
+      return await _repository.pingDailyStreak();
+    } catch (_) {
+      await AppPreferences.setLastDailyStreakPingUtcDate(null);
+      return null;
     }
   }
 }

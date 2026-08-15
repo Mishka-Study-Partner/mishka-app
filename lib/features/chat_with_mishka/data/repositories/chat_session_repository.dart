@@ -4,12 +4,33 @@ import 'package:mishka_app/core/network/api_service.dart';
 import 'package:mishka_app/core/preferences/app_preferences.dart';
 import 'package:mishka_app/features/chat_with_mishka/data/controller/chat_flow_controller.dart';
 import 'package:mishka_app/features/chat_with_mishka/data/data_sources/chat_session_remote_data_source.dart';
+import 'package:mishka_app/features/chat_with_mishka/data/data_sources/generate_tools_remote_data_source.dart';
+import 'package:mishka_app/features/chat_with_mishka/data/generate_tools_result.dart';
 
 class ChatSessionRepository {
-  ChatSessionRepository({ChatSessionRemoteDataSource? remote})
-      : _remote = remote ?? ChatSessionRemoteDataSource(ApiService());
+  ChatSessionRepository({
+    ChatSessionRemoteDataSource? remote,
+    GenerateToolsRemoteDataSource? generateTools,
+  })  : _remote = remote ?? ChatSessionRemoteDataSource(ApiService()),
+        _generateTools =
+            generateTools ?? GenerateToolsRemoteDataSource(ApiService());
 
   final ChatSessionRemoteDataSource _remote;
+  final GenerateToolsRemoteDataSource _generateTools;
+
+  Future<GenerateToolsResult> generateTool({
+    required String aiSessionId,
+    required String chatSessionId,
+    required StudyAction action,
+    required String complexity,
+  }) {
+    return _generateTools.generateTool(
+      aiSessionId: aiSessionId,
+      chatSessionId: chatSessionId,
+      action: action,
+      complexity: complexity,
+    );
+  }
 
   Future<ChatSessionModel> startSession({
     required String title,
@@ -99,7 +120,7 @@ class ChatSessionRepository {
     );
   }
 
-  Future<void> persistMessage({
+  Future<String?> persistMessage({
     required String backendSessionId,
     required ChatMessage message,
   }) async {
@@ -107,7 +128,7 @@ class ChatSessionRepository {
     switch (message.type) {
       case MessageType.text:
       case MessageType.explanation:
-        await _remote.createMessage(
+        return _remote.createMessage(
           sessionId: backendSessionId,
           senderType: senderType,
           messageContent: message.text ?? '',
@@ -116,40 +137,50 @@ class ChatSessionRepository {
               : 'text',
         );
       case MessageType.system:
-        await _remote.createMessage(
+        return _remote.createMessage(
           sessionId: backendSessionId,
           senderType: 'ai',
           messageContent: message.text ?? '',
           inputType: 'system',
         );
       case MessageType.file:
-        await _remote.createMessage(
+        return _remote.createMessage(
           sessionId: backendSessionId,
           senderType: 'user',
           messageContent: message.fileName ?? '',
           inputType: 'file',
         );
       case MessageType.options:
-        await _remote.createMessage(
+        return _remote.createMessage(
           sessionId: backendSessionId,
           senderType: 'ai',
           messageContent: jsonEncode(message.options ?? const []),
           inputType: 'options',
         );
       case MessageType.selection:
-        await _remote.createMessage(
+        return _remote.createMessage(
           sessionId: backendSessionId,
           senderType: 'user',
           messageContent: message.selectedOption ?? '',
           inputType: 'selection',
         );
       case MessageType.toolPreview:
-        await _remote.createMessage(
+        return _remote.createMessage(
           sessionId: backendSessionId,
           senderType: 'ai',
           messageContent: jsonEncode(message.toolData ?? const {}),
           inputType: 'tool_preview',
         );
     }
+  }
+
+  Future<bool> updateToolPreviewMessage({
+    required String backendMessageId,
+    required Map<String, dynamic> toolData,
+  }) async {
+    return _remote.updateMessageContent(
+      messageId: backendMessageId,
+      messageContent: jsonEncode(toolData),
+    );
   }
 }

@@ -4,6 +4,12 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:http_parser/http_parser.dart';
+import 'package:mishka_app/features/chat_with_mishka/data/ai_service_config.dart';
+import 'package:mishka_app/features/chat_with_mishka/data/ai_service_logger.dart';
+import 'package:mishka_app/features/chat_with_mishka/data/ai_response_helpers.dart';
+import 'package:mishka_app/features/chat_with_mishka/data/ai_study_text_extractor.dart';
+
+import 'package:mishka_app/features/chat_with_mishka/data/generate_tools_result.dart';
 
 import '../controller/chat_flow_controller.dart';
 
@@ -14,15 +20,12 @@ String _basename(String filePath) {
 }
 
 class MishkaAiService {
-  /// Override with `--dart-define=AI_BASE_URL=https://...` when needed.
   final String baseUrl;
 
-  MishkaAiService({
-    this.baseUrl = const String.fromEnvironment(
-      'AI_BASE_URL',
-      defaultValue: 'https://mishka-ai-model-production.up.railway.app',
-    ),
-  });
+  MishkaAiService({String? baseUrl})
+      : baseUrl = baseUrl ?? AiServiceConfig.baseUrl;
+
+  Map<String, String> get _headers => AiServiceConfig.headers;
 
   /// OpenAPI: `POST /upload` multipart — only `file` (required) and `summary_level`.
   /// Tool choice is sent later via `POST /generate-tools` (query params).
@@ -31,6 +34,29 @@ class MishkaAiService {
     required String summaryLevel, // "simple" | "detailed"
   }) async {
     final uri = Uri.parse('$baseUrl/upload');
+    try {
+      return await _explainPdf(
+        uri: uri,
+        pdfPath: pdfPath,
+        summaryLevel: summaryLevel,
+      );
+    } catch (e, st) {
+      logAiServiceError(
+        operation: 'POST /upload',
+        error: e,
+        stackTrace: st,
+        baseUrl: baseUrl,
+        url: uri.toString(),
+      );
+      rethrow;
+    }
+  }
+
+  Future<ExplainResult> _explainPdf({
+    required Uri uri,
+    required String pdfPath,
+    required String summaryLevel,
+  }) async {
     _logRequest(
       method: 'POST',
       path: '/upload',
@@ -40,7 +66,11 @@ class MishkaAiService {
       },
     );
 
-    final req = http.MultipartRequest('POST', uri)..fields['summary_level'] = summaryLevel;
+    final req = http.MultipartRequest('POST', uri)
+      ..fields['summary_level'] = summaryLevel;
+    if (_headers.isNotEmpty) {
+      req.headers.addAll(_headers);
+    }
 
     final fileName = _basename(pdfPath);
     int? fileBytes;
@@ -60,8 +90,9 @@ class MishkaAiService {
       ),
     );
 
-    final streamed = await req.send();
-    final res = await http.Response.fromStream(streamed);
+    final streamed = await req.send().timeout(AiServiceConfig.uploadTimeout);
+    final res = await http.Response.fromStream(streamed)
+        .timeout(AiServiceConfig.uploadTimeout);
     _logResponse(method: 'POST', path: '/upload', statusCode: res.statusCode, body: res.body);
 
     if (res.statusCode < 200 || res.statusCode >= 300) {
@@ -73,13 +104,35 @@ class MishkaAiService {
         fullUrl: uri.toString(),
         responseHeaders: res.headers,
       );
-      throw Exception('Upload failed (${res.statusCode}): ${res.body}');
+      throw AiServiceException(
+        detail: res.statusCode == 503 &&
+                res.body.toLowerCase().contains('ngrok')
+            ? 'AI upload service is offline. If using ngrok dev, restart the tunnel; otherwise check Railway AI deployment.'
+            : res.statusCode >= 500
+                ? 'AI upload service is unavailable (${res.statusCode}). Check the Railway AI deployment and try again.'
+                : 'Upload failed (${res.statusCode}): ${res.body}',
+      );
     }
 
-    final json = _jsonDecode(res.body);
+    final decoded = _jsonDecode(res.body);
+    final json = decoded is Map<String, dynamic>
+        ? decoded
+        : decoded is Map
+            ? Map<String, dynamic>.from(decoded)
+            : <String, dynamic>{};
+    final payload = AiStudyTextExtractor.unwrapPayload(json);
+    final sessionId =
+        (payload['session_id'] ?? payload['sessionId'] ?? '').toString();
+    final explanation = AiStudyTextExtractor.extractUploadExplanation(json) ?? '';
+    AiResponseHelpers.throwIfProviderError(explanation, field: 'explanation');
+    if (explanation.trim().isEmpty) {
+      throw AiServiceException(
+        detail: 'Upload returned empty explanation (session_id=$sessionId)',
+      );
+    }
     return ExplainResult(
-      sessionId: (json['session_id'] ?? '').toString(),
-      explanation: (json['explanation'] ?? '').toString(),
+      sessionId: sessionId,
+      explanation: explanation,
     );
   }
 
@@ -94,13 +147,34 @@ class MishkaAiService {
         'message': message,
       },
     );
+    try {
+      return await _chat(uri);
+    } catch (e, st) {
+      logAiServiceError(
+        operation: 'POST /chat',
+        error: e,
+        stackTrace: st,
+        baseUrl: baseUrl,
+        url: uri.toString(),
+      );
+      rethrow;
+    }
+  }
+
+  Future<String> _chat(Uri uri) async {
     if (kDebugMode) {
       debugPrint('🤖 AI REQUEST [POST] /chat');
       debugPrint('   url: $uri');
     }
 
-    final res = await http.post(uri);
+    final res = await http
+        .post(uri, headers: _headers)
+        .timeout(AiServiceConfig.chatTimeout);
     _logResponse(method: 'POST', path: '/chat', statusCode: res.statusCode, body: res.body);
+
+    if (res.statusCode == 404) {
+      throw const AiSessionNotFoundException();
+    }
 
     if (res.statusCode < 200 || res.statusCode >= 300) {
       _logError(
@@ -115,14 +189,19 @@ class MishkaAiService {
     }
 
     final json = _jsonDecode(res.body);
-    return (json['response'] ?? '').toString();
+    final response = (json['response'] ?? '').toString();
+    AiResponseHelpers.throwIfProviderError(response, field: 'response');
+    if (response.trim().isEmpty) {
+      throw const AiServiceException(detail: 'Chat returned empty response');
+    }
+    return response;
   }
 
   /// OpenAPI: `POST /generate-tools` — query params `session_id`, `tool_type`, `complexity`.
-  Future<Map<String, dynamic>> generateTool({
+  Future<GenerateToolsResult> generateTool({
     required String sessionId,
     required StudyAction action,
-    required String complexity, // "Simple" | "Intermediate" | "Hard" (your UI)
+    required String complexity, // "Simple" | "Intermediate" | "Hard"
   }) async {
     final toolType = _toolType(action);
     final uri = Uri.parse('$baseUrl/generate-tools').replace(
@@ -132,18 +211,42 @@ class MishkaAiService {
         'complexity': complexity,
       },
     );
+    try {
+      return await _generateTool(uri: uri, toolType: toolType);
+    } catch (e, st) {
+      logAiServiceError(
+        operation: 'POST /generate-tools',
+        error: e,
+        stackTrace: st,
+        baseUrl: baseUrl,
+        url: uri.toString(),
+      );
+      rethrow;
+    }
+  }
+
+  Future<GenerateToolsResult> _generateTool({
+    required Uri uri,
+    required String toolType,
+  }) async {
     if (kDebugMode) {
       debugPrint('🤖 AI REQUEST [POST] /generate-tools');
       debugPrint('   url: $uri');
     }
 
-    final res = await http.post(uri);
+    final res = await http
+        .post(uri, headers: _headers)
+        .timeout(AiServiceConfig.generateToolsTimeout);
     _logResponse(
       method: 'POST',
       path: '/generate-tools',
       statusCode: res.statusCode,
       body: res.body,
     );
+
+    if (res.statusCode == 404) {
+      throw const AiSessionNotFoundException();
+    }
 
     if (res.statusCode < 200 || res.statusCode >= 300) {
       _logError(
@@ -157,7 +260,18 @@ class MishkaAiService {
       throw Exception('Generate-tools failed (${res.statusCode}): ${res.body}');
     }
 
-    return _jsonDecode(res.body) as Map<String, dynamic>;
+    final decoded = _jsonDecode(res.body);
+    final map = decoded is Map<String, dynamic>
+        ? decoded
+        : decoded is Map
+            ? Map<String, dynamic>.from(decoded)
+            : <String, dynamic>{};
+    map.putIfAbsent('tool_type', () => toolType);
+    final errorText = (map['error'] ?? map['detail'] ?? map['message'])?.toString();
+    if (errorText != null && AiResponseHelpers.looksLikeProviderError(errorText)) {
+      throw AiServiceException(detail: errorText);
+    }
+    return parseGenerateToolsResponse(map);
   }
 
   String _toolType(StudyAction action) {
@@ -180,6 +294,7 @@ class MishkaAiService {
   }) {
     if (!kDebugMode) return;
     debugPrint('🤖 AI REQUEST [$method] $path');
+    debugPrint('   baseUrl: $baseUrl');
     debugPrint('   body: $body');
   }
 
@@ -192,7 +307,8 @@ class MishkaAiService {
     if (!kDebugMode) return;
     debugPrint('🤖 AI RESPONSE [$method] $path');
     debugPrint('   status: $statusCode');
-    debugPrint('   body: $body');
+    final preview = body.length > 500 ? '${body.substring(0, 500)}…' : body;
+    debugPrint('   body: $preview');
   }
 
   void _logError({
@@ -228,7 +344,6 @@ class MishkaAiService {
   }
 }
 
-/// Simple JSON decode without importing `dart:convert` everywhere
 dynamic _jsonDecode(String body) {
   return body.isNotEmpty ? jsonDecode(body) : {};
 }
@@ -242,5 +357,3 @@ class ExplainResult {
     required this.explanation,
   });
 }
-
-/// Local helper so this file stays minimal.

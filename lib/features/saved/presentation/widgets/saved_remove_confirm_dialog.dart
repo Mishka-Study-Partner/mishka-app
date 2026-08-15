@@ -57,6 +57,8 @@ Future<bool?> showSavedRemoveConfirmDialog(BuildContext context) {
                       l10n.cancel,
                       style: TextStyle(
                         fontFamily: 'Pridi',
+                        fontSize: AppSizes.fontSizeMedium,
+                        fontWeight: FontWeight.w600,
                         color: AppColors.mainDark,
                       ),
                     ),
@@ -77,6 +79,8 @@ Future<bool?> showSavedRemoveConfirmDialog(BuildContext context) {
                       l10n.delete,
                       style: TextStyle(
                         fontFamily: 'Pridi',
+                        fontSize: AppSizes.fontSizeMedium,
+                        fontWeight: FontWeight.w600,
                         color: AppColors.white,
                       ),
                     ),

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'package:mishka_app/core/network/api_exception.dart';
 import 'package:mishka_app/features/community/presentation/share_community_flow.dart';
+import 'package:mishka_app/features/our_community/data/community_channel_material_publisher.dart';
 import 'package:mishka_app/features/saved/data/repositories/saved_repository.dart';
 import 'package:mishka_app/features/saved/data/saved_detail_cache.dart';
 import 'package:mishka_app/features/saved/domain/saved_content_kind.dart';
@@ -34,6 +35,21 @@ Future<void> shareSavedLibraryItem({
       kind: kind,
       savedListRowId: savedListItemId,
       channelIds: selection.channelIds,
+      note: selection.note,
+    );
+    await ensureSavedRowMaterialPosted(
+      repository: repository,
+      kind: kind,
+      savedListRowId: savedListItemId,
+      note: selection.note,
+      targets: selection.groups
+          .map(
+            (group) => (
+              communityId: group.communityId,
+              channelId: group.id,
+            ),
+          )
+          .toList(),
     );
     if (!context.mounted) return;
     await showShareCompletedFeedback(

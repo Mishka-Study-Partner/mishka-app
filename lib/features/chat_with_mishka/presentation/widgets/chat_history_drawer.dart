@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:mishka_app/core/utils/app_colors.dart';
+import 'package:mishka_app/features/chat_with_mishka/presentation/chat_layout_metrics.dart';
 import 'package:mishka_app/core/utils/app_sizes.dart';
 import 'package:mishka_app/features/chat_with_mishka/data/models/chat_history_item.dart';
 import 'package:mishka_app/l10n/app_localizations.dart';
@@ -57,7 +58,7 @@ class _ChatHistoryDrawerState extends State<ChatHistoryDrawer> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final width = MediaQuery.sizeOf(context).width * 0.82;
+    final width = ChatLayoutMetrics.historyDrawerWidth(context);
     final filteredChats = _filter(widget.data.chats);
     final filteredQuizzes = _filter(widget.data.quizzes);
     final filteredFlashcards = _filter(widget.data.flashcards);

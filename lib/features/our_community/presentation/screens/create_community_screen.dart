@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import 'package:mishka_app/core/utils/app_colors.dart';
+import 'package:mishka_app/core/widgets/screen_end_spacer.dart';
 import 'package:mishka_app/core/widgets/custom_app_bar.dart';
 import 'package:mishka_app/l10n/app_localizations.dart';
 
@@ -12,8 +13,9 @@ import '../../data/community_discover_models.dart';
 import '../../data/community_error_helpers.dart';
 import '../../data/community_locale.dart';
 import '../../data/community_repository.dart';
+import '../widgets/community_category_field.dart';
 import '../widgets/community_dialogs.dart';
-import '../widgets/community_discovery_fields.dart';
+import '../widgets/community_public_discovery_section.dart';
 import 'community_home_screen.dart';
 
 class CreateCommunityScreen extends StatefulWidget {
@@ -28,18 +30,20 @@ class CreateCommunityScreen extends StatefulWidget {
 class _CreateCommunityScreenState extends State<CreateCommunityScreen> {
   bool _isPrivate = true;
   bool _submitting = false;
-  bool _loadingCategories = false;
+  bool _loadingDiscover = false;
   DiscoverCategories? _categories;
   final Set<String> _subjectKeys = {};
   String? _purposeKey;
   final _nameController = TextEditingController();
   final _descController = TextEditingController();
+  final _categoryController = TextEditingController();
+  List<CommunityCategoryTitle> _categoryTitles = const [];
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted) _loadCategories();
+      if (mounted) _loadDiscoverData();
     });
   }
 
@@ -47,20 +51,28 @@ class _CreateCommunityScreenState extends State<CreateCommunityScreen> {
   void dispose() {
     _nameController.dispose();
     _descController.dispose();
+    _categoryController.dispose();
     super.dispose();
   }
 
-  Future<void> _loadCategories() async {
-    setState(() => _loadingCategories = true);
+  Future<void> _loadDiscoverData() async {
+    setState(() => _loadingDiscover = true);
     try {
       final locale = communityApiLocale(context);
       final categories =
           await widget.repository.loadDiscoverCategories(locale: locale);
+      var titles = categories.categoryTitles;
+      if (titles.isEmpty) {
+        titles = await widget.repository.loadCategoryTitles();
+      }
       if (!mounted) return;
-      setState(() => _categories = categories);
+      setState(() {
+        _categories = categories;
+        _categoryTitles = titles;
+      });
     } catch (_) {
     } finally {
-      if (mounted) setState(() => _loadingCategories = false);
+      if (mounted) setState(() => _loadingDiscover = false);
     }
   }
 
@@ -82,8 +94,29 @@ class _CreateCommunityScreenState extends State<CreateCommunityScreen> {
     return l10n.communityCreateEducationHintProfile(status);
   }
 
-  CommunityCreateParams? _discoveryParams() {
-    if (_isPrivate) return null;
+  (String? category, String? newCategoryTitle) _resolveCategoryFields() {
+    final catText = _categoryController.text.trim();
+    if (catText.isEmpty) return (null, null);
+    final known = _categoryTitles.any(
+      (t) => t.title.toLowerCase() == catText.toLowerCase(),
+    );
+    if (known) {
+      final title = _categoryTitles
+          .firstWhere((t) => t.title.toLowerCase() == catText.toLowerCase())
+          .title;
+      return (title, null);
+    }
+    return (null, catText);
+  }
+
+  CommunityCreateParams _createParams() {
+    final (category, newCategoryTitle) = _resolveCategoryFields();
+    if (_isPrivate) {
+      return CommunityCreateParams(
+        category: category,
+        newCategoryTitle: newCategoryTitle,
+      );
+    }
     final user = readCachedUser();
     final locale = communityApiLocale(context);
     return CommunityCreateParams(
@@ -92,8 +125,10 @@ class _CreateCommunityScreenState extends State<CreateCommunityScreen> {
       schoolTrack: user?.schoolTrack,
       schoolGrade: user?.schoolGrade,
       universityYear: user?.universityYear,
-      purpose: _purposeKey ?? 'general',
+      purpose: _purposeKey,
       locale: locale,
+      category: category,
+      newCategoryTitle: newCategoryTitle,
     );
   }
 
@@ -111,7 +146,7 @@ class _CreateCommunityScreenState extends State<CreateCommunityScreen> {
         name: name,
         isPublic: !_isPrivate,
         description: _descController.text.trim(),
-        discovery: _discoveryParams(),
+        discovery: _createParams(),
       );
       if (!mounted) return;
       await showCommunitySuccessDialog(
@@ -154,7 +189,7 @@ class _CreateCommunityScreenState extends State<CreateCommunityScreen> {
         showBottomBar: false,
       ),
       body: SingleChildScrollView(
-        padding: EdgeInsets.all(16.w),
+        padding: AppScrollInsets.page(horizontal: 16.w, top: 16.h),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -214,34 +249,30 @@ class _CreateCommunityScreenState extends State<CreateCommunityScreen> {
                 l10n.communityCreateDescHint,
               ),
             ),
-            if (!_isPrivate) ...[
-              SizedBox(height: 20.h),
-              Text(
-                l10n.communityCreateDiscoverSection,
-                style: CommunityStyles.sectionLabel,
+            SizedBox(height: 20.h),
+            if (_isPrivate)
+              CommunityCategoryField(
+                repository: widget.repository,
+                controller: _categoryController,
+                initialTitles: _categoryTitles,
+              )
+            else
+              CommunityPublicDiscoverySection(
+                repository: widget.repository,
+                categoryController: _categoryController,
+                categoryTitles: _categoryTitles,
+                categories: _categories,
+                loadingDiscover: _loadingDiscover,
+                selectedSubjectKeys: _subjectKeys,
+                selectedPurposeKey: _purposeKey,
+                profileEducationHint: _profileEducationHint(l10n),
+                onSubjectsChanged: (keys) => setState(() {
+                  _subjectKeys
+                    ..clear()
+                    ..addAll(keys);
+                }),
+                onPurposeChanged: (key) => setState(() => _purposeKey = key),
               ),
-              SizedBox(height: 6.h),
-              Text(
-                l10n.communityCreateDiscoverSubtitle,
-                style: CommunityStyles.caption,
-              ),
-              SizedBox(height: 10.h),
-              if (_loadingCategories)
-                const Center(child: CircularProgressIndicator(strokeWidth: 2))
-              else
-                CommunityDiscoveryFields(
-                  categories: _categories,
-                  selectedSubjectKeys: _subjectKeys,
-                  selectedPurposeKey: _purposeKey,
-                  profileEducationHint: _profileEducationHint(l10n),
-                  onSubjectsChanged: (keys) => setState(() {
-                    _subjectKeys
-                      ..clear()
-                      ..addAll(keys);
-                  }),
-                  onPurposeChanged: (key) => setState(() => _purposeKey = key),
-                ),
-            ],
             SizedBox(height: 30.h),
             SizedBox(
               width: double.infinity,

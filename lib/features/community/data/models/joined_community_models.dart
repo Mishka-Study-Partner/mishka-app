@@ -35,9 +35,15 @@ class JoinedCommunity {
 }
 
 class ShareCommunitySelection {
-  const ShareCommunitySelection({required this.groups});
+  const ShareCommunitySelection({
+    required this.groups,
+    this.note,
+  });
 
   final List<CommunityGroup> groups;
+  final String? note;
 
   List<String> get channelIds => groups.map((g) => g.id).toList();
+
+  CommunityGroup? get primaryGroup => groups.isEmpty ? null : groups.first;
 }

@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:mishka_app/core/utils/app_colors.dart';
+import 'package:mishka_app/core/widgets/screen_end_spacer.dart';
 import 'package:mishka_app/core/utils/app_sizes.dart';
 import 'package:mishka_app/core/widgets/custom_app_bar.dart';
 import 'package:mishka_app/features/todo_lists/data/models/task_api_model.dart';
@@ -113,6 +114,7 @@ class _TaskScreenState extends State<TaskScreen> {
                   if (_selectedDayTasks.isNotEmpty)
                     Expanded(
                       child: ListView.separated(
+                            padding: AppScrollInsets.list(),
                         itemCount: _selectedDayTasks.length,
                         separatorBuilder: (_, __) => SizedBox(height: 8.h),
                         itemBuilder: (context, index) {

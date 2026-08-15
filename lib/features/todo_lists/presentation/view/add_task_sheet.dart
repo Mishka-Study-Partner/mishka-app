@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:mishka_app/core/utils/app_colors.dart';
 import 'package:mishka_app/core/utils/app_sizes.dart';
+import 'package:mishka_app/core/widgets/button_label.dart';
 import 'package:mishka_app/features/todo_lists/data/models/list_item_model.dart';
 import 'package:mishka_app/l10n/app_localizations.dart';
 
@@ -17,15 +18,17 @@ class AddTaskSheet extends StatefulWidget {
 }
 
 class _AddTaskSheetState extends State<AddTaskSheet> {
+  static const _minuteOptions = [0, 15, 30, 45];
+
   final TextEditingController _titleController = TextEditingController();
   final TextEditingController _dayController = TextEditingController();
   final TextEditingController _monthController = TextEditingController();
   final TextEditingController _yearController = TextEditingController();
 
   String? _selectedListId;
-  int _selectedHour = 7;
+  int _selectedHour = 12;
   int _selectedMinute = 0;
-  bool _isPM = true;
+  bool _isPM = false;
 
   late final FixedExtentScrollController _hourController;
   late final FixedExtentScrollController _minuteController;
@@ -35,9 +38,30 @@ class _AddTaskSheetState extends State<AddTaskSheet> {
   void initState() {
     super.initState();
     _selectedListId = widget.preselectedListId ?? widget.lists.firstOrNull?.id;
+    _initDefaultsFromNow();
     _hourController = FixedExtentScrollController(initialItem: _selectedHour - 1);
-    _minuteController = FixedExtentScrollController(initialItem: _selectedMinute ~/ 15);
+    _minuteController = FixedExtentScrollController(
+      initialItem: _minuteOptions.indexOf(_selectedMinute).clamp(0, 3),
+    );
     _ampmController = FixedExtentScrollController(initialItem: _isPM ? 1 : 0);
+  }
+
+  void _initDefaultsFromNow() {
+    final now = DateTime.now();
+    _dayController.text = now.day.toString();
+    _monthController.text = now.month.toString();
+    _yearController.text = now.year.toString();
+
+    var hour24 = now.hour;
+    var minute = ((now.minute + 14) ~/ 15) * 15;
+    if (minute >= 60) {
+      minute = 0;
+      hour24 = (hour24 + 1) % 24;
+    }
+    _selectedMinute = minute;
+    _isPM = hour24 >= 12;
+    final hour12 = hour24 % 12;
+    _selectedHour = hour12 == 0 ? 12 : hour12;
   }
 
   @override
@@ -52,7 +76,15 @@ class _AddTaskSheetState extends State<AddTaskSheet> {
     super.dispose();
   }
 
+  void _readTimeFromPickers() {
+    _selectedHour = _hourController.selectedItem + 1;
+    _selectedMinute = _minuteOptions[_minuteController.selectedItem];
+    _isPM = _ampmController.selectedItem == 1;
+  }
+
   void _save() {
+    _readTimeFromPickers();
+
     DateTime? deadline;
     final day = int.tryParse(_dayController.text.trim());
     final month = int.tryParse(_monthController.text.trim());
@@ -116,12 +148,9 @@ class _AddTaskSheetState extends State<AddTaskSheet> {
 
                 SizedBox(height: 14.h),
 
-                // --- List selector row ---
                 Row(
                   children: [
-                    Expanded(
-                      child: _buildListDropdown(l10n),
-                    ),
+                    Expanded(child: _buildListDropdown(l10n)),
                     SizedBox(width: 8.w),
                     _buildAddNewListButton(l10n),
                   ],
@@ -129,7 +158,6 @@ class _AddTaskSheetState extends State<AddTaskSheet> {
 
                 SizedBox(height: 18.h),
 
-                // --- Task label ---
                 Text(
                   l10n.theTask,
                   style: TextStyle(
@@ -168,7 +196,6 @@ class _AddTaskSheetState extends State<AddTaskSheet> {
 
                 SizedBox(height: 16.h),
 
-                // --- Date label + fields ---
                 Text(
                   l10n.date,
                   style: TextStyle(
@@ -191,7 +218,6 @@ class _AddTaskSheetState extends State<AddTaskSheet> {
 
                 SizedBox(height: 16.h),
 
-                // --- Time picker ---
                 Text(
                   l10n.time,
                   style: TextStyle(
@@ -206,67 +232,58 @@ class _AddTaskSheetState extends State<AddTaskSheet> {
 
                 SizedBox(height: 20.h),
 
-                // --- Buttons ---
                 Row(
                   children: [
                     Expanded(
-                      child: SizedBox(
-                        height: 40.h,
-                        child: ElevatedButton(
-                          onPressed: _save,
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: AppColors.mainGold,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(8.r),
-                            ),
-                            elevation: 0,
+                      child: ElevatedButton(
+                        onPressed: _save,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppColors.mainGold,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8.r),
                           ),
-                          child: Text(
-                            l10n.save,
-                            style: TextStyle(
-                              color: AppColors.white,
-                              fontFamily: 'Pridi',
-                              fontSize: 13.sp,
-                              height: 1.0,
-                            ),
-                            strutStyle: StrutStyle(
-                              fontFamily: 'Pridi',
-                              fontSize: 13.sp,
-                              height: 1.4,
-                              leading: 0,
-                              forceStrutHeight: true,
-                            ),
+                          elevation: 0,
+                          minimumSize: Size(0, 44.h),
+                          padding: EdgeInsets.symmetric(
+                            horizontal: 12.w,
+                            vertical: 10.h,
+                          ),
+                          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                        ),
+                        child: ButtonLabel(
+                          l10n.save,
+                          style: TextStyle(
+                            color: AppColors.white,
+                            fontFamily: 'Pridi',
+                            fontSize: 13.sp,
+                            height: 1.2,
                           ),
                         ),
                       ),
                     ),
                     SizedBox(width: 8.w),
                     Expanded(
-                      child: SizedBox(
-                        height: 40.h,
-                        child: OutlinedButton(
-                          onPressed: () => Navigator.pop(context),
-                          style: OutlinedButton.styleFrom(
-                            side: const BorderSide(color: AppColors.red),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(8.r),
-                            ),
+                      child: OutlinedButton(
+                        onPressed: () => Navigator.pop(context),
+                        style: OutlinedButton.styleFrom(
+                          side: const BorderSide(color: AppColors.red),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8.r),
                           ),
-                          child: Text(
-                            l10n.cancel,
-                            style: TextStyle(
-                              color: AppColors.red,
-                              fontFamily: 'Pridi',
-                              fontSize: 13.sp,
-                              height: 1.0,
-                            ),
-                            strutStyle: StrutStyle(
-                              fontFamily: 'Pridi',
-                              fontSize: 13.sp,
-                              height: 1.4,
-                              leading: 0,
-                              forceStrutHeight: true,
-                            ),
+                          minimumSize: Size(0, 44.h),
+                          padding: EdgeInsets.symmetric(
+                            horizontal: 12.w,
+                            vertical: 10.h,
+                          ),
+                          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                        ),
+                        child: ButtonLabel(
+                          l10n.cancel,
+                          style: TextStyle(
+                            color: AppColors.red,
+                            fontFamily: 'Pridi',
+                            fontSize: 13.sp,
+                            height: 1.2,
                           ),
                         ),
                       ),
@@ -344,96 +361,101 @@ class _AddTaskSheetState extends State<AddTaskSheet> {
   }
 
   Widget _buildAddNewListButton(AppLocalizations l10n) {
-    return SizedBox(
-      height: 34.h,
-      child: ElevatedButton.icon(
-        onPressed: () => Navigator.pop(context, {'action': 'addList'}),
-        icon: Icon(Icons.arrow_forward_ios, size: 12.w, color: AppColors.white),
-        label: Text(
-          l10n.addNewList,
-          style: TextStyle(
-            fontFamily: 'Pridi',
-            fontSize: 11.sp,
-            color: AppColors.white,
-          ),
+    return ElevatedButton.icon(
+      onPressed: () => Navigator.pop(context, {'action': 'addList'}),
+      icon: Icon(Icons.arrow_forward_ios, size: 12.w, color: AppColors.white),
+      label: ButtonLabel(
+        l10n.addNewList,
+        style: TextStyle(
+          fontFamily: 'Pridi',
+          fontSize: 11.sp,
+          color: AppColors.white,
+          height: 1.2,
         ),
-        style: ElevatedButton.styleFrom(
-          backgroundColor: AppColors.mainGold,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(8.r),
-          ),
-          padding: EdgeInsets.symmetric(horizontal: 10.w),
-          elevation: 0,
+      ),
+      style: ElevatedButton.styleFrom(
+        backgroundColor: AppColors.mainGold,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(8.r),
         ),
+        padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 8.h),
+        minimumSize: Size(0, AppSizes.buttonHeightSmall),
+        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+        elevation: 0,
       ),
     );
   }
 
   Widget _buildTimePicker() {
     final hours = List.generate(12, (i) => i + 1);
-    final minutes = [0, 15, 30, 45];
     final periods = ['AM', 'PM'];
 
-    return Container(
-      height: 110.h,
-      decoration: BoxDecoration(
-        border: Border.all(color: AppColors.stroke),
-        borderRadius: BorderRadius.circular(8.r),
-      ),
-      child: Row(
-        children: [
-          // Hour
-          Expanded(
-            child: CupertinoPicker(
-              scrollController: _hourController,
-              itemExtent: 34.h,
-              selectionOverlay: _pickerOverlay(),
-              onSelectedItemChanged: (i) => _selectedHour = hours[i],
-              children: hours
-                  .map((h) => Center(
+    return NotificationListener<ScrollNotification>(
+      onNotification: (_) => true,
+      child: Container(
+        height: 110.h,
+        decoration: BoxDecoration(
+          border: Border.all(color: AppColors.stroke),
+          borderRadius: BorderRadius.circular(8.r),
+        ),
+        child: Row(
+          children: [
+            Expanded(
+              child: CupertinoPicker(
+                scrollController: _hourController,
+                itemExtent: 34.h,
+                selectionOverlay: _pickerOverlay(),
+                onSelectedItemChanged: (i) => _selectedHour = hours[i],
+                children: hours
+                    .map(
+                      (h) => Center(
                         child: Text(
                           '$h',
                           style: TextStyle(fontFamily: 'Pridi', fontSize: 15.sp),
                         ),
-                      ))
-                  .toList(),
+                      ),
+                    )
+                    .toList(),
+              ),
             ),
-          ),
-          // Minute
-          Expanded(
-            child: CupertinoPicker(
-              scrollController: _minuteController,
-              itemExtent: 34.h,
-              selectionOverlay: _pickerOverlay(),
-              onSelectedItemChanged: (i) => _selectedMinute = minutes[i],
-              children: minutes
-                  .map((m) => Center(
+            Expanded(
+              child: CupertinoPicker(
+                scrollController: _minuteController,
+                itemExtent: 34.h,
+                selectionOverlay: _pickerOverlay(),
+                onSelectedItemChanged: (i) => _selectedMinute = _minuteOptions[i],
+                children: _minuteOptions
+                    .map(
+                      (m) => Center(
                         child: Text(
                           m.toString().padLeft(2, '0'),
                           style: TextStyle(fontFamily: 'Pridi', fontSize: 15.sp),
                         ),
-                      ))
-                  .toList(),
+                      ),
+                    )
+                    .toList(),
+              ),
             ),
-          ),
-          // AM / PM
-          Expanded(
-            child: CupertinoPicker(
-              scrollController: _ampmController,
-              itemExtent: 34.h,
-              selectionOverlay: _pickerOverlay(),
-              onSelectedItemChanged: (i) => _isPM = i == 1,
-              children: periods
-                  .map((p) => Center(
+            Expanded(
+              child: CupertinoPicker(
+                scrollController: _ampmController,
+                itemExtent: 34.h,
+                selectionOverlay: _pickerOverlay(),
+                onSelectedItemChanged: (i) => _isPM = i == 1,
+                children: periods
+                    .map(
+                      (p) => Center(
                         child: Text(
                           p,
                           style: TextStyle(fontFamily: 'Pridi', fontSize: 15.sp),
                         ),
-                      ))
-                  .toList(),
+                      ),
+                    )
+                    .toList(),
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

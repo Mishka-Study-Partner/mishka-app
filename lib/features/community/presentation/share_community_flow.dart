@@ -4,6 +4,7 @@ import 'package:mishka_app/features/community/data/community_share_remote_data_s
 import 'package:mishka_app/features/community/data/models/joined_community_models.dart';
 import 'package:mishka_app/features/community/presentation/widgets/share_to_community_sheet.dart';
 import 'package:mishka_app/features/community/presentation/widgets/share_to_community_success_dialog.dart';
+import 'package:mishka_app/features/our_community/utils/community_share_navigation.dart';
 import 'package:mishka_app/l10n/app_localizations.dart';
 
 /// Loads joined communities and opens the share picker sheet.
@@ -53,10 +54,11 @@ Future<void> showShareCompletedFeedback({
   if (action == ShareToCommunitySuccessAction.openGroup) {
     if (onOpenGroup != null) {
       onOpenGroup();
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(AppLocalizations.of(context)!.comingSoonFeature)),
-      );
+      return;
     }
+    await openCommunityGroupChatFromSelection(
+      context,
+      selection: selection,
+    );
   }
 }

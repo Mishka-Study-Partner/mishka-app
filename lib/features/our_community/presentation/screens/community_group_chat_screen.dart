@@ -1,11 +1,14 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import 'package:mishka_app/core/network/api_exception.dart';
+import 'package:mishka_app/core/widgets/screen_end_spacer.dart';
 import 'package:mishka_app/core/preferences/app_preferences.dart';
 import 'package:mishka_app/core/utils/app_colors.dart';
+import 'package:mishka_app/core/utils/app_sizes.dart';
 import 'package:mishka_app/features/Auth/data/models/user_model.dart';
 import 'package:mishka_app/features/chat_with_mishka/presentation/widgets/chat_input_bar.dart';
 import 'package:mishka_app/features/saved/data/repositories/saved_repository.dart';
@@ -16,6 +19,7 @@ import '../../community_styles.dart';
 import '../../data/community_json_helpers.dart';
 import '../../data/community_models.dart';
 import '../../data/community_repository.dart';
+import '../../utils/community_navigation.dart';
 import '../share_saved_to_channel_flow.dart';
 import '../widgets/community_action_menu.dart';
 import '../widgets/community_chat_app_bar.dart';
@@ -38,10 +42,14 @@ class CommunityGroupChatScreen extends StatefulWidget {
       _CommunityGroupChatScreenState();
 }
 
-class _CommunityGroupChatScreenState extends State<CommunityGroupChatScreen> {
+class _CommunityGroupChatScreenState extends State<CommunityGroupChatScreen>
+    with WidgetsBindingObserver {
+  static const _pollInterval = Duration(seconds: 12);
+
   final _messageController = TextEditingController();
   final _scrollController = ScrollController();
   final _savedRepository = SavedRepository();
+  Timer? _pollTimer;
 
   late CommunityModel _community;
   bool _loading = true;
@@ -59,17 +67,50 @@ class _CommunityGroupChatScreenState extends State<CommunityGroupChatScreen> {
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     _community = widget.community;
     _channelJoined = widget.group.joined;
     _loadCurrentUser();
     _loadMessages();
+    _pollTimer = Timer.periodic(_pollInterval, (_) => _pollMessagesQuietly());
   }
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    _pollTimer?.cancel();
     _messageController.dispose();
     _scrollController.dispose();
     super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      _pollMessagesQuietly();
+    }
+  }
+
+  bool _messagesChanged(
+    List<CommunityChatMessage> previous,
+    List<CommunityChatMessage> next,
+  ) {
+    if (previous.length != next.length) return true;
+    if (previous.isEmpty) return false;
+    return previous.last.id != next.last.id;
+  }
+
+  Future<void> _pollMessagesQuietly() async {
+    if (!mounted || _loading || _sending || _sharing) return;
+    try {
+      final messages = await widget.repository.fetchChannelMessages(
+        widget.community.id,
+        widget.group.id,
+      );
+      if (!mounted || !_messagesChanged(_messages, messages)) return;
+      setState(() => _messages = messages);
+      _scrollToBottom();
+    } catch (_) {}
   }
 
   void _loadCurrentUser() {
@@ -193,12 +234,6 @@ class _CommunityGroupChatScreenState extends State<CommunityGroupChatScreen> {
         _community = bundle.community;
         _messages = bundle.messages;
         _loading = false;
-        _memberNamesByUserId
-          ..clear()
-          ..addAll(bundle.memberNamesByUserId);
-        _memberRolesByUserId
-          ..clear()
-          ..addAll(bundle.memberRolesByUserId);
         if (_currentUserId.isNotEmpty && _currentUserName.isNotEmpty) {
           _memberNamesByUserId[_currentUserId] = _currentUserName;
         }
@@ -262,7 +297,9 @@ class _CommunityGroupChatScreenState extends State<CommunityGroupChatScreen> {
       await shareSavedMaterialToChannel(
         context: context,
         repository: _savedRepository,
+        communityId: widget.community.id,
         channelId: widget.group.id,
+        knownMessages: _messages,
         onShared: _loadMessages,
       );
     } catch (e) {
@@ -297,6 +334,11 @@ class _CommunityGroupChatScreenState extends State<CommunityGroupChatScreen> {
           community: _community,
           repository: widget.repository,
           onChanged: _loadMessages,
+          onLeftCommunity: () {
+            if (mounted) {
+              Navigator.pop(context, communityLeftRouteResult);
+            }
+          },
         ),
       ),
       body: Column(
@@ -330,6 +372,7 @@ class _CommunityGroupChatScreenState extends State<CommunityGroupChatScreen> {
                         child: _messages.isEmpty
                             ? ListView(
                                 physics: const AlwaysScrollableScrollPhysics(),
+                                padding: AppScrollInsets.list(top: 8.h),
                                 children: [
                                   SizedBox(height: 48.h),
                                   Center(
@@ -338,11 +381,12 @@ class _CommunityGroupChatScreenState extends State<CommunityGroupChatScreen> {
                                       style: CommunityStyles.caption,
                                     ),
                                   ),
+                                  const ScreenEndSpacer(),
                                 ],
                               )
                             : ListView.builder(
                                 controller: _scrollController,
-                                padding: EdgeInsets.only(top: 8.h, bottom: 12.h),
+                                padding: AppScrollInsets.list(top: 8.h, bottom: 12.h),
                                 itemCount: _messages.length,
                                 itemBuilder: (context, index) {
                                   final message = _messages[index];
@@ -362,7 +406,10 @@ class _CommunityGroupChatScreenState extends State<CommunityGroupChatScreen> {
               child: const CircularProgressIndicator(strokeWidth: 2),
             ),
           Padding(
-            padding: EdgeInsets.only(bottom: 20.h),
+            padding: EdgeInsets.only(
+              bottom: MediaQuery.paddingOf(context).bottom +
+                  AppSizes.screenEndPadding,
+            ),
             child: ChatInputBar(
               typingEnabled: !_sending && !_sharing,
               controller: _messageController,

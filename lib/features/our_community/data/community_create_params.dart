@@ -8,6 +8,8 @@ class CommunityCreateParams {
     this.universityYear,
     this.purpose,
     this.locale,
+    this.category,
+    this.newCategoryTitle,
   });
 
   final List<String> subjectKeys;
@@ -17,9 +19,15 @@ class CommunityCreateParams {
   final int? universityYear;
   final String? purpose;
   final String? locale;
+  /// Existing title from `GET /communities/category-titles`.
+  final String? category;
+  /// New display category (mutually exclusive with [category]).
+  final String? newCategoryTitle;
 
   bool get hasDiscoveryFields =>
       subjectKeys.isNotEmpty ||
       (educationStatus != null && educationStatus!.isNotEmpty) ||
-      (purpose != null && purpose!.isNotEmpty);
+      (purpose != null && purpose!.isNotEmpty) ||
+      (category != null && category!.isNotEmpty) ||
+      (newCategoryTitle != null && newCategoryTitle!.isNotEmpty);
 }

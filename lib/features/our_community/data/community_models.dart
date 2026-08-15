@@ -1,6 +1,10 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 
 import 'package:mishka_app/core/utils/app_colors.dart';
+import 'package:mishka_app/features/chat_with_mishka/data/tool_data_normalizer.dart';
+import 'package:mishka_app/features/our_community/data/community_material_ref.dart';
 import '../../../generated/assets.dart';
 import 'community_json_helpers.dart';
 
@@ -17,6 +21,8 @@ class CommunityModel {
   final bool isPublic;
   final bool isMember;
   final bool isPinned;
+  final DateTime? pinnedAt;
+  final String? category;
   final String? myRole;
   final String? ownerUserId;
   final String? inviteCode;
@@ -35,6 +41,8 @@ class CommunityModel {
     this.isPublic = true,
     this.isMember = false,
     this.isPinned = false,
+    this.pinnedAt,
+    this.category,
     this.myRole,
     this.ownerUserId,
     this.inviteCode,
@@ -68,6 +76,8 @@ class CommunityModel {
     bool? isPublic,
     bool? isMember,
     bool? isPinned,
+    DateTime? pinnedAt,
+    String? category,
     String? myRole,
     String? ownerUserId,
     String? inviteCode,
@@ -86,6 +96,8 @@ class CommunityModel {
       isPublic: isPublic ?? this.isPublic,
       isMember: isMember ?? this.isMember,
       isPinned: isPinned ?? this.isPinned,
+      pinnedAt: pinnedAt ?? this.pinnedAt,
+      category: category ?? this.category,
       myRole: myRole ?? this.myRole,
       ownerUserId: ownerUserId ?? this.ownerUserId,
       inviteCode: inviteCode ?? this.inviteCode,
@@ -137,21 +149,9 @@ class CommunityModel {
         ? visibilityFromRow({...source, ...membership})
         : visibilityFromRow(source);
 
-    final memberCount = parseInt(
-      source['memberCount'] ??
-          source['membersCount'] ??
-          row['memberCount'] ??
-          row['membersCount'],
-    );
+    final memberCount = parseCommunityMemberCount(source, row: row);
 
-    final groupCount = parseInt(
-      source['channelCount'] ??
-          source['channelsCount'] ??
-          source['groupCount'] ??
-          source['groupsCount'] ??
-          row['channelCount'] ??
-          row['groupsCount'],
-    );
+    final groupCount = parseCommunityGroupCount(source, row: row);
 
     final isMember = membership != null ||
         parseBool(row['isMember']) ||
@@ -177,6 +177,21 @@ class CommunityModel {
               Map<String, dynamic>.from(membership),
               const ['pinnedAt', 'savedAt'],
             ).isNotEmpty);
+
+    DateTime? pinnedAt;
+    for (final key in const ['pinnedAt', 'savedAt']) {
+      final raw = membership?[key] ?? row[key] ?? source[key];
+      if (raw != null) {
+        pinnedAt = DateTime.tryParse(raw.toString());
+        if (pinnedAt != null) break;
+      }
+    }
+
+    final category = readString(source, const ['category']).isEmpty
+        ? (readString(row, const ['category']).isEmpty
+            ? null
+            : readString(row, const ['category']))
+        : readString(source, const ['category']);
 
     final myRole = readString(membership ?? row, membershipRoleKeys);
 
@@ -209,6 +224,8 @@ class CommunityModel {
       isPublic: isPublicCommunity,
       isMember: isMember,
       isPinned: isPinned,
+      pinnedAt: pinnedAt,
+      category: category?.isEmpty == true ? null : category,
       myRole: myRole.isEmpty ? null : myRole,
       ownerUserId: ownerUserId.isEmpty ? null : ownerUserId,
       inviteCode: inviteCode.isEmpty ? null : inviteCode,
@@ -422,6 +439,9 @@ class CommunityChatMessage {
     this.senderRole = '',
     this.isMishka = false,
     this.isShared = false,
+    this.inputType = '',
+    this.materialRef,
+    this.inlineToolData,
   });
 
   final String id;
@@ -432,6 +452,12 @@ class CommunityChatMessage {
   final DateTime? sentAt;
   final bool isMishka;
   final bool isShared;
+  final String inputType;
+  final CommunityMaterialRef? materialRef;
+  final Map<String, dynamic>? inlineToolData;
+
+  bool get hasSharedMaterial =>
+      materialRef != null || inlineToolData != null;
 
   static CommunityChatMessage fromJson(Map<String, dynamic> row) {
     final id = readString(row, const ['id', 'messageId']);
@@ -483,10 +509,27 @@ class CommunityChatMessage {
     final isMishka = inputType.contains('mishka') ||
         sender.toLowerCase().contains('mishka') ||
         parseBool(row['isMishka']);
-    final isShared = parseBool(row['isShared']) ||
+
+    final materialRef = CommunityMaterialRef.tryParseFromMessage(
+      inputType: inputType,
+      messageContent: content,
+    );
+    final inlineToolData = _tryParseInlineToolData(
+      inputType: inputType,
+      messageContent: content,
+    );
+
+    final isShared = materialRef != null ||
+        inlineToolData != null ||
+        inputType == 'material' ||
+        parseBool(row['isShared']) ||
         inputType.contains('shared') ||
         inputType.contains('saved') ||
         content.toLowerCase().contains('shared from mishka');
+
+    final displayText = materialRef != null
+        ? (materialRef.note ?? '')
+        : (inlineToolData != null ? '' : content);
 
     DateTime? sentAt;
     for (final key in const ['createdAt', 'sentAt', 'timestamp']) {
@@ -502,11 +545,30 @@ class CommunityChatMessage {
       senderName: sender.isEmpty ? (isMishka ? 'Mishka' : '') : sender,
       senderUserId: senderUserId,
       senderRole: formattedRole,
-      text: content,
+      text: displayText,
       sentAt: sentAt,
       isMishka: isMishka,
       isShared: isShared,
+      inputType: inputType,
+      materialRef: materialRef,
+      inlineToolData: inlineToolData,
     );
+  }
+
+  static Map<String, dynamic>? _tryParseInlineToolData({
+    required String inputType,
+    required String messageContent,
+  }) {
+    if (inputType != 'tool_preview') return null;
+    final trimmed = messageContent.trim();
+    if (trimmed.isEmpty || !trimmed.startsWith('{')) return null;
+    try {
+      final decoded = jsonDecode(trimmed);
+      if (decoded is! Map) return null;
+      return normalizeToolData(Map<String, dynamic>.from(decoded));
+    } catch (_) {
+      return null;
+    }
   }
 
   CommunityChatMessage copyWith({
@@ -521,6 +583,9 @@ class CommunityChatMessage {
       sentAt: sentAt,
       isMishka: isMishka,
       isShared: isShared,
+      inputType: inputType,
+      materialRef: materialRef,
+      inlineToolData: inlineToolData,
     );
   }
 

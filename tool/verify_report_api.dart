@@ -1,5 +1,5 @@
 // ignore_for_file: avoid_print
-/// Verifies Your Report APIs against production (bundle + legacy fallbacks).
+/// Verifies Your Report bundle + export APIs (same contract as the Flutter app).
 ///
 /// Usage:
 ///   TEST_EMAIL=you@example.com TEST_PASSWORD=secret dart run tool/verify_report_api.dart
@@ -8,7 +8,7 @@ import 'dart:io';
 
 const _base = String.fromEnvironment(
   'API_BASE_URL',
-  defaultValue: 'https://fleshy-lemon-persevere.ngrok-free.dev',
+    defaultValue: 'https://mishka-backend-production-3f6f.up.railway.app',
 );
 
 Future<void> main() async {
@@ -24,8 +24,7 @@ Future<void> main() async {
   }
 
   final client = HttpClient();
-  var bundleReady = false;
-  var legacyOk = true;
+  final anchor = _todayAnchor();
 
   try {
     print('1. Login…');
@@ -36,87 +35,69 @@ Future<void> main() async {
     }
     print('   OK — token received\n');
 
-    print('2. GET /reports/your-report?format=bundle&period=weekly…');
+    print(
+      '2. GET /reports/your-report?format=bundle&period=weekly&anchorDate=$anchor…',
+    );
     final bundle = await _get(
       client,
-      '/reports/your-report?format=bundle&period=weekly',
+      '/reports/your-report?format=bundle&period=weekly&anchorDate=$anchor&locale=en',
       token,
     );
     print('   HTTP ${bundle.statusCode} success=${_success(bundle.body)}');
-    if (bundle.statusCode >= 200 && bundle.statusCode < 300 && _success(bundle.body)) {
-      bundleReady = true;
+    final bundleReady = bundle.statusCode >= 200 &&
+        bundle.statusCode < 300 &&
+        _success(bundle.body);
+    if (bundleReady) {
       final keys = _bundleKeys(bundle.body);
       print('   bundle keys: ${keys.join(", ")}');
+      final rings = _aiRingKeys(bundle.body);
+      if (rings.isNotEmpty) print('   aiTools.rings: ${rings.join(", ")}');
     } else {
-      print('   (expected until backend deploys — Flutter uses legacy fallback)');
-      if (bundle.body.length < 500) print('   body: ${bundle.body}');
+      if (bundle.body.length < 800) print('   body: ${bundle.body}');
     }
 
-    print('\n3. Legacy study week (topLevelMode=all)…');
-    final weekAll = await _get(
-      client,
-      '/study-with-mishka/reports/week?topLevelMode=all',
-      token,
-    );
-    print('   HTTP ${weekAll.statusCode} success=${_success(weekAll.body)}');
-    if (weekAll.statusCode < 200 || weekAll.statusCode >= 300) {
-      legacyOk = false;
-      print('   Trying dual-mode merge…');
-      for (final mode in ['concentration', 'call_with_mishka']) {
-        final r = await _get(
-          client,
-          '/study-with-mishka/reports/week?topLevelMode=$mode',
-          token,
-        );
-        print('   $mode HTTP ${r.statusCode} success=${_success(r.body)}');
-        if (r.statusCode < 200 || r.statusCode >= 300) legacyOk = false;
-      }
-    }
-
-    print('\n4. GET /daily-streaks…');
-    final streak = await _get(client, '/daily-streaks', token);
-    print('   HTTP ${streak.statusCode} success=${_success(streak.body)}');
-    if (streak.statusCode < 200 || streak.statusCode >= 300) legacyOk = false;
-
-    print('\n5. GET /tasks…');
-    final tasks = await _get(client, '/tasks', token);
-    print('   HTTP ${tasks.statusCode} success=${_success(tasks.body)}');
-    if (tasks.statusCode < 200 || tasks.statusCode >= 300) legacyOk = false;
-
-    print('\n6. POST /reports/your-report/export (delivery=download)…');
+    print('\n3. POST /reports/your-report/export (delivery=download)…');
     final export = await _post(
       client,
       '/reports/your-report/export',
       token,
       {
         'period': 'weekly',
+        'anchorDate': anchor,
         'locale': 'en',
         'delivery': 'download',
+        'emailRecipient': 'account',
       },
     );
     print('   HTTP ${export.statusCode} success=${_success(export.body)}');
     final exportReady = export.statusCode >= 200 &&
         export.statusCode < 300 &&
         _success(export.body);
-    if (!exportReady && export.body.length < 500) {
-      print('   (expected until deploy — Flutter falls back to local PDF)');
+    if (!exportReady && export.body.length < 800) {
       print('   body: ${export.body}');
     }
 
     print('\n--- Summary ---');
-    print('Bundle API ready:     ${bundleReady ? "YES" : "NO (legacy fallback active)"}');
-    print('Legacy APIs usable:   ${legacyOk ? "YES" : "NO — check auth/data"}');
-    print('Server PDF export:    ${exportReady ? "YES" : "NO (local PDF fallback active)"}');
+    print('Bundle API ready:  ${bundleReady ? "YES" : "NO"}');
+    print('Server PDF export: ${exportReady ? "YES" : "NO"}');
 
-    if (legacyOk || bundleReady) {
-      print('\nPASS — at least one report data path works.');
+    if (bundleReady && exportReady) {
+      print('\nPASS — bundle and export match Flutter integration.');
       exit(0);
     }
-    print('\nFAIL — neither bundle nor legacy paths responded OK.');
+    print('\nFAIL — fix backend or query params before shipping Your Report.');
     exit(1);
   } finally {
     client.close();
   }
+}
+
+String _todayAnchor() {
+  final now = DateTime.now().toUtc();
+  final y = now.year.toString().padLeft(4, '0');
+  final m = now.month.toString().padLeft(2, '0');
+  final d = now.day.toString().padLeft(2, '0');
+  return '$y-$m-$d';
 }
 
 Future<String?> _login(HttpClient client, String email, String password) async {
@@ -180,6 +161,24 @@ List<String> _bundleKeys(String body) {
     final map = jsonDecode(body) as Map<String, dynamic>;
     final data = map['data'];
     if (data is Map) return data.keys.map((k) => k.toString()).toList()..sort();
+  } catch (_) {}
+  return const [];
+}
+
+List<String> _aiRingKeys(String body) {
+  try {
+    final map = jsonDecode(body) as Map<String, dynamic>;
+    final data = map['data'];
+    if (data is! Map) return const [];
+    final ai = data['aiTools'];
+    if (ai is! Map) return const [];
+    final rings = ai['rings'];
+    if (rings is! List) return const [];
+    return rings
+        .whereType<Map>()
+        .map((r) => (r['key'] ?? '').toString())
+        .where((k) => k.isNotEmpty)
+        .toList();
   } catch (_) {}
   return const [];
 }

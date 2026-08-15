@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import 'package:mishka_app/core/utils/app_colors.dart';
+import 'package:mishka_app/core/widgets/screen_end_spacer.dart';
 import 'package:mishka_app/core/widgets/custom_app_bar.dart';
 import 'package:mishka_app/l10n/app_localizations.dart';
 
@@ -11,6 +12,7 @@ import '../../data/community_error_helpers.dart';
 import '../../data/community_current_user.dart';
 import '../../data/community_models.dart';
 import '../../data/community_repository.dart';
+import '../../utils/community_navigation.dart';
 import '../widgets/community_avatar.dart';
 import '../widgets/community_dialogs.dart';
 import '../widgets/member_widgets.dart';
@@ -57,8 +59,17 @@ class _CommunityDetailScreenState extends State<CommunityDetailScreen> {
       if (!mounted) return;
       setState(() {
         if (refreshed != null) {
-          _community = refreshed.copyWith(
-            myRole: refreshed.myRole ?? _community.myRole,
+          _community = applyResolvedCommunityCounts(
+            model: refreshed.copyWith(
+              myRole: refreshed.myRole ?? _community.myRole,
+            ),
+            seed: _community,
+            membersLoaded: members.length,
+          );
+        } else {
+          _community = applyResolvedCommunityCounts(
+            model: _community,
+            membersLoaded: members.length,
           );
         }
         _members = members;
@@ -93,7 +104,7 @@ class _CommunityDetailScreenState extends State<CommunityDetailScreen> {
         );
       }
       if (!mounted) return;
-      Navigator.pop(context);
+      Navigator.pop(context, communityLeftRouteResult);
     } catch (e) {
       if (!mounted) return;
       CommunityStyles.showSnackBar(
@@ -123,7 +134,7 @@ class _CommunityDetailScreenState extends State<CommunityDetailScreen> {
               onRefresh: _load,
               child: SingleChildScrollView(
                 physics: const AlwaysScrollableScrollPhysics(),
-                padding: EdgeInsets.all(14.w),
+                padding: AppScrollInsets.page(horizontal: 14.w, top: 14.h),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [

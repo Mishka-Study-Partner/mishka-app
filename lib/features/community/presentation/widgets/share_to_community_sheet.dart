@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:mishka_app/core/utils/app_colors.dart';
 import 'package:mishka_app/core/utils/app_sizes.dart';
+import 'package:mishka_app/core/widgets/app_bottom_sheet_layout.dart';
 import 'package:mishka_app/features/community/data/models/joined_community_models.dart';
 import 'package:mishka_app/l10n/app_localizations.dart';
 
@@ -13,6 +14,7 @@ Future<ShareCommunitySelection?> showShareToCommunitySheet({
   final l10n = AppLocalizations.of(context)!;
   final selectedGroupIds = <String>{};
   final expandedCommunityIds = <String>{};
+  final noteController = TextEditingController();
 
   if (communities.length == 1) {
     expandedCommunityIds.add(communities.first.id);
@@ -30,27 +32,22 @@ Future<ShareCommunitySelection?> showShareToCommunitySheet({
               .where((g) => selectedGroupIds.contains(g.id))
               .toList();
 
-          return Padding(
-            padding: EdgeInsets.only(
-              bottom: MediaQuery.viewInsetsOf(context).bottom,
-            ),
-            child: Align(
-              alignment: Alignment.bottomCenter,
-              child: Container(
-                width: double.infinity,
-                constraints: BoxConstraints(
-                  maxHeight: MediaQuery.sizeOf(context).height * 0.88,
-                ),
-                margin: EdgeInsets.symmetric(horizontal: 12.w),
-                padding: EdgeInsets.fromLTRB(16.w, 20.h, 16.w, 16.h),
-                decoration: BoxDecoration(
-                  color: AppColors.white,
-                  borderRadius: BorderRadius.circular(20.r),
-                  border: Border.all(color: AppColors.stroke),
-                ),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
+          return AppBottomSheetLayout.wrap(
+            context,
+            child: LayoutBuilder(
+              builder: (context, sheetConstraints) {
+                return Container(
+                  height: sheetConstraints.maxHeight.isFinite
+                      ? sheetConstraints.maxHeight
+                      : MediaQuery.sizeOf(context).height * 0.88,
+                  padding: EdgeInsets.fromLTRB(16.w, 20.h, 16.w, 16.h),
+                  decoration: BoxDecoration(
+                    color: AppColors.white,
+                    borderRadius: BorderRadius.circular(20.r),
+                    border: Border.all(color: AppColors.stroke),
+                  ),
+                  child: Column(
+                    children: [
                     Text(
                       l10n.shareCommunitiesYouJoined,
                       textAlign: TextAlign.center,
@@ -62,9 +59,8 @@ Future<ShareCommunitySelection?> showShareToCommunitySheet({
                       ),
                     ),
                     SizedBox(height: 16.h),
-                    Flexible(
+                    Expanded(
                       child: ListView.separated(
-                        shrinkWrap: true,
                         itemCount: communities.length,
                         separatorBuilder: (_, __) => SizedBox(height: 10.h),
                         itemBuilder: (context, index) {
@@ -97,6 +93,43 @@ Future<ShareCommunitySelection?> showShareToCommunitySheet({
                         },
                       ),
                     ),
+                    if (selectedGroups.isNotEmpty) ...[
+                      SizedBox(height: 12.h),
+                      TextField(
+                        controller: noteController,
+                        maxLines: 2,
+                        textInputAction: TextInputAction.done,
+                        decoration: InputDecoration(
+                          hintText: l10n.shareOptionalNote,
+                          hintStyle: TextStyle(
+                            fontFamily: 'Pridi',
+                            fontSize: AppSizes.fontSizeSmall,
+                            color: AppColors.greyText,
+                          ),
+                          filled: true,
+                          fillColor: AppColors.lightFrameBackground,
+                          border: OutlineInputBorder(
+                            borderRadius:
+                                BorderRadius.circular(AppSizes.radiusSmall),
+                            borderSide: const BorderSide(color: AppColors.stroke),
+                          ),
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius:
+                                BorderRadius.circular(AppSizes.radiusSmall),
+                            borderSide: const BorderSide(color: AppColors.stroke),
+                          ),
+                          contentPadding: EdgeInsets.symmetric(
+                            horizontal: 12.w,
+                            vertical: 10.h,
+                          ),
+                        ),
+                        style: TextStyle(
+                          fontFamily: 'Pridi',
+                          fontSize: AppSizes.fontSizeSmall,
+                          color: AppColors.mainDark,
+                        ),
+                      ),
+                    ],
                     SizedBox(height: 16.h),
                     SizedBox(
                       width: double.infinity,
@@ -105,10 +138,12 @@ Future<ShareCommunitySelection?> showShareToCommunitySheet({
                         onPressed: selectedGroups.isEmpty
                             ? null
                             : () {
+                                final note = noteController.text.trim();
                                 Navigator.pop(
                                   sheetContext,
                                   ShareCommunitySelection(
                                     groups: selectedGroups,
+                                    note: note.isEmpty ? null : note,
                                   ),
                                 );
                               },
@@ -135,13 +170,14 @@ Future<ShareCommunitySelection?> showShareToCommunitySheet({
                     ),
                   ],
                 ),
-              ),
+              );
+              },
             ),
           );
         },
       );
     },
-  );
+  ).whenComplete(noteController.dispose);
 }
 
 class _CommunityShareCard extends StatelessWidget {

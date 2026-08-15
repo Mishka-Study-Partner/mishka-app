@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:intl/intl.dart';
+import 'package:mishka_app/core/layout/app_scale.dart';
+import 'package:mishka_app/core/utils/app_colors.dart';
+import 'package:mishka_app/core/utils/app_sizes.dart';
 import 'package:mishka_app/l10n/app_localizations.dart';
 
 enum MonthDirection { next, previous }
@@ -33,24 +37,21 @@ class _CustomCalendarState extends State<CustomCalendar> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: EdgeInsets.all(AppSizes.paddingMedium),
       decoration: BoxDecoration(
-        border: Border.all(color: const Color(0xFFCCA85E)),
-        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: AppColors.mainGold),
+        borderRadius: BorderRadius.circular(AppSizes.radiusMedium),
       ),
       child: Column(
         children: [
           _buildHeader(),
-          const SizedBox(height: 16),
+          SizedBox(height: 16.h),
           _buildWeekDays(),
-          const SizedBox(height: 12),
-
-          ///  Animated Month Change
+          SizedBox(height: 12.h),
           AnimatedSwitcher(
             duration: const Duration(milliseconds: 350),
             transitionBuilder: (child, animation) {
-              final beginOffset =
-              direction == MonthDirection.next
+              final beginOffset = direction == MonthDirection.next
                   ? const Offset(1, 0)
                   : const Offset(-1, 0);
 
@@ -71,13 +72,12 @@ class _CustomCalendarState extends State<CustomCalendar> {
     );
   }
 
-  // ---------------- HEADER ----------------
   Widget _buildHeader() {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         IconButton(
-          icon: const Icon(Icons.arrow_back_ios),
+          icon: Icon(Icons.arrow_back_ios, size: AppSizes.iconSmall),
           onPressed: () {
             setState(() {
               direction = MonthDirection.previous;
@@ -87,21 +87,26 @@ class _CustomCalendarState extends State<CustomCalendar> {
           },
         ),
         Container(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          padding: EdgeInsets.symmetric(
+            horizontal: AppScale.w(16),
+            vertical: AppScale.h(8),
+          ),
           decoration: BoxDecoration(
-            color: const Color(0xFFCCA85E),
-            borderRadius: BorderRadius.circular(8),
+            color: AppColors.mainGold,
+            borderRadius: BorderRadius.circular(AppSizes.radiusSmall),
           ),
           child: Text(
             DateFormat('MMMM / yyyy').format(currentMonth),
-            style: const TextStyle(
-              color: Colors.white,
+            style: TextStyle(
+              color: AppColors.white,
+              fontFamily: 'Pridi',
+              fontSize: AppSizes.fontSizeMedium,
               fontWeight: FontWeight.w600,
             ),
           ),
         ),
         IconButton(
-          icon: const Icon(Icons.arrow_forward_ios),
+          icon: Icon(Icons.arrow_forward_ios, size: AppSizes.iconSmall),
           onPressed: () {
             setState(() {
               direction = MonthDirection.next;
@@ -114,46 +119,57 @@ class _CustomCalendarState extends State<CustomCalendar> {
     );
   }
 
-  // ---------------- WEEK DAYS ----------------
   Widget _buildWeekDays() {
     final l10n = AppLocalizations.of(context)!;
-    final days = [l10n.mon, l10n.tue, l10n.wed, l10n.thu, l10n.fri, l10n.sat, l10n.sun];
+    final days = [
+      l10n.mon,
+      l10n.tue,
+      l10n.wed,
+      l10n.thu,
+      l10n.fri,
+      l10n.sat,
+      l10n.sun,
+    ];
 
     return Row(
       children: days
           .map(
             (day) => Expanded(
-          child: Center(
-            child: Text(
-              day,
-              style: const TextStyle(fontWeight: FontWeight.w600),
+              child: Center(
+                child: Text(
+                  day,
+                  style: TextStyle(
+                    fontFamily: 'Pridi',
+                    fontSize: AppSizes.fontSizeSmall,
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.mainDark,
+                  ),
+                ),
+              ),
             ),
-          ),
-        ),
-      )
+          )
           .toList(),
     );
   }
 
-  // ---------------- DAYS GRID ----------------
   Widget _buildDaysGrid({required Key key}) {
-    final firstDay =
-    DateTime(currentMonth.year, currentMonth.month, 1);
+    final firstDay = DateTime(currentMonth.year, currentMonth.month, 1);
     final daysInMonth =
         DateTime(currentMonth.year, currentMonth.month + 1, 0).day;
     final startWeekday = firstDay.weekday - 1;
     final totalCells = startWeekday + daysInMonth;
 
     return GridView.builder(
-        key: key,
-        shrinkWrap: true,
-        physics: const NeverScrollableScrollPhysics(),
-    itemCount: totalCells,
-    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-    crossAxisCount: 7,
-      mainAxisSpacing: 8,
-      crossAxisSpacing: 8,
-    ),
+      key: key,
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      itemCount: totalCells,
+      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 7,
+        mainAxisSpacing: AppScale.h(8),
+        crossAxisSpacing: AppScale.w(8),
+        childAspectRatio: 1,
+      ),
       itemBuilder: (context, index) {
         if (index < startWeekday) {
           return const SizedBox();
@@ -167,8 +183,8 @@ class _CustomCalendarState extends State<CustomCalendar> {
         );
 
         final hasTask = widget.taskDates.any(
-              (d) =>
-          d.year == date.year &&
+          (d) =>
+              d.year == date.year &&
               d.month == date.month &&
               d.day == date.day,
         );
@@ -188,22 +204,24 @@ class _CustomCalendarState extends State<CustomCalendar> {
           child: Container(
             decoration: BoxDecoration(
               color: isSelected
-                  ? const Color(0xFFCCA85E)
+                  ? AppColors.mainGold
                   : hasTask
-                  ? const Color(0xFFCCA85E).withValues(alpha: 0.25)
-                  : Colors.transparent,
-              borderRadius: BorderRadius.circular(8),
+                      ? AppColors.mainGold.withValues(alpha: 0.25)
+                      : Colors.transparent,
+              borderRadius: BorderRadius.circular(AppSizes.radiusSmall),
             ),
             child: Center(
               child: Text(
                 dayNumber.toString(),
                 style: TextStyle(
+                  fontFamily: 'Pridi',
+                  fontSize: AppSizes.fontSizeMedium,
                   fontWeight: FontWeight.w600,
                   color: isSelected
-                      ? Colors.white
+                      ? AppColors.white
                       : hasTask
-                      ? const Color(0xFFCCA85E)
-                      : Colors.black,
+                          ? AppColors.mainGold
+                          : AppColors.mainDark,
                 ),
               ),
             ),

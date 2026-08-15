@@ -1,7 +1,12 @@
 import 'package:mishka_app/core/network/api_endpoints.dart';
 import 'package:mishka_app/core/network/api_service.dart';
+import 'package:mishka_app/features/chat_with_mishka/data/tool_data_normalizer.dart';
+import 'package:flutter/foundation.dart';
 
 enum SavedMaterialType { quiz, flashcards, summary, mindmap }
+
+/// Required by Mishka backend Prisma models when persisting AI-generated tutor rows.
+const String generatedMaterialSourceType = 'ai';
 
 class CommunityChannel {
   const CommunityChannel({required this.id, required this.name});
@@ -26,9 +31,11 @@ class SavedLibraryRemoteDataSource {
     required SavedMaterialType type,
     required Map<String, dynamic> toolData,
   }) async {
-    final existingId = _extractEntityId(type, toolData);
+    final normalized = normalizeToolData(toolData);
+    _validateForSave(type: type, normalized: normalized);
+    final existingId = _extractEntityId(type, normalized);
     final entityId =
-        existingId ?? await _createEntity(type: type, toolData: toolData);
+        existingId ?? await _createEntity(type: type, toolData: normalized);
     final savedId = await _saveEntity(type: type, entityId: entityId);
     return SavedMaterialRef(entityId: entityId, savedId: savedId);
   }
@@ -80,11 +87,45 @@ class SavedLibraryRemoteDataSource {
     required SavedMaterialType type,
     required Map<String, dynamic> toolData,
   }) async {
-    final existingId = _extractEntityId(type, toolData);
+    final normalized = normalizeToolData(toolData);
+    _validateForSave(type: type, normalized: normalized);
+    final existingId = _extractEntityId(type, normalized);
     if (existingId != null && existingId.isNotEmpty) {
       return existingId;
     }
-    return _createEntity(type: type, toolData: toolData);
+    return _createEntity(type: type, toolData: normalized);
+  }
+
+  void _validateForSave({
+    required SavedMaterialType type,
+    required Map<String, dynamic> normalized,
+  }) {
+    switch (type) {
+      case SavedMaterialType.quiz:
+        final questions = (normalized['questions'] as List?) ?? const [];
+        if (questions.isEmpty) {
+          throw const FormatException('Quiz has no questions to save');
+        }
+      case SavedMaterialType.flashcards:
+        final cards = (normalized['cards'] as List?) ?? const [];
+        if (cards.isEmpty) {
+          throw const FormatException('Flashcard set has no cards to save');
+        }
+      case SavedMaterialType.summary:
+        final text = (normalized['summaryText'] ??
+                normalized['summary'] ??
+                normalized['text'] ??
+                '')
+            .toString()
+            .trim();
+        if (text.isEmpty) {
+          throw const FormatException('Summary is empty');
+        }
+      case SavedMaterialType.mindmap:
+        if (!mindMapHasSaveableContent(normalized)) {
+          throw const FormatException('Mind map has no nodes to save');
+        }
+    }
   }
 
   Future<void> shareGeneratedMaterialToChannels({
@@ -114,67 +155,126 @@ class SavedLibraryRemoteDataSource {
     required SavedMaterialType type,
     required Map<String, dynamic> toolData,
   }) async {
+    final normalized = normalizeToolData(toolData);
     switch (type) {
       case SavedMaterialType.quiz:
+        final questions = (normalized['questions'] as List?) ?? const [];
         final env = await _api.post<Map<String, dynamic>>(
           ApiEndpoints.quizzes,
           data: {
-            'title': (toolData['title'] ?? 'Generated Quiz').toString(),
-            if (toolData['questions'] is List)
-              'questions': toolData['questions'],
-            'raw': toolData,
+            'title': (normalized['title'] ?? 'Generated Quiz').toString(),
+            'sourceType': generatedMaterialSourceType,
+            if (questions.isNotEmpty) 'totalQuestions': questions.length,
+            ...chatSessionFieldForCreate(normalized),
+            ...sourceReferenceFieldsForCreate(normalized),
           },
           dataFromJson: _mapFromRaw,
         );
-        return _extractFirstId(env.data);
+        final quizId = _extractFirstId(env.data);
+        await _createQuizQuestions(
+          quizId: quizId,
+          questions: questions,
+        );
+        return quizId;
       case SavedMaterialType.flashcards:
         final setEnv = await _api.post<Map<String, dynamic>>(
           ApiEndpoints.flashcardSets,
           data: {
-            'title': (toolData['title'] ?? 'Generated Flashcards').toString(),
-            'raw': toolData,
+            'title': (normalized['title'] ?? 'Generated Flashcards').toString(),
+            'sourceType': generatedMaterialSourceType,
+            ...chatSessionFieldForCreate(normalized),
+            ...sourceReferenceFieldsForCreate(normalized),
           },
           dataFromJson: _mapFromRaw,
         );
         final setId = _extractFirstId(setEnv.data);
-        final cards = (toolData['cards'] as List?) ?? const [];
+        final cards = (normalized['cards'] as List?) ?? const [];
         for (final card in cards.whereType<Map>()) {
+          final row = Map<String, dynamic>.from(card);
+          final front =
+              (row['front'] ?? row['term'] ?? row['question'] ?? '').toString();
+          final back = (row['back'] ??
+                  row['answer'] ??
+                  row['definition'] ??
+                  '')
+              .toString();
           await _api.post<void>(
-            ApiEndpoints.flashcards,
+            ApiEndpoints.flashcardSetFlashcards(setId),
             data: {
-              'flashcardSetId': setId,
-              'front': (card['front'] ?? '').toString(),
-              'back': (card['back'] ?? '').toString(),
-              if (card['title'] != null) 'title': card['title'].toString(),
-              if (card['image'] != null) 'image': card['image'].toString(),
+              'question': front,
+              'answer': back,
             },
           );
         }
         return setId;
       case SavedMaterialType.summary:
+        final summaryText = (normalized['summaryText'] ??
+                normalized['summary'] ??
+                normalized['text'] ??
+                '')
+            .toString()
+            .trim();
         final env = await _api.post<Map<String, dynamic>>(
           ApiEndpoints.summaries,
           data: {
-            'title': (toolData['title'] ?? 'Generated Summary').toString(),
-            'content': (toolData['summary'] ?? toolData['text'] ?? '')
-                .toString(),
-            'raw': toolData,
+            'summaryText': summaryText,
+            'sourceType': generatedMaterialSourceType,
+            ...chatSessionFieldForCreate(normalized),
+            ...sourceReferenceFieldsForCreate(normalized),
           },
           dataFromJson: _mapFromRaw,
         );
         return _extractFirstId(env.data);
       case SavedMaterialType.mindmap:
+        final content = mindMapContentForApi(normalized);
+        final payload = <String, dynamic>{
+          'sourceType': generatedMaterialSourceType,
+          'content': content,
+          ...chatSessionFieldForCreate(normalized),
+          ...sourceReferenceFieldsForCreate(normalized),
+        };
+        final topTitle =
+            (normalized['title'] ?? content['title'] ?? 'Generated Mind Map')
+                .toString()
+                .trim();
+        if (topTitle.isNotEmpty) {
+          payload['title'] = topTitle;
+        }
+        if (kDebugMode) {
+          debugPrint('🧠 SAVE mind-map payload: $payload');
+        }
         final env = await _api.post<Map<String, dynamic>>(
           ApiEndpoints.mindMaps,
-          data: {
-            'title': (toolData['title'] ?? 'Generated Mind Map').toString(),
-            if (toolData['root'] != null) 'root': toolData['root'],
-            if (toolData['nodes'] != null) 'nodes': toolData['nodes'],
-            'raw': toolData,
-          },
+          data: payload,
           dataFromJson: _mapFromRaw,
         );
         return _extractFirstId(env.data);
+    }
+  }
+
+  Future<void> _createQuizQuestions({
+    required String quizId,
+    required List<dynamic> questions,
+  }) async {
+    var order = 0;
+    for (final item in questions) {
+      if (item is! Map) continue;
+      final row = Map<String, dynamic>.from(item);
+      final options = List<String>.from(
+        (row['options'] as List?)?.map((e) => e.toString()) ?? const [],
+      );
+      await _api.post<void>(
+        ApiEndpoints.quizQuestions,
+        data: {
+          'quizId': quizId,
+          'questionText':
+              (row['questionText'] ?? row['question'] ?? '').toString(),
+          'options': options,
+          'correctOptionIndex': row['correctOptionIndex'] ?? 0,
+          'order': order,
+        },
+      );
+      order++;
     }
   }
 
@@ -214,6 +314,57 @@ class SavedLibraryRemoteDataSource {
     }
   }
 
+  Future<String?> lookupSavedRowId({
+    required SavedMaterialType type,
+    required String entityId,
+  }) async {
+    if (entityId.isEmpty) return null;
+
+    final env = await _api.get<List<Map<String, dynamic>>>(
+      switch (type) {
+        SavedMaterialType.quiz => ApiEndpoints.savedQuizzes,
+        SavedMaterialType.flashcards => ApiEndpoints.savedFlashcardSets,
+        SavedMaterialType.summary => ApiEndpoints.savedSummaries,
+        SavedMaterialType.mindmap => ApiEndpoints.savedMindMaps,
+      },
+      dataFromJson: (raw) {
+        final list = (raw as List?) ?? const [];
+        return list
+            .whereType<Map>()
+            .map((e) => Map<String, dynamic>.from(e))
+            .toList();
+      },
+    );
+
+    final entityKey = switch (type) {
+      SavedMaterialType.quiz => 'quizId',
+      SavedMaterialType.flashcards => 'flashcardSetId',
+      SavedMaterialType.summary => 'summaryId',
+      SavedMaterialType.mindmap => 'mindMapId',
+    };
+
+    for (final row in env.data ?? const <Map<String, dynamic>>[]) {
+      final savedRowId = row['id']?.toString();
+      if (savedRowId == null || savedRowId.isEmpty) continue;
+
+      final direct = row[entityKey]?.toString();
+      if (direct == entityId) return savedRowId;
+
+      final nestedKey = switch (type) {
+        SavedMaterialType.quiz => 'quiz',
+        SavedMaterialType.flashcards => 'flashcardSet',
+        SavedMaterialType.summary => 'summary',
+        SavedMaterialType.mindmap => 'mindMap',
+      };
+      final nested = row[nestedKey];
+      if (nested is Map) {
+        final nestedId = nested['id']?.toString();
+        if (nestedId == entityId) return savedRowId;
+      }
+    }
+    return null;
+  }
+
   String? _extractEntityId(
     SavedMaterialType type,
     Map<String, dynamic> toolData,
@@ -247,6 +398,20 @@ class SavedLibraryRemoteDataSource {
       final value = map[key];
       if (value != null && value.toString().isNotEmpty) {
         return value.toString();
+      }
+    }
+    for (final nestedKey in const [
+      'quiz',
+      'flashcardSet',
+      'flashcard_set',
+      'summary',
+      'mindMap',
+      'mind_map',
+    ]) {
+      final nested = map[nestedKey];
+      if (nested is Map) {
+        final nestedId = nested['id']?.toString();
+        if (nestedId != null && nestedId.isNotEmpty) return nestedId;
       }
     }
     throw const FormatException('Created entity id is missing');

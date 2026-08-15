@@ -4,6 +4,9 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:mishka_app/core/network/api_exception.dart';
 import 'package:mishka_app/core/utils/app_colors.dart';
 import 'package:mishka_app/core/utils/app_sizes.dart';
+import 'package:mishka_app/core/widgets/app_bottom_sheet_layout.dart';
+import 'package:mishka_app/features/our_community/data/community_channel_material_publisher.dart';
+import 'package:mishka_app/features/our_community/data/community_models.dart';
 import 'package:mishka_app/features/saved/data/repositories/saved_repository.dart';
 import 'package:mishka_app/features/saved/domain/saved_content_kind.dart';
 import 'package:mishka_app/l10n/app_localizations.dart';
@@ -25,7 +28,9 @@ class SavedMaterialPick {
 Future<void> shareSavedMaterialToChannel({
   required BuildContext context,
   required SavedRepository repository,
+  required String communityId,
   required String channelId,
+  List<CommunityChatMessage>? knownMessages,
   VoidCallback? onShared,
 }) async {
   final l10n = AppLocalizations.of(context)!;
@@ -37,6 +42,15 @@ Future<void> shareSavedMaterialToChannel({
       kind: picked.kind,
       savedListRowId: picked.savedListItemId,
       channelIds: [channelId],
+    );
+    await ensureSavedRowMaterialPosted(
+      repository: repository,
+      kind: picked.kind,
+      savedListRowId: picked.savedListItemId,
+      knownMessages: knownMessages,
+      targets: [
+        (communityId: communityId, channelId: channelId),
+      ],
     );
     if (!context.mounted) return;
     CommunityStyles.showSnackBar(
@@ -55,11 +69,28 @@ Future<SavedMaterialPick?> showPickSavedMaterialSheet(BuildContext context) {
   return showModalBottomSheet<SavedMaterialPick>(
     context: context,
     isScrollControlled: true,
-    backgroundColor: AppColors.white,
-    shape: RoundedRectangleBorder(
-      borderRadius: BorderRadius.vertical(top: Radius.circular(AppSizes.radiusMedium)),
+    backgroundColor: Colors.transparent,
+    builder: (ctx) => AppBottomSheetLayout.wrap(
+      ctx,
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final maxHeight = constraints.maxHeight.isFinite
+              ? constraints.maxHeight
+              : MediaQuery.sizeOf(context).height * 0.88;
+          return SizedBox(
+            height: maxHeight,
+            child: Material(
+              color: AppColors.white,
+              borderRadius: BorderRadius.vertical(
+                top: Radius.circular(AppSizes.radiusMedium),
+              ),
+              clipBehavior: Clip.antiAlias,
+              child: const _PickSavedMaterialSheet(),
+            ),
+          );
+        },
+      ),
     ),
-    builder: (ctx) => const _PickSavedMaterialSheet(),
   );
 }
 
@@ -82,7 +113,7 @@ class _PickSavedMaterialSheetState extends State<_PickSavedMaterialSheet> {
       SavedContentKind.flashcards => l10n.savedFlashCards,
       SavedContentKind.quiz => l10n.savedQuizes,
       SavedContentKind.summary => l10n.savedSummary,
-      SavedContentKind.mindmap => l10n.mindMap,
+      SavedContentKind.mindmap => l10n.savedMindMap,
     };
   }
 
@@ -154,88 +185,112 @@ class _PickSavedMaterialSheetState extends State<_PickSavedMaterialSheet> {
     final kinds = SavedContentKind.values;
 
     return SafeArea(
-      child: Padding(
-        padding: EdgeInsets.fromLTRB(16.w, 12.h, 16.w, 16.h),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              l10n.shareToCommunityChannels,
-              style: CommunityStyles.sectionLabel,
-            ),
-            SizedBox(height: 4.h),
-            Text(
-              l10n.communityShareChooseMaterial,
-              style: CommunityStyles.caption,
-            ),
-            SizedBox(height: 12.h),
-            if (_selectedKind == null)
-              Wrap(
-                spacing: 8.w,
-                runSpacing: 8.h,
-                children: kinds
-                    .map(
-                      (kind) => ActionChip(
-                        label: Text(_kindLabel(kind, l10n)),
-                        onPressed: () => _loadKind(kind),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Padding(
+            padding: EdgeInsets.fromLTRB(16.w, 12.h, 16.w, 0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  l10n.shareToCommunityChannels,
+                  style: CommunityStyles.sectionLabel,
+                ),
+                SizedBox(height: 4.h),
+                Text(
+                  l10n.communityShareChooseMaterial,
+                  style: CommunityStyles.caption,
+                ),
+                SizedBox(height: 12.h),
+                if (_selectedKind == null)
+                  Wrap(
+                    spacing: 8.w,
+                    runSpacing: 8.h,
+                    children: kinds
+                        .map(
+                          (kind) => ActionChip(
+                            label: Text(_kindLabel(kind, l10n)),
+                            onPressed: () => _loadKind(kind),
+                          ),
+                        )
+                        .toList(),
+                  )
+                else
+                  Row(
+                    children: [
+                      IconButton(
+                        onPressed: () => setState(() {
+                          _selectedKind = null;
+                          _items = const [];
+                          _error = null;
+                        }),
+                        icon: const Icon(Icons.arrow_back),
+                        color: AppColors.mainGold,
                       ),
-                    )
-                    .toList(),
-              )
-            else ...[
-              Row(
-                children: [
-                  IconButton(
-                    onPressed: () => setState(() {
-                      _selectedKind = null;
-                      _items = const [];
-                      _error = null;
-                    }),
-                    icon: const Icon(Icons.arrow_back),
-                    color: AppColors.mainGold,
+                      Expanded(
+                        child: Text(
+                          _kindLabel(_selectedKind!, l10n),
+                          style: CommunityStyles.bodySemiBold,
+                        ),
+                      ),
+                    ],
                   ),
-                  Expanded(
+              ],
+            ),
+          ),
+          if (_selectedKind != null) ...[
+            SizedBox(height: 8.h),
+            if (_loading)
+              const Expanded(
+                child: Center(child: CircularProgressIndicator()),
+              )
+            else if (_error != null)
+              Expanded(
+                child: Center(
+                  child: Padding(
+                    padding: EdgeInsets.all(16.w),
                     child: Text(
-                      _kindLabel(_selectedKind!, l10n),
-                      style: CommunityStyles.bodySemiBold,
+                      _error!,
+                      textAlign: TextAlign.center,
+                      style: CommunityStyles.error,
                     ),
                   ),
-                ],
-              ),
-              SizedBox(height: 8.h),
-              if (_loading)
-                const Padding(
-                  padding: EdgeInsets.all(24),
-                  child: Center(child: CircularProgressIndicator()),
-                )
-              else if (_error != null)
-                Text(_error!, style: CommunityStyles.error)
-              else if (_items.isEmpty)
-                Text(
-                  l10n.communityShareNoSavedInCategory,
-                  style: CommunityStyles.caption,
-                )
-              else
-                ConstrainedBox(
-                  constraints: BoxConstraints(maxHeight: 320.h),
-                  child: ListView.separated(
-                    shrinkWrap: true,
-                    itemCount: _items.length,
-                    separatorBuilder: (_, __) => Divider(height: 1, color: AppColors.stroke),
-                    itemBuilder: (context, index) {
-                      final item = _items[index];
-                      return ListTile(
-                        title: Text(item.title, style: CommunityStyles.body),
-                        trailing: Icon(Icons.share_outlined, color: AppColors.mainGold),
-                        onTap: () => Navigator.pop(context, item),
-                      );
-                    },
+                ),
+              )
+            else if (_items.isEmpty)
+              Expanded(
+                child: Center(
+                  child: Padding(
+                    padding: EdgeInsets.all(16.w),
+                    child: Text(
+                      l10n.communityShareNoSavedInCategory,
+                      textAlign: TextAlign.center,
+                      style: CommunityStyles.caption,
+                    ),
                   ),
                 ),
-            ],
+              )
+            else
+              Expanded(
+                child: ListView.separated(
+                  padding: EdgeInsets.fromLTRB(8.w, 0, 8.w, 16.h),
+                  itemCount: _items.length,
+                  separatorBuilder: (_, __) =>
+                      Divider(height: 1, color: AppColors.stroke),
+                  itemBuilder: (context, index) {
+                    final item = _items[index];
+                    return ListTile(
+                      title: Text(item.title, style: CommunityStyles.body),
+                      trailing:
+                          Icon(Icons.share_outlined, color: AppColors.mainGold),
+                      onTap: () => Navigator.pop(context, item),
+                    );
+                  },
+                ),
+              ),
           ],
-        ),
+        ],
       ),
     );
   }

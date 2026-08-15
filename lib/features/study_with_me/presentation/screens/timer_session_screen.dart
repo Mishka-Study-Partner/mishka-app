@@ -2,7 +2,9 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:mishka_app/core/navigation/safe_navigation.dart';
 import 'package:mishka_app/core/utils/app_colors.dart';
+import 'package:mishka_app/core/utils/app_sizes.dart';
 import 'package:mishka_app/core/widgets/custom_app_bar.dart';
 import 'package:mishka_app/l10n/app_localizations.dart';
 
@@ -12,9 +14,13 @@ import '../../data/timer_model.dart';
 import '../widgets/study_checkin_popups.dart';
 
 class TimerSessionScreen extends StatefulWidget {
-  final StudyTimerModel model;
+  final StudyTimerModel? model;
 
-  const TimerSessionScreen({super.key, required this.model});
+  const TimerSessionScreen({super.key, required StudyTimerModel model})
+      : model = model;
+
+  /// Re-open the global in-progress session without resetting the timer.
+  const TimerSessionScreen.resume({super.key}) : model = null;
 
   @override
   State<TimerSessionScreen> createState() => _TimerSessionScreenState();
@@ -47,25 +53,35 @@ class _TimerSessionScreenState extends State<TimerSessionScreen> {
 
   bool get _sessionRegistered => _manager.hasActiveSession;
 
+  StudyTimerModel get _displayModel =>
+      _sessionRegistered ? _manager.controller!.model : widget.model!;
+
   @override
   void initState() {
     super.initState();
+    _manager.markSessionScreenOpen(true);
     if (_manager.hasActiveSession) {
       _startStudyTick();
     } else {
-      _localController = SmartTimerController(widget.model);
-      _localController!.addListener(_onUpdate);
+      final model = widget.model;
+      if (model == null) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted) SafeNavigator.popIfPossible(context);
+        });
+      } else {
+        _localController = SmartTimerController(model);
+        _localController!.addListener(_onUpdate);
+      }
     }
     _manager.addListener(_onUpdate);
   }
 
-  /// Safe check — if controller is somehow null (e.g., hot reload cleared state),
-  /// re-create a local one.
+  /// Safe check — only create a local pre-start controller when no global session exists.
   void _ensureController() {
-    if (_controllerOrNull == null) {
-      _localController = SmartTimerController(widget.model);
-      _localController!.addListener(_onUpdate);
-    }
+    if (_manager.hasActiveSession || widget.model == null) return;
+    if (_localController != null) return;
+    _localController = SmartTimerController(widget.model!);
+    _localController!.addListener(_onUpdate);
   }
 
   @override
@@ -74,6 +90,7 @@ class _TimerSessionScreenState extends State<TimerSessionScreen> {
     _localController?.removeListener(_onUpdate);
     _localController?.dispose();
     _manager.removeListener(_onUpdate);
+    _manager.markSessionScreenOpen(false);
     super.dispose();
   }
 
@@ -84,11 +101,22 @@ class _TimerSessionScreenState extends State<TimerSessionScreen> {
   /// Called the first time the user presses play.
   /// Registers the session with the global manager so the floating bar appears.
   void _registerAndStart() {
-    _localController?.removeListener(_onUpdate);
-    _localController?.dispose();
+    final model = widget.model;
+    if (model == null) return;
+
+    final local = _localController;
+    local?.removeListener(_onUpdate);
     _localController = null;
-    _manager.startSession(widget.model);
-    _manager.controller!.start();
+
+    _manager.startSession(model);
+    final registered = _manager.controller!;
+    if (local != null) {
+      registered.adoptStateFrom(local);
+      local.dispose();
+    }
+    if (!registered.isRunning) {
+      registered.start();
+    }
     _startStudyTick();
   }
 
@@ -178,18 +206,128 @@ class _TimerSessionScreenState extends State<TimerSessionScreen> {
     }
   }
 
+  bool get _isPreStart => !_sessionRegistered && !_stopped;
+
+  bool get _isStudyRunning =>
+      !_stopped &&
+      _controller.isRunning &&
+      _controller.currentMode == TimerMode.study;
+
+  void _onStart() {
+    if (_sessionRegistered) {
+      _controller.start();
+    } else {
+      _registerAndStart();
+    }
+    setState(() => _stopped = false);
+  }
+
+  void _onStop() {
+    _controller.pause();
+    setState(() => _stopped = true);
+  }
+
+  void _onBreak() {
+    if (_controller.currentMode != TimerMode.study) return;
+    _controller.skipToBreak();
+    _controller.start();
+    setState(() => _stopped = false);
+  }
+
+  void _onContinue() {
+    setState(() => _stopped = false);
+    _controller.start();
+  }
+
+  void _onEndSession() {
+    SafeNavigator.popIfPossible(context);
+    _manager.endSession(outcome: 'abandoned');
+  }
+
+  Widget _buildTimerBarRow(Color accent) {
+    final Widget left;
+    final Widget right;
+
+    if (_isPreStart) {
+      left = _CircleButton(
+        icon: Icons.play_arrow,
+        color: accent,
+        onTap: _onStart,
+      );
+      right = SizedBox(width: 42.w);
+    } else if (_stopped) {
+      left = _CircleButton(
+        icon: Icons.play_arrow,
+        color: AppColors.green,
+        onTap: _onContinue,
+      );
+      right = _CircleButton(
+        icon: Icons.close,
+        color: AppColors.red,
+        onTap: _onEndSession,
+      );
+    } else if (_isStudyRunning) {
+      left = _CircleButton(
+        icon: Icons.free_breakfast,
+        color: AppColors.blue,
+        onTap: _onBreak,
+      );
+      right = _CircleButton(
+        icon: Icons.stop,
+        color: accent,
+        onTap: _onStop,
+      );
+    } else {
+      left = !_controller.isRunning
+          ? _CircleButton(
+              icon: Icons.play_arrow,
+              color: AppColors.green,
+              onTap: _onContinue,
+            )
+          : SizedBox(width: 42.w);
+      right = _CircleButton(
+        icon: Icons.close,
+        color: AppColors.red,
+        onTap: _onEndSession,
+      );
+    }
+
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        left,
+        Text(
+          _controller.formattedTime,
+          style: TextStyle(
+            fontFamily: 'Pridi',
+            fontSize: 32.sp,
+            fontWeight: FontWeight.bold,
+            color: AppColors.mainDark,
+            letterSpacing: 2,
+          ),
+        ),
+        right,
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
+    if (!_sessionRegistered && widget.model == null) {
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
+    }
     _ensureController();
+    if (_controllerOrNull == null) {
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
+    }
     final l10n = AppLocalizations.of(context)!;
     final mode = _controller.currentMode;
     final accent = _modeAccent(mode);
-    final isCountUp = _controller.isCountUp;
 
     return Scaffold(
       backgroundColor: AppColors.screenBackground,
       appBar: MishkaAppBar(
-        title: widget.model.title,
+        title: _displayModel.title,
         topTitle: l10n.studyWithMe,
         showBack: true,
         showBottomBar: false,
@@ -227,7 +365,12 @@ class _TimerSessionScreenState extends State<TimerSessionScreen> {
 
           // Timer bar
           Padding(
-            padding: EdgeInsets.fromLTRB(24.w, 0, 24.w, 24.h),
+            padding: EdgeInsets.fromLTRB(
+              24.w,
+              0,
+              24.w,
+              24.h + AppSizes.screenEndPadding,
+            ),
             child: Container(
               padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 10.h),
               decoration: BoxDecoration(
@@ -235,80 +378,7 @@ class _TimerSessionScreenState extends State<TimerSessionScreen> {
                 borderRadius: BorderRadius.circular(12.r),
                 border: Border.all(color: accent.withValues(alpha: 0.5)),
               ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  if (!_stopped) ...[
-                    _CircleButton(
-                      icon: _controller.isRunning
-                          ? Icons.pause
-                          : Icons.play_arrow,
-                      color: accent,
-                      onTap: () {
-                        if (_controller.isRunning) {
-                          _controller.pause();
-                        } else if (!_sessionRegistered) {
-                          _registerAndStart();
-                        } else {
-                          _controller.start();
-                        }
-                      },
-                    ),
-                    Text(
-                      _controller.formattedTime,
-                      style: TextStyle(
-                        fontFamily: 'Pridi',
-                        fontSize: 32.sp,
-                        fontWeight: FontWeight.bold,
-                        color: AppColors.mainDark,
-                        letterSpacing: 2,
-                      ),
-                    ),
-                    _CircleButton(
-                      icon: isCountUp && mode == TimerMode.study
-                          ? Icons.check
-                          : Icons.stop,
-                      color: accent,
-                      onTap: () {
-                        if (isCountUp && mode == TimerMode.study) {
-                          _controller.finishStudy();
-                          _controller.start();
-                        } else {
-                          _controller.pause();
-                          setState(() => _stopped = true);
-                        }
-                      },
-                    ),
-                  ] else ...[
-                    _CircleButton(
-                      icon: Icons.play_arrow,
-                      color: AppColors.green,
-                      onTap: () {
-                        setState(() => _stopped = false);
-                        _controller.start();
-                      },
-                    ),
-                    Text(
-                      _controller.formattedTime,
-                      style: TextStyle(
-                        fontFamily: 'Pridi',
-                        fontSize: 32.sp,
-                        fontWeight: FontWeight.bold,
-                        color: AppColors.mainDark,
-                        letterSpacing: 2,
-                      ),
-                    ),
-                    _CircleButton(
-                      icon: Icons.close,
-                      color: AppColors.red,
-                      onTap: () {
-                        _manager.endSession(outcome: 'abandoned');
-                        Navigator.of(context).pop();
-                      },
-                    ),
-                  ],
-                ],
-              ),
+              child: _buildTimerBarRow(accent),
             ),
           ),
         ],

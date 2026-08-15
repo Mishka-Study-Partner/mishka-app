@@ -20,7 +20,7 @@ class CustomSegmentedButton extends StatelessWidget {
     final n = segments.length;
     final fontSize =
         n > 3 ? AppSizes.fontSizeSmall : AppSizes.fontSizeMedium;
-    final barHeight = n > 3 ? 38.h : 32.h;
+    final barHeight = n > 3 ? 40.h : 36.h;
 
     return Container(
       width: double.infinity,
@@ -57,7 +57,9 @@ class CustomSegmentedButton extends StatelessWidget {
                       style: TextStyle(
                         fontSize: fontSize,
                         fontWeight: FontWeight.w600,
-                        fontFamily: "Pridi",
+                        fontFamily: 'Pridi',
+                        height: 1.25,
+                        leadingDistribution: TextLeadingDistribution.even,
                         decoration: TextDecoration.none,
                         color:
                             isSelected ? AppColors.white : AppColors.mainGold,

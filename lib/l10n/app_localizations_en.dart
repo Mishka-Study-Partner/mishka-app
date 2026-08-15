@@ -48,7 +48,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get agreeToTerms => 'Agree to terms and conditions & privacy policy';
 
   @override
-  String get alreadyHaveAccount => 'Already have account? Sign In';
+  String get alreadyHaveAccount => 'Already have account?';
 
   @override
   String get orSignUpWith => 'or sign up with';
@@ -63,7 +63,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get email => 'Email';
 
   @override
-  String get dontHaveAccount => 'Don\'t have account? create account';
+  String get dontHaveAccount => 'Don\'t have account?';
 
   @override
   String get resetPassword => 'Reset Password';
@@ -153,6 +153,11 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get welcomeBackSara => 'Welcome, Back Ziad!';
+
+  @override
+  String welcomeBackName(String name) {
+    return 'Welcome back, $name';
+  }
 
   @override
   String get sundayJan26 => 'Sunday, Jan 26, 2026';
@@ -370,6 +375,18 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get chatAiServiceUnavailable =>
+      'Mishka\'s AI service is temporarily unavailable. The model server could not reach OpenRouter — ask your team to check the OpenRouter API key on the Mishka AI model server (Railway), then try again.';
+
+  @override
+  String get chatAiServerUnreachable =>
+      'Mishka\'s AI server is not responding. Check that the Railway AI deployment is running and healthy, then try again.';
+
+  @override
+  String get chatAiSessionExpired =>
+      'This study session expired. Please start a new chat and upload your PDF again.';
+
+  @override
   String chatToolGenerationFailed(String error) {
     return 'Tool generation failed.\n$error';
   }
@@ -443,6 +460,14 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get mishkasSupport => 'Mishka\'s Support:';
+
+  @override
+  String get supportStudyHoursBadge =>
+      'Count your daily study hours with Mishka';
+
+  @override
+  String get supportChallengesBadge =>
+      'Win Mishka\'s challenges and get your prize';
 
   @override
   String get exploreMore => 'Explore more';
@@ -544,6 +569,25 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get gamificationSubtitle => 'points, streaks, Badges, Challenges.';
+
+  @override
+  String get gamificationPoints => 'Points';
+
+  @override
+  String get gamificationBadges => 'Badges';
+
+  @override
+  String get gamificationRewards => 'Rewards';
+
+  @override
+  String get gamificationChallenges => 'Challenges';
+
+  @override
+  String get myProgress => 'My Progress';
+
+  @override
+  String get myProgressSubtitle =>
+      'Study time, streaks, tasks, and AI usage by week or month.';
 
   @override
   String get accountSetting => 'Account Setting:';
@@ -789,6 +833,10 @@ class AppLocalizationsEn extends AppLocalizations {
       'You successfully reviewed all our flashcards great job!';
 
   @override
+  String get flashcardsFinishedMessage =>
+      'You Have Successfully Finished All Your Flashcards';
+
+  @override
   String get eyeOfHorus => 'the eye of Horus';
 
   @override
@@ -903,13 +951,102 @@ class AppLocalizationsEn extends AppLocalizations {
   String get savedFlashCards => 'Saved Flash Cards';
 
   @override
+  String get savedFlashCardTitle => 'Saved Flash Card';
+
+  @override
+  String get savedFlashcardSourcePrompt =>
+      'Make me FLASHCARDS for this uploaded file';
+
+  @override
+  String get savedFlashcardFileTypePdf => 'Type: pdf file';
+
+  @override
+  String savedCreatedOnDate(String date) {
+    return 'Created on $date';
+  }
+
+  @override
   String get view => 'View';
 
   @override
   String get savedQuizes => 'Saved Quizes';
 
   @override
+  String get savedQuizzes => 'Saved Quizzes';
+
+  @override
+  String get savedQuizTitle => 'Saved Quiz';
+
+  @override
+  String get savedQuizSearchHint => 'Search...';
+
+  @override
+  String get savedQuizUploadedFileLabel => 'This is the uploaded file:';
+
+  @override
+  String get savedQuizTypeMcq => 'Type: Multiple choice questions';
+
+  @override
+  String savedQuizQuestionsCount(int count) {
+    return 'Questions: $count mcq';
+  }
+
+  @override
+  String savedQuizCreatedOn(String date) {
+    return 'Created on: $date';
+  }
+
+  @override
+  String get viewDetails => 'View Details';
+
+  @override
+  String savedQuizQuestionLabel(int current, int total) {
+    return 'Question $current/$total';
+  }
+
+  @override
+  String savedQuizCorrectWrong(int correct, int wrong) {
+    return '$correct Correct / $wrong Wrong';
+  }
+
+  @override
+  String savedQuizPreviousScore(int percent) {
+    return 'Your previous score: $percent%';
+  }
+
+  @override
+  String get savedQuizSolveAgain => 'Solve again';
+
+  @override
+  String get focusBeforeAnswering => 'Focus before answering';
+
+  @override
+  String flashcardProgress(int current, int total) {
+    return 'Card $current of $total';
+  }
+
+  @override
   String get savedSummary => 'Saved Summary';
+
+  @override
+  String get savedSummaryTitle => 'Saved Summary';
+
+  @override
+  String get savedMindMap => 'Saved Mind Map';
+
+  @override
+  String get savedMindMapTitle => 'Saved Mind Map';
+
+  @override
+  String get summaryFinishedMessage =>
+      'You Have Successfully Finished Your Summarized Paragraph';
+
+  @override
+  String get mindMapFinishedMessage =>
+      'You Have Successfully Finished Your Mind Map';
+
+  @override
+  String get savedSnippetMore => 'More';
 
   @override
   String get savedSearchHint => 'Search saved items...';
@@ -956,10 +1093,18 @@ class AppLocalizationsEn extends AppLocalizations {
   String get congratulation => 'Congratulation!';
 
   @override
-  String get keepItUp => 'Keep it up';
+  String get keepItUp => 'Keep It Up';
 
   @override
   String get collectBadge => 'Collect Badge';
+
+  @override
+  String quizYouHaveAnsweredPercent(int percent) {
+    return 'You Have Answered $percent%';
+  }
+
+  @override
+  String get correctAnswers => 'Correct Answers';
 
   @override
   String get answered100Percent => 'you have answered 100% correct answers';
@@ -971,7 +1116,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get answered40Percent => 'you have answered 40% correct answers';
 
   @override
-  String get keepGoing => 'Keep going';
+  String get keepGoing => 'Keep Going';
 
   @override
   String get delete => 'Delete';
@@ -993,6 +1138,10 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get errorPrefix => 'Error';
+
+  @override
+  String get networkConnectionError =>
+      'Can\'t reach Mishka right now. Check your internet connection and try again.';
 
   @override
   String get pleaseFillAllRequiredFields => 'Please fill all required fields';
@@ -1093,6 +1242,12 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get shareOpenGroup => 'Open group';
+
+  @override
+  String get shareOptionalNote => 'Add a note (optional)';
+
+  @override
+  String get communitySharedMaterialTapToOpen => 'Tap to open full screen';
 
   @override
   String get noCommunityChannelsFound => 'No community channels found';
@@ -1252,6 +1407,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get cameraOn => 'Camera On';
 
   @override
+  String get callMishka => 'Call Mishka';
+
+  @override
+  String get startCallWithMishka => 'Start call with Mishka';
+
+  @override
   String get videoCallWithMishka => 'Video call with Mishka';
 
   @override
@@ -1259,6 +1420,47 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get cameraIsOff => 'Camera is Off';
+
+  @override
+  String get studyFocusConnecting => 'Connecting to focus monitor…';
+
+  @override
+  String get studyFocusFocused => 'Focused';
+
+  @override
+  String get studyFocusDistracted => 'Check your posture';
+
+  @override
+  String get studyFocusUnknown => 'Analyzing…';
+
+  @override
+  String get studyFocusOffline => 'Focus monitor unavailable';
+
+  @override
+  String get studyPostureCalibration =>
+      'Breathe softly and sit as you naturally do. My ancient whiskers are adjusting to your unique aura.';
+
+  @override
+  String get studyMlCalibrating =>
+      'Settle into your natural stance while Mishka calibrates your workspace…';
+
+  @override
+  String get studyMlFocusing => 'Focused — keep going!';
+
+  @override
+  String get studyMlBadPosture =>
+      'Mishka says: Sit up straight to protect your energy!';
+
+  @override
+  String get studyMlLookingAway => 'Eyes back on your material!';
+
+  @override
+  String get studyMlNoUser =>
+      'Mishka lost track of you. Ensure your camera isn\'t obstructed.';
+
+  @override
+  String get studyMlError =>
+      'Focus monitor had a hiccup — stay seated and we\'ll retry.';
 
   @override
   String get timer => 'Timer';
@@ -1304,10 +1506,10 @@ class AppLocalizationsEn extends AppLocalizations {
       'Camera permission is required for video call mode.';
 
   @override
-  String get onboardingIntroLine1 => 'I am Mishka, custodian of';
+  String get onboardingIntroLine1 => 'I am Mishka, custodian of knowledge,';
 
   @override
-  String get onboardingIntroLine2 => 'knowledge our quest for glory';
+  String get onboardingIntroLine2 => 'our quest for glory';
 
   @override
   String get onboardingIntroLine3 => 'begins now!';
@@ -1343,10 +1545,31 @@ class AppLocalizationsEn extends AppLocalizations {
   String get schoolStageQuestion => 'Which School Stage Are You Currently In?';
 
   @override
+  String get primarySchoolColon => 'Primary School:';
+
+  @override
   String get middleSchoolColon => 'Middle School:';
 
   @override
   String get highSchoolColon => 'High School:';
+
+  @override
+  String get firstPrimary => '1st Primary';
+
+  @override
+  String get secondPrimary => '2nd Primary';
+
+  @override
+  String get thirdPrimary => '3rd Primary';
+
+  @override
+  String get fourthPrimary => '4th Primary';
+
+  @override
+  String get fifthPrimary => '5th Primary';
+
+  @override
+  String get sixthPrimary => '6th Primary';
 
   @override
   String get firstPreparatory => '1st Preparatory';
@@ -1429,7 +1652,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get reportCreatePdfEmail => 'Create PDF and share';
 
   @override
-  String get reportEmailMyReport => 'Email my report';
+  String get reportEmailMyReport => 'Create PDF and send link to email';
+
+  @override
+  String get reportOpenSettings => 'Open your report\'s settings';
+
+  @override
+  String get reportSettingsTitle => 'Report settings';
 
   @override
   String reportPdfEmailSent(String email) {
@@ -1440,8 +1669,11 @@ class AppLocalizationsEn extends AppLocalizations {
   String get reportPdfOpenFailed => 'Could not open the report PDF link.';
 
   @override
-  String get reportPdfSharedLocally =>
-      'Server export unavailable — shared a local PDF copy instead.';
+  String get reportExportNoData => 'No activity in this period to export yet.';
+
+  @override
+  String get reportExportEmailNotConfigured =>
+      'Email delivery is not available right now. Try again later or contact support.';
 
   @override
   String get reportUsingLegacyData =>
@@ -1451,8 +1683,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get reportStudyWithMishka => 'Study with Mishka';
 
   @override
-  String get reportDuringConcentrationMode =>
-      'Total study time (Concentration + Camera modes):';
+  String get reportDuringConcentrationMode => 'Total study time (all modes):';
 
   @override
   String get reportAiTools => 'Using Mishka\'s AI tools';
@@ -1565,6 +1796,16 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get communityCreateDescHint => 'Community description';
+
+  @override
+  String get communityCreateCategoryLabel => 'Category (optional):';
+
+  @override
+  String get communityCreateCategoryHint => 'e.g. Physics, Exam prep';
+
+  @override
+  String get communityCreateCategoryHelper =>
+      'Pick a suggestion or type a new category name';
 
   @override
   String get communityCreateDiscoverSection => 'Discovery (public communities)';
@@ -1825,8 +2066,8 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get communityHubJoinFailedOpenAnyway =>
-      'Could not join community. Opening anyway…';
+  String get communityAccessDenied =>
+      'You do not have access to this community. Join to see channels and groups.';
 
   @override
   String get communityHubNoneYet => 'None yet.';
@@ -1969,7 +2210,15 @@ class AppLocalizationsEn extends AppLocalizations {
   String get communityDiscoverySubjectsOptional => 'Subjects (optional)';
 
   @override
+  String get communityDiscoverySubjectsHelper =>
+      'Tap one or more subject tags for discover';
+
+  @override
   String get communityDiscoveryPurposeOptional => 'Purpose (optional)';
+
+  @override
+  String get communityDiscoveryPurposeHelper =>
+      'Tap one purpose tag — e.g. study group or exam prep';
 
   @override
   String get communityInviteEmailHint => 'Email address';
@@ -2010,4 +2259,270 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get reportCommunityChannelJoins => 'Channel joins';
+
+  @override
+  String get studySubjectPickerTitle => 'What are you studying?';
+
+  @override
+  String get studySubjectPickerSubtitle =>
+      'Optional — pick a course or continue without one.';
+
+  @override
+  String get studySubjectNone => 'No specific subject';
+
+  @override
+  String get studySubjectManage => 'Manage my subjects';
+
+  @override
+  String get studySubjectStartSession => 'Start session';
+
+  @override
+  String get studentSubjectsTitle => 'My subjects';
+
+  @override
+  String get studentSubjectsSettingsHint =>
+      'Add courses to track study time per subject.';
+
+  @override
+  String get studentSubjectsDescription =>
+      'Create up to 20 subjects (Physics, Arabic, …). Pick one when you start a study session, or leave it unassigned.';
+
+  @override
+  String get studentSubjectsEmpty =>
+      'No subjects yet. Tap + to add your first course.';
+
+  @override
+  String get studentSubjectsAddTitle => 'Add subject';
+
+  @override
+  String get studentSubjectsEditTitle => 'Edit subject';
+
+  @override
+  String get studentSubjectsEditMenu => 'Edit';
+
+  @override
+  String get studentSubjectsNameLabel => 'Subject name';
+
+  @override
+  String get studentSubjectsColorLabel => 'Color';
+
+  @override
+  String get studentSubjectsDeleteTitle => 'Delete subject?';
+
+  @override
+  String studentSubjectsDeleteBody(String name) {
+    return 'Remove \"$name\" from your list? Past study sessions keep their history in reports.';
+  }
+
+  @override
+  String get studentSubjectsNameInUse =>
+      'You already have a subject with this name.';
+
+  @override
+  String get studentSubjectsSaveFailed => 'Could not save subject. Try again.';
+
+  @override
+  String studentSubjectsMaxReached(int count) {
+    return 'You can have up to $count subjects.';
+  }
+
+  @override
+  String get reportStudyBySubject => 'Study by subject';
+
+  @override
+  String reportTotalStudyMinutes(int minutes) {
+    return '$minutes min total';
+  }
+
+  @override
+  String get reportMinutesSuffix => 'm';
+
+  @override
+  String get reportNoStudyBySubject =>
+      'No subject breakdown for this period yet.';
+
+  @override
+  String get gamificationHubTitle => 'Gamifications';
+
+  @override
+  String get gamificationWeekly => 'weekly';
+
+  @override
+  String get gamificationMonthly => 'monthly';
+
+  @override
+  String get gamificationLoadFailed => 'Could not load gamification data.';
+
+  @override
+  String gamificationStreakDaysPerWeek(int count) {
+    return '$count days streak/ week';
+  }
+
+  @override
+  String get gamificationTodoSection => 'To Do List :';
+
+  @override
+  String get gamificationTodoGoalWeekly =>
+      'Finishing all tasks/week == 1 Badge';
+
+  @override
+  String gamificationTasksPerWeek(int count) {
+    return '$count Tasks/ week';
+  }
+
+  @override
+  String gamificationTasksAwayFromBadge(int count) {
+    return '$count Tasks away to get Badge';
+  }
+
+  @override
+  String gamificationTasksProgress(int done, int total) {
+    return '$done tasks/ $total done...';
+  }
+
+  @override
+  String gamificationBadgesEarnedMonth(int count) {
+    return 'Got $count badges this month';
+  }
+
+  @override
+  String get gamificationAiToolsSection => 'AI Tools :';
+
+  @override
+  String get gamificationStudySection => 'Study with Mishka :';
+
+  @override
+  String get gamificationStudyGoalWeekly =>
+      'Counting total study minutes (3hrs/Day == 21hr/week)';
+
+  @override
+  String gamificationStudyHoursPerWeek(int hours) {
+    return '$hours hrs / week';
+  }
+
+  @override
+  String gamificationStudyHoursAway(int hours) {
+    return '$hours hr away to get Badge';
+  }
+
+  @override
+  String gamificationStudyProgress(int done, int total) {
+    return '$done hrs/ $total done...';
+  }
+
+  @override
+  String get gamificationCommunitySection => 'Mishka\'s Community :';
+
+  @override
+  String get gamificationCommunityGoalWeekly =>
+      'Active in community 700% /week (1 Badge == >500% /week)';
+
+  @override
+  String gamificationCommunityPercentWeek(int percent) {
+    return '$percent% / week';
+  }
+
+  @override
+  String gamificationCommunityPercentAway(int percent) {
+    return '$percent% away to get Badge';
+  }
+
+  @override
+  String gamificationCommunityProgress(int done, int total) {
+    return '$done%/ $total done...';
+  }
+
+  @override
+  String get gamificationBadgeQuizPerfect => 'Get 10 / 10 in Quizzes';
+
+  @override
+  String get gamificationBadgeQuizScore80 => 'Get 8 / 10 in Quizzes';
+
+  @override
+  String get gamificationBadgeQuizKeepLearning => 'Get <5 / 10 in Quizzes';
+
+  @override
+  String get gamificationBadgeFlashcards => 'Finishing all your Flashcards';
+
+  @override
+  String get gamificationBadgeSummary => 'Finishing your Summarized';
+
+  @override
+  String get gamificationBadgeMindMap => 'Finishing your Mind Map';
+
+  @override
+  String get gamificationBadgeChat =>
+      'Chat with Mishka (Every 1 Text = 1 point)';
+
+  @override
+  String get gamificationChatBadgeFootnote => '(10 point = 1 badge)';
+
+  @override
+  String gamificationBadgeEarnedCount(int count) {
+    return 'Got this Badge $count times';
+  }
+
+  @override
+  String gamificationMonthlyTitle(String section) {
+    return '$section — Monthly';
+  }
+
+  @override
+  String get gamificationMonthlyPlaceholder =>
+      'Monthly breakdown for this section will appear here once the backend ships aggregated data. Share the Figma monthly screen when ready and we will match it.';
+
+  @override
+  String get gamificationStreakCalendarTitle => 'Your Monthly Streak Calendar';
+
+  @override
+  String gamificationStreakDaysPerMonth(int count) {
+    return '$count days streak/month';
+  }
+
+  @override
+  String get gamificationStreakOpenedApp => 'Opened The App';
+
+  @override
+  String get gamificationStreakMissedApp => 'Didn\'t Open The App';
+
+  @override
+  String gamificationWeekLabel(int week) {
+    return 'Week $week';
+  }
+
+  @override
+  String get gamificationDetailsLabel => 'Details:';
+
+  @override
+  String get gamificationMonthlyBadgesHighlight => 'Monthly Badges';
+
+  @override
+  String get gamificationTodoMonthlyAppBar => 'To Do List Monthly Badges';
+
+  @override
+  String get gamificationTodoMonthlyTitle => 'To Do List';
+
+  @override
+  String get gamificationStudyGoalWeeklyShort => '21 hr/ week == 1 badge';
+
+  @override
+  String get gamificationStudyMonthlyAppBar =>
+      'Study With Mishka Monthly Badges';
+
+  @override
+  String get gamificationStudyMonthlyTitle => 'Study With Mishka';
+
+  @override
+  String get gamificationCommunityMonthlyAppBar =>
+      'Mishka\'s Community Monthly Badges';
+
+  @override
+  String get gamificationCommunityMonthlyTitle => 'Mishka\'s Community';
+
+  @override
+  String get gamificationAiToolsMonthlyAppBar =>
+      'Mishka\'s AI Tool\'s Monthly Badges';
+
+  @override
+  String get gamificationAiToolsMonthlyTitle => 'Mishka\'s AI Tool\'s';
 }

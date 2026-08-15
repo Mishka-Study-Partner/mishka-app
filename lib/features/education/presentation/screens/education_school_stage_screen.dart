@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:iconify_flutter/icons/fluent_emoji_high_contrast.dart';
 
+import 'package:mishka_app/core/layout/form_screen_body.dart';
 import 'package:mishka_app/core/utils/app_colors.dart';
+import 'package:mishka_app/core/widgets/screen_end_spacer.dart';
 import 'package:mishka_app/core/utils/app_sizes.dart';
 import 'package:mishka_app/core/widgets/custom_app_bar.dart';
 import 'package:mishka_app/features/education/education_flow_config.dart';
@@ -24,7 +26,7 @@ class _SchoolOption {
   final int grade;
 }
 
-/// Step 2 (school) — middle / high school year.
+/// Step 2 (school) — primary / middle / high school year.
 class EducationSchoolStageScreen extends StatefulWidget {
   const EducationSchoolStageScreen({super.key, this.config = const EducationFlowConfig()});
 
@@ -36,9 +38,43 @@ class EducationSchoolStageScreen extends StatefulWidget {
 }
 
 class _EducationSchoolStageScreenState extends State<EducationSchoolStageScreen> {
-  _SchoolOption? _selected;
+  String? _selectedTrack;
+  int? _selectedGrade;
   bool _isLoading = false;
   bool _didRestore = false;
+
+  List<_SchoolOption> _primaryOptions(AppLocalizations l10n) => [
+        _SchoolOption(
+          label: l10n.firstPrimary,
+          track: 'primary_school',
+          grade: 1,
+        ),
+        _SchoolOption(
+          label: l10n.secondPrimary,
+          track: 'primary_school',
+          grade: 2,
+        ),
+        _SchoolOption(
+          label: l10n.thirdPrimary,
+          track: 'primary_school',
+          grade: 3,
+        ),
+        _SchoolOption(
+          label: l10n.fourthPrimary,
+          track: 'primary_school',
+          grade: 4,
+        ),
+        _SchoolOption(
+          label: l10n.fifthPrimary,
+          track: 'primary_school',
+          grade: 5,
+        ),
+        _SchoolOption(
+          label: l10n.sixthPrimary,
+          track: 'primary_school',
+          grade: 6,
+        ),
+      ];
 
   List<_SchoolOption> _middleOptions(AppLocalizations l10n) => [
         _SchoolOption(
@@ -76,16 +112,26 @@ class _EducationSchoolStageScreenState extends State<EducationSchoolStageScreen>
         ),
       ];
 
+  bool _isSelected(_SchoolOption option) =>
+      _selectedTrack == option.track && _selectedGrade == option.grade;
+
+  void _selectOption(_SchoolOption option) {
+    setState(() {
+      _selectedTrack = option.track;
+      _selectedGrade = option.grade;
+    });
+  }
+
   Future<void> _submit() async {
-    if (_selected == null || _isLoading) return;
+    if (_selectedTrack == null || _selectedGrade == null || _isLoading) return;
     setState(() => _isLoading = true);
     try {
       await EducationFlowService.submitAndFinish(
         context: context,
         config: widget.config,
         educationStatus: 'school',
-        schoolTrack: _selected!.track,
-        schoolGrade: _selected!.grade,
+        schoolTrack: _selectedTrack,
+        schoolGrade: _selectedGrade,
       );
     } catch (e) {
       if (!mounted) return;
@@ -108,19 +154,15 @@ class _EducationSchoolStageScreenState extends State<EducationSchoolStageScreen>
     final grade = user.schoolGrade;
     if (track == null || grade == null) return;
 
-    final all = [..._middleOptions(l10n), ..._highOptions(l10n)];
-    for (final option in all) {
-      if (option.track == track && option.grade == grade) {
-        _selected = option;
-        break;
-      }
-    }
+    _selectedTrack = track;
+    _selectedGrade = grade;
   }
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     _restoreFromProfile(l10n);
+    final primary = _primaryOptions(l10n);
     final middle = _middleOptions(l10n);
     final high = _highOptions(l10n);
 
@@ -132,12 +174,14 @@ class _EducationSchoolStageScreenState extends State<EducationSchoolStageScreen>
         showBack: true,
         showBottomBar: false,
       ),
-      body: Column(
+      body: FormScreenBody.constrain(
+        context,
+        Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Expanded(
             child: SingleChildScrollView(
-              padding: EdgeInsets.symmetric(horizontal: AppSizes.paddingLarge),
+              padding: AppScrollInsets.page(horizontal: AppSizes.paddingLarge),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -155,6 +199,20 @@ class _EducationSchoolStageScreenState extends State<EducationSchoolStageScreen>
                   SizedBox(height: 24.h),
                   _SectionHeader(
                     icon: FluentEmojiHighContrast.school,
+                    title: l10n.primarySchoolColon,
+                  ),
+                  SizedBox(height: 10.h),
+                  ...primary.map((o) => Padding(
+                        padding: EdgeInsets.only(bottom: 10.h),
+                        child: EducationOptionTile(
+                          label: o.label,
+                          selected: _isSelected(o),
+                          onTap: () => _selectOption(o),
+                        ),
+                      )),
+                  SizedBox(height: 16.h),
+                  _SectionHeader(
+                    icon: FluentEmojiHighContrast.school,
                     title: l10n.middleSchoolColon,
                   ),
                   SizedBox(height: 10.h),
@@ -162,8 +220,8 @@ class _EducationSchoolStageScreenState extends State<EducationSchoolStageScreen>
                         padding: EdgeInsets.only(bottom: 10.h),
                         child: EducationOptionTile(
                           label: o.label,
-                          selected: _selected == o,
-                          onTap: () => setState(() => _selected = o),
+                          selected: _isSelected(o),
+                          onTap: () => _selectOption(o),
                         ),
                       )),
                   SizedBox(height: 16.h),
@@ -176,8 +234,8 @@ class _EducationSchoolStageScreenState extends State<EducationSchoolStageScreen>
                         padding: EdgeInsets.only(bottom: 10.h),
                         child: EducationOptionTile(
                           label: o.label,
-                          selected: _selected == o,
-                          onTap: () => setState(() => _selected = o),
+                          selected: _isSelected(o),
+                          onTap: () => _selectOption(o),
                         ),
                       )),
                 ],
@@ -185,11 +243,12 @@ class _EducationSchoolStageScreenState extends State<EducationSchoolStageScreen>
             ),
           ),
           EducationNextButton(
-            enabled: _selected != null,
+            enabled: _selectedTrack != null && _selectedGrade != null,
             isLoading: _isLoading,
             onPressed: _submit,
           ),
         ],
+      ),
       ),
     );
   }

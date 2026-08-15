@@ -2,7 +2,7 @@
   "@@locale": "ar",
   "appTitle": "ميشكا",
   "createAccount": "إنشاء حساب",
-  "createAccountAtMishka": "أنشئ حسابك في MISHKA",
+  "createAccountAtMishka": "أنشئ حسابك في ميشكا",
   "firstName": "الاسم الأول",
   "lastName": "اسم العائلة",
   "phoneNumber": "رقم الهاتف",
@@ -13,12 +13,12 @@
   "rememberMe": "تذكرني",
   "forgetPassword": "نسيت كلمة المرور؟",
   "agreeToTerms": "الموافقة على الشروط والأحكام وسياسة الخصوصية",
-  "alreadyHaveAccount": "هل لديك حساب بالفعل؟ تسجيل الدخول",
+  "alreadyHaveAccount": "هل لديك حساب بالفعل؟",
   "orSignUpWith": "أو سجل مع",
   "signIn": "تسجيل الدخول",
-  "welcomeBackToMishka": "مرحباً بعودتك إلى MISHKA",
+  "welcomeBackToMishka": "مرحباً بعودتك إلى ميشكا",
   "email": "البريد الإلكتروني",
-  "dontHaveAccount": "ليس لديك حساب؟ إنشاء حساب",
+  "dontHaveAccount": "ليس لديك حساب؟",
   "resetPassword": "إعادة تعيين كلمة المرور",
   "resetPasswordUsing": "إعادة تعيين كلمة المرور باستخدام:",
   "writeEmailForCode": "اكتب بريدك الإلكتروني لتلقي رمز التأكيد لإنشاء كلمة مرور جديدة",
@@ -73,6 +73,14 @@
     }
   },
   "welcomeBackSara": "مرحباً بعودتك، زياد!",
+  "welcomeBackName": "مرحباً بعودتك، {name}",
+  "@welcomeBackName": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
   "sundayJan26": "الأحد، 26 يناير 2026",
   "dailyStreaks": "سلسلة الأيام:",
   "days": "{count} أيام",
@@ -126,7 +134,7 @@
   "pm700": "07:00 م",
   "pm900": "09:00 م",
   "pm200": "02:00 م",
-  "mishkasAiTools": "أدوات MISHKA الذكية:",
+  "mishkasAiTools": "أدوات ميشكا الذكية:",
   "viewMore": "عرض المزيد",
   "chatWithMishka": "الدردشة مع ميشكا",
   "yourHistory": "سجلّك",
@@ -177,6 +185,9 @@
       "error": { "type": "String" }
     }
   },
+  "chatAiServiceUnavailable": "خدمة الذكاء الاصطناعي لـ ميشكا غير متاحة مؤقتاً. تعذّر على خادم النموذج الاتصال بـ OpenRouter — اطلب من الفريق التحقق من مفتاح OpenRouter API على خادم نموذج ميشكا (Railway)، ثم أعد المحاولة.",
+  "chatAiServerUnreachable": "خادم الذكاء الاصطناعي لـ ميشكا لا يستجيب. تحقق من أن نشر Railway AI يعمل بشكل سليم، ثم أعد المحاولة.",
+  "chatAiSessionExpired": "انتهت صلاحية جلسة الدراسة هذه. ابدأ محادثة جديدة وارفع ملف PDF مرة أخرى.",
   "chatToolGenerationFailed": "فشل إنشاء الأداة.\n{error}",
   "@chatToolGenerationFailed": {
     "placeholders": {
@@ -214,6 +225,8 @@
   "youCanRejoinSavedCommunity": "يمكنك إعادة الانضمام إلى مجتمعك المحفوظ",
   "exploreCommunitiesByMajor": "استكشف مجتمعاتنا بناءً على تخصصك",
   "mishkasSupport": "دعم ميشكا:",
+  "supportStudyHoursBadge": "احسب ساعات دراستك اليومية مع ميشكا",
+  "supportChallengesBadge": "اربح تحديات ميشكا واحصل على جائزتك",
   "exploreMore": "استكشف المزيد",
   "countDailyStudyHours": "احسب ساعات دراستك اليومية مع ميشكا",
   "winMishkasChallenges": "اربح تحديات ميشكا واحصل على جائزتك",
@@ -246,6 +259,12 @@
   "ourCommunitySubtitle": "مكتبة المرشدين، مجتمع الأحداث، تاريخ الإرشاد.",
   "gamification": "التلعيب",
   "gamificationSubtitle": "النقاط، السلاسل، الشارات، التحديات.",
+  "gamificationPoints": "النقاط",
+  "gamificationBadges": "الشارات",
+  "gamificationRewards": "المكافآت",
+  "gamificationChallenges": "التحديات",
+  "myProgress": "تقدّمي",
+  "myProgressSubtitle": "وقت الدراسة، السلاسل، المهام، واستخدام أدوات الذكاء الاصطناعي أسبوعياً أو شهرياً.",
   "accountSetting": "إعدادات الحساب:",
   "fullName": "الاسم الكامل:",
   "yourFullName": "اسمك الكامل",
@@ -271,11 +290,11 @@
   "chooseAppearance": "اختر المظهر",
   "settings": "الإعدادات",
   "settingsSubtitle": "اللغة، المظهر، الإشعارات",
-  "settingsDescription": "اختر شكل تطبيق Mishka وكيف نتواصل معك. تُطبَّق التغييرات على هذا الجهاز وتُزامَن مع حسابك عند تسجيل الدخول.",
+  "settingsDescription": "اختر شكل تطبيق ميشكا وكيف نتواصل معك. تُطبَّق التغييرات على هذا الجهاز وتُزامَن مع حسابك عند تسجيل الدخول.",
   "settingsPreferencesSection": "التفضيلات",
   "settingsSyncFailed": "تعذّر مزامنة الإعدادات مع حسابك. تم حفظ اختيارك على هذا الجهاز.",
-  "privacyPolicyBody": "يحترم Mishka خصوصيتك. نجمع فقط المعلومات اللازمة لتشغيل حسابك وتخصيص ميزات الدراسة وتحسين التطبيق.\n\nنستخدم بريدك الإلكتروني وبيانات ملفك للمصادقة والتواصل بشأن حسابك. يُخزَّن نشاط الدراسة والمهام وتفاعلات الذكاء الاصطناعي لتوفير السجل والسلاسل وميزات التدريس التي تستخدمها.\n\nلا نبيع بياناتك الشخصية. قد نشارك بيانات محدودة مع مزودي البنية التحتية والإشعارات بموجب سرية صارمة.\n\nيمكنك تحديث ملفك وتعليمك وتفضيلاتك من التطبيق. تواصل مع الدعم إذا احتجت الوصول أو التصحيح أو الحذف.\n\nهذا ملخص للتيسير. قد تُنشر سياسة قانونية كاملة لاحقًا على موقعنا.",
-  "helpSupportIntro": "تحتاج مساعدة في Mishka؟ تواصل معنا عبر بيانات الاتصال أدناه.",
+  "privacyPolicyBody": "يحترم ميشكا خصوصيتك. نجمع فقط المعلومات اللازمة لتشغيل حسابك وتخصيص ميزات الدراسة وتحسين التطبيق.\n\nنستخدم بريدك الإلكتروني وبيانات ملفك للمصادقة والتواصل بشأن حسابك. يُخزَّن نشاط الدراسة والمهام وتفاعلات الذكاء الاصطناعي لتوفير السجل والسلاسل وميزات التدريس التي تستخدمها.\n\nلا نبيع بياناتك الشخصية. قد نشارك بيانات محدودة مع مزودي البنية التحتية والإشعارات بموجب سرية صارمة.\n\nيمكنك تحديث ملفك وتعليمك وتفضيلاتك من التطبيق. تواصل مع الدعم إذا احتجت الوصول أو التصحيح أو الحذف.\n\nهذا ملخص للتيسير. قد تُنشر سياسة قانونية كاملة لاحقًا على موقعنا.",
+  "helpSupportIntro": "تحتاج مساعدة في ميشكا؟ تواصل معنا عبر بيانات الاتصال أدناه.",
   "helpSupportContactsTitle": "تواصل معنا",
   "helpSupportTapToOpen": "اضغط على الصف لفتح Gmail أو واتساب أو الرابط في التطبيق المناسب.",
   "linkOpenFailed": "تعذّر فتح هذا الرابط على جهازك.",
@@ -284,23 +303,23 @@
   "supportInstagram": "إنستغرام",
   "supportWhatsApp": "واتساب",
   "copiedToClipboard": "تم النسخ",
-  "helpSupportBody": "تحتاج مساعدة في Mishka؟ إليك خطوات سريعة.\n\nالحساب وتسجيل الدخول: استخدم «نسيت كلمة المرور» من شاشة الدخول. تأكد أن البريد أو الهاتف يطابق ما سجّلت به.\n\nالدراسة مع Mishka: ابدأ جلسة من الرئيسية، اختر مؤقتًا، وابقَ على شاشة الجلسة حتى تنهي أو تتوقف مبكرًا. إن فشل البدء، تحقق من الاتصال وأعد المحاولة.\n\nالمهام والقوائم: أنشئ قوائم من قسم المهام، ثم أضف مهامًا بمواعيد. اسحب للتحديث في الرئيسية لرؤية المهام القادمة.\n\nالملف والتعليم: افتح الملف الشخصي لتعديل الاسم والاتصال والجنس والمستوى التعليمي. استخدم الإعدادات للغة والمظهر والإشعارات.\n\nما زلت بحاجة لمساعدة؟ راسلنا على support@mishka.app مع وصف مختصر ولقطات إن أمكن. نرد عادة خلال أيام عمل.",
+  "helpSupportBody": "تحتاج مساعدة في ميشكا؟ إليك خطوات سريعة.\n\nالحساب وتسجيل الدخول: استخدم «نسيت كلمة المرور» من شاشة الدخول. تأكد أن البريد أو الهاتف يطابق ما سجّلت به.\n\nالدراسة مع ميشكا: ابدأ جلسة من الرئيسية، اختر مؤقتًا، وابقَ على شاشة الجلسة حتى تنهي أو تتوقف مبكرًا. إن فشل البدء، تحقق من الاتصال وأعد المحاولة.\n\nالمهام والقوائم: أنشئ قوائم من قسم المهام، ثم أضف مهامًا بمواعيد. اسحب للتحديث في الرئيسية لرؤية المهام القادمة.\n\nالملف والتعليم: افتح الملف الشخصي لتعديل الاسم والاتصال والجنس والمستوى التعليمي. استخدم الإعدادات للغة والمظهر والإشعارات.\n\nما زلت بحاجة لمساعدة؟ راسلنا على support@mishka.app مع وصف مختصر ولقطات إن أمكن. نرد عادة خلال أيام عمل.",
   "privacyPolicy": "سياسة الخصوصية",
   "helpSupport": "المساعدة والدعم",
   "logOut": "تسجيل الخروج",
   "search": "بحث ...",
-  "chatWithMishkaTitle": "الدردشة مع MISHKA",
+  "chatWithMishkaTitle": "الدردشة مع ميشكا",
   "flashCards": "البطاقات التعليمية",
   "quizzes": "الاختبارات",
   "summarize": "تلخيص",
   "mishka": "ميشكا",
   "helloSara": "مرحباً، سارة!",
-  "askMishka": "اسأل MISHKA ....",
+  "askMishka": "اسأل ميشكا ....",
   "apologizeNotUnderstand": "أعتذر، لكنني لم أفهم هذا الإدخال",
   "pleaseClarify": "هل يمكنك توضيح طلبك.",
-  "tellMeMoreAboutMishkaApp": "أخبرني المزيد عن تطبيق MISHKA؟",
+  "tellMeMoreAboutMishkaApp": "أخبرني المزيد عن تطبيق ميشكا؟",
   "mishkaDescription": "ميشكا هو رفيق دراسة تفاعلي مدعوم بالذكاء الاصطناعي، مصمم لمعالجة العقبات الرئيسية التي يواجهها الطلاب في التعليم الحديث: صعوبة فهم المواد المعقدة، التشتت، نقص التحفيز، وفرص التعاون المحدودة. من خلال الجمع بين الذكاء الاصطناعي والتلعيب والتصميم الشامل في منصة واحدة متكاملة، يحول ميشكا الدراسة من نشاط معزول ومرهق إلى تجربة جذابة ومنظمة ومجزية.",
-  "whatMakesMishkaBetter": "لكن ما الذي يجعل MISHKA أفضل من التطبيقات الأخرى؟",
+  "whatMakesMishkaBetter": "لكن ما الذي يجعل ميشكا أفضل من التطبيقات الأخرى؟",
   "mishkaBetterDescription": "يتميز ميشكا عن تطبيقات الدراسة الأخرى من خلال دمج الذكاء الاصطناعي والتلعيب والتصميم الشامل في منصة واحدة، متجاوزاً التدريس الأساسي لمعالجة العقبات الرئيسية للطلاب من المواد المعقدة والتشتت ونقص التحفيز، وتحويل الدراسة إلى تجربة جذابة ومنظمة ومجزية للجميع.",
   "uploadFiles": "رفع الملفات",
   "uploadPDF": "رفع PDF",
@@ -322,6 +341,7 @@
   "pleaseEnterMaterialSummarize": "يرجى إدخال مادتك حتى أتمكن من تلخيصها لك.",
   "thisIsYourFlashcards": "هذه هي بطاقاتك التعليمية:",
   "successfullyReviewedFlashcards": "لقد راجعت جميع بطاقاتنا التعليمية بنجاح، عمل رائع!",
+  "flashcardsFinishedMessage": "لقد أنهيت جميع بطاقاتك التعليمية بنجاح",
   "eyeOfHorus": "عين حورس",
   "wedjitEye": "(عين وجيت)",
   "ancientEgyptian": "مصري قديم",
@@ -369,9 +389,71 @@
   "no": "لا",
   "yes": "نعم",
   "savedFlashCards": "البطاقات التعليمية المحفوظة",
+  "savedFlashCardTitle": "بطاقة تعليمية محفوظة",
+  "savedFlashcardSourcePrompt": "أنشئ لي بطاقات تعليمية لهذا الملف المرفوع",
+  "savedFlashcardFileTypePdf": "النوع: ملف pdf",
+  "savedCreatedOnDate": "تم الإنشاء في {date}",
+  "@savedCreatedOnDate": {
+    "placeholders": {
+      "date": { "type": "String" }
+    }
+  },
   "view": "عرض",
   "savedQuizes": "الاختبارات المحفوظة",
+  "savedQuizzes": "الاختبارات المحفوظة",
+  "savedQuizTitle": "اختبار محفوظ",
+  "savedQuizSearchHint": "بحث...",
+  "savedQuizUploadedFileLabel": "هذا هو الملف المرفوع:",
+  "savedQuizTypeMcq": "النوع: أسئلة اختيار من متعدد",
+  "savedQuizQuestionsCount": "الأسئلة: {count} سؤال",
+  "@savedQuizQuestionsCount": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "savedQuizCreatedOn": "تاريخ الإنشاء: {date}",
+  "@savedQuizCreatedOn": {
+    "placeholders": {
+      "date": { "type": "String" }
+    }
+  },
+  "viewDetails": "عرض التفاصيل",
+  "savedQuizQuestionLabel": "السؤال {current}/{total}",
+  "@savedQuizQuestionLabel": {
+    "placeholders": {
+      "current": { "type": "int" },
+      "total": { "type": "int" }
+    }
+  },
+  "savedQuizCorrectWrong": "{correct} صحيحة / {wrong} خاطئة",
+  "@savedQuizCorrectWrong": {
+    "placeholders": {
+      "correct": { "type": "int" },
+      "wrong": { "type": "int" }
+    }
+  },
+  "savedQuizPreviousScore": "نتيجتك السابقة: {percent}٪",
+  "@savedQuizPreviousScore": {
+    "placeholders": {
+      "percent": { "type": "int" }
+    }
+  },
+  "savedQuizSolveAgain": "حل مرة أخرى",
+  "focusBeforeAnswering": "ركّز قبل الإجابة",
+  "flashcardProgress": "البطاقة {current} من {total}",
+  "@flashcardProgress": {
+    "placeholders": {
+      "current": { "type": "int" },
+      "total": { "type": "int" }
+    }
+  },
   "savedSummary": "الملخص المحفوظ",
+  "savedSummaryTitle": "الملخص المحفوظ",
+  "savedMindMap": "الخريطة الذهنية المحفوظة",
+  "savedMindMapTitle": "الخريطة الذهنية المحفوظة",
+  "summaryFinishedMessage": "لقد أنهيت فقرة الملخص بنجاح",
+  "mindMapFinishedMessage": "لقد أنهيت الخريطة الذهنية بنجاح",
+  "savedSnippetMore": "المزيد",
   "savedSearchHint": "ابحث في المحفوظات...",
   "savedDetailPlaceholder": "سيظهر المحتوى المحفوظ هنا عند ربط المكتبة.",
   "savedNoSearchResults": "لا توجد عناصر مطابقة لبحثك.",
@@ -387,6 +469,13 @@
   "congratulation": "تهانينا!",
   "keepItUp": "استمر",
   "collectBadge": "اجمع الشارة",
+  "quizYouHaveAnsweredPercent": "لقد أجبت على {percent}%",
+  "@quizYouHaveAnsweredPercent": {
+    "placeholders": {
+      "percent": { "type": "int" }
+    }
+  },
+  "correctAnswers": "إجابات صحيحة",
   "answered100Percent": "لقد أجبت على 100% من الإجابات الصحيحة",
   "answered80Percent": "لقد أجبت على 80% من الإجابات الصحيحة",
   "answered40Percent": "لقد أجبت على 40% من الإجابات الصحيحة",
@@ -398,6 +487,7 @@
   ,"renameList": "إعادة تسمية القائمة"
   ,"listRenamed": "تم إعادة تسمية القائمة"
   ,"errorPrefix": "خطأ"
+  ,"networkConnectionError": "تعذّر الاتصال بـ ميشكا. تحقق من اتصال الإنترنت وحاول مرة أخرى."
   ,"pleaseFillAllRequiredFields": "يرجى ملء جميع الحقول المطلوبة"
   ,"pleaseEnterVerificationCode": "يرجى إدخال رمز التحقق"
   ,"pleaseEnterBothPasswordFields": "يرجى إدخال حقلي كلمة المرور"
@@ -429,6 +519,8 @@
   ,"shareSuccessTitle": "تمت المشاركة بنجاح إلى المجموعة"
   ,"shareSuccessContinue": "متابعة"
   ,"shareOpenGroup": "فتح المجموعة"
+  ,"shareOptionalNote": "أضف ملاحظة (اختياري)"
+  ,"communitySharedMaterialTapToOpen": "اضغط لفتح الشاشة الكاملة"
   ,"noCommunityChannelsFound": "لا توجد قنوات مجتمع متاحة"
   ,"failedToLoadChannels": "تعذر تحميل القنوات: {error}"
   ,"shareFailed": "فشلت المشاركة: {error}"
@@ -535,9 +627,23 @@
   ,"customYourOwnTimer": "خصص مؤقتك الخاص:"
   ,"recentlyCustomizedTimers": "المؤقتات المخصصة مؤخراً:"
   ,"cameraOn": "الكاميرا مفعلة"
-  ,"videoCallWithMishka": "مكالمة فيديو مع مشكا"
+  ,"callMishka": "اتصل بميشكا"
+  ,"startCallWithMishka": "ابدأ مكالمة مع ميشكا"
+  ,"videoCallWithMishka": "مكالمة فيديو مع ميشكا"
   ,"cameraIsOn": "الكاميرا مفعلة"
   ,"cameraIsOff": "الكاميرا مغلقة"
+  ,"studyFocusConnecting": "جاري الاتصال بمراقب التركيز…"
+  ,"studyFocusFocused": "مركّز"
+  ,"studyFocusDistracted": "تحقق من وضعية جلوسك"
+  ,"studyFocusUnknown": "جاري التحليل…"
+  ,"studyFocusOffline": "مراقب التركيز غير متاح"
+  ,"studyPostureCalibration": "استرخي واقعد على طبيعتك… ميشكا بتعمل فحص سريع بطريقتها القططية القديمة عشان تفهم نمط جلوسك وتركيزك"
+  ,"studyMlCalibrating": "استريح في وضع جلوسك الطبيعي بينما ميشكا تضبط مساحة عملك…"
+  ,"studyMlFocusing": "مركّز — كمّل!"
+  ,"studyMlBadPosture": "ميشكا تقول: اجلس مستقيمًا لتحافظ على طاقتك!"
+  ,"studyMlLookingAway": "رجّع عينك على مادتك!"
+  ,"studyMlNoUser": "ميشكا فقدتك. تأكد أن الكاميرا غير مغطاة."
+  ,"studyMlError": "حدثت مشكلة بسيطة — ابقَ جالسًا وسنعيد المحاولة."
   ,"timer": "المؤقت"
   ,"yourStudyLink": "رابط الدراسة الخاص بك:"
   ,"linkCopied": "تم نسخ الرابط!"
@@ -564,8 +670,15 @@
   ,"university": "جامعة"
   ,"otherColon": "أخرى:"
   ,"schoolStageQuestion": "في أي مرحلة مدرسية أنت الآن؟"
+  ,"primarySchoolColon": "المرحلة الابتدائية:"
   ,"middleSchoolColon": "المرحلة الإعدادية:"
   ,"highSchoolColon": "المرحلة الثانوية:"
+  ,"firstPrimary": "الابتدائي الأول"
+  ,"secondPrimary": "الابتدائي الثاني"
+  ,"thirdPrimary": "الابتدائي الثالث"
+  ,"fourthPrimary": "الابتدائي الرابع"
+  ,"fifthPrimary": "الابتدائي الخامس"
+  ,"sixthPrimary": "الابتدائي السادس"
   ,"firstPreparatory": "الإعدادي الأول"
   ,"secondPreparatory": "الإعدادي الثاني"
   ,"thirdPreparatory": "الإعدادي الثالث"
@@ -592,7 +705,9 @@
   ,"reportPeriodMonthlySuffix": "/شهر"
   ,"reportPeriodYearlySuffix": "/سنة"
   ,"reportCreatePdfEmail": "إنشاء PDF ومشاركته"
-  ,"reportEmailMyReport": "إرسال التقرير بالبريد"
+  ,"reportEmailMyReport": "إنشاء PDF وإرسال الرابط بالبريد"
+  ,"reportOpenSettings": "فتح إعدادات تقريرك"
+  ,"reportSettingsTitle": "إعدادات التقرير"
   ,"reportPdfEmailSent": "تم إرسال التقرير إلى {email}"
   ,"@reportPdfEmailSent": {
     "placeholders": {
@@ -602,10 +717,11 @@
     }
   }
   ,"reportPdfOpenFailed": "تعذر فتح رابط PDF للتقرير."
-  ,"reportPdfSharedLocally": "تعذر التصدير من الخادم — تمت مشاركة نسخة PDF محلية."
+  ,"reportExportNoData": "لا يوجد نشاط في هذه الفترة للتصدير بعد."
+  ,"reportExportEmailNotConfigured": "إرسال البريد غير متاح حالياً. حاول لاحقاً أو تواصل مع الدعم."
   ,"reportUsingLegacyData": "يتم استخدام واجهات التقرير الكلاسيكية حتى يتم نشر الحزمة الجديدة."
   ,"reportStudyWithMishka": "الدراسة مع ميشكا"
-  ,"reportDuringConcentrationMode": "إجمالي وقت الدراسة (وضع التركيز + الكاميرا):"
+  ,"reportDuringConcentrationMode": "إجمالي وقت الدراسة (جميع الأوضاع):"
   ,"reportAiTools": "استخدام أدوات ميشكا الذكية"
   ,"reportDailyStreak": "سلسلة الأيام"
   ,"reportDailyStreakChartHint": "كل شريط = يوم: 100% = حافظت على السلسلة، 0% = فاتك."
@@ -652,6 +768,9 @@
   ,"communityCreateNameHint": "اسم المجتمع"
   ,"communityCreateDescLabel": "الوصف (اختياري):"
   ,"communityCreateDescHint": "وصف المجتمع"
+  ,"communityCreateCategoryLabel": "الفئة (اختياري):"
+  ,"communityCreateCategoryHint": "مثال: فيزياء، تحضير للامتحان"
+  ,"communityCreateCategoryHelper": "اختر اقتراحًا أو اكتب اسم فئة جديد"
   ,"communityCreateDiscoverSection": "الاكتشاف (مجتمعات عامة)"
   ,"communityCreateDiscoverSubtitle": "ساعد الآخرين على إيجاد مجتمعك في الاكتشاف والتوصيات."
   ,"communityCreateNameRequired": "يرجى إدخال اسم المجتمع"
@@ -737,7 +856,7 @@
       "username": {"type": "String"}
     }
   }
-  ,"communityHubJoinFailedOpenAnyway": "تعذّر الانضمام. سيتم فتح المجتمع على أي حال…"
+  ,"communityAccessDenied": "ليس لديك صلاحية للوصول إلى هذا المجتمع. انضم لعرض القنوات والمجموعات."
   ,"communityHubNoneYet": "لا يوجد بعد."
   ,"communityHomeTypeLabel": "مجتمع"
   ,"communityHomeAnnouncements": "الإعلانات"
@@ -789,7 +908,7 @@
   ,"communityChatEmpty": "لا توجد رسائل بعد. قل مرحبًا!"
   ,"communityChatTypeHint": "اكتب رسالة…"
   ,"communityChatMemberFallback": "عضو"
-  ,"communityChatSharedFromMishka": "مشارَك من Mishka"
+  ,"communityChatSharedFromMishka": "مشارَك من ميشكا"
   ,"communityMemberAddToGroup": "إضافة إلى مجموعة"
   ,"communityMemberRemoveFromCommunity": "إزالة من المجتمع"
   ,"communitySelectGroupPrompt": "اختر مجموعة لـ {memberName}"
@@ -802,7 +921,9 @@
   ,"communityShareChooseMaterial": "اختر مادة ذكاء اصطناعي محفوظة لمشاركتها مع هذه المجموعة."
   ,"communityShareNoSavedInCategory": "لا توجد عناصر محفوظة في هذه الفئة بعد."
   ,"communityDiscoverySubjectsOptional": "المواد (اختياري)"
+  ,"communityDiscoverySubjectsHelper": "اختر واحدة أو أكثر من وسوم المواد للاكتشاف"
   ,"communityDiscoveryPurposeOptional": "الغرض (اختياري)"
+  ,"communityDiscoveryPurposeHelper": "اختر وسماً واحداً — مثل مجموعة دراسة أو تحضير للامتحان"
   ,"communityInviteEmailHint": "عنوان البريد الإلكتروني"
   ,"communityErrorServerUnreachable": "تعذّر الاتصال بالخادم. تحقق من أن الخادم يعمل."
   ,"communityRoleOwner": "المالك"
@@ -811,9 +932,81 @@
   ,"communityFallbackName": "مجتمع"
   ,"communityFallbackGroupName": "مجموعة"
   ,"communityFallbackMemberName": "عضو"
-  ,"communityBrandMishka": "Mishka"
+  ,"communityBrandMishka": "ميشكا"
   ,"reportCommunitySection": "مجتمعنا"
   ,"reportCommunityMessages": "الرسائل المنشورة"
   ,"reportCommunityMaterialShares": "المواد المشاركة"
   ,"reportCommunityChannelJoins": "انضمامات القنوات"
+  ,"studySubjectPickerTitle": "ماذا تدرس؟"
+  ,"studySubjectPickerSubtitle": "اختياري — اختر مادة أو تابع بدون تحديد."
+  ,"studySubjectNone": "بدون مادة محددة"
+  ,"studySubjectManage": "إدارة موادي"
+  ,"studySubjectStartSession": "بدء الجلسة"
+  ,"studentSubjectsTitle": "موادي الدراسية"
+  ,"studentSubjectsSettingsHint": "أضف مواد لتتبع وقت الدراسة لكل مادة."
+  ,"studentSubjectsDescription": "أنشئ حتى 20 مادة (فيزياء، عربي، …). اختر واحدة عند بدء جلسة الدراسة، أو اتركها غير محددة."
+  ,"studentSubjectsEmpty": "لا توجد مواد بعد. اضغط + لإضافة أول مادة."
+  ,"studentSubjectsAddTitle": "إضافة مادة"
+  ,"studentSubjectsEditTitle": "تعديل المادة"
+  ,"studentSubjectsEditMenu": "تعديل"
+  ,"studentSubjectsNameLabel": "اسم المادة"
+  ,"studentSubjectsColorLabel": "اللون"
+  ,"studentSubjectsDeleteTitle": "حذف المادة؟"
+  ,"studentSubjectsDeleteBody": "إزالة \"{name}\" من قائمتك؟ جلسات الدراسة السابقة تبقى في التقارير."
+  ,"studentSubjectsNameInUse": "لديك مادة بهذا الاسم بالفعل."
+  ,"studentSubjectsSaveFailed": "تعذّر حفظ المادة. حاول مرة أخرى."
+  ,"studentSubjectsMaxReached": "يمكنك إضافة حتى {count} مادة."
+  ,"reportStudyBySubject": "الدراسة حسب المادة"
+  ,"reportTotalStudyMinutes": "{minutes} دقيقة إجمالاً"
+  ,"reportMinutesSuffix": "د"
+  ,"reportNoStudyBySubject": "لا يوجد تفصيل حسب المادة في هذه الفترة بعد."
+  ,"gamificationHubTitle": "التلعيب"
+  ,"gamificationWeekly": "أسبوعي"
+  ,"gamificationMonthly": "شهري"
+  ,"gamificationLoadFailed": "تعذّر تحميل بيانات التلعيب."
+  ,"gamificationStreakDaysPerWeek": "{count} أيام متتالية/ أسبوع"
+  ,"gamificationTodoSection": "قائمة المهام :"
+  ,"gamificationTodoGoalWeekly": "إنهاء جميع المهام/أسبوع == شارة واحدة"
+  ,"gamificationTasksPerWeek": "{count} مهمة/ أسبوع"
+  ,"gamificationTasksAwayFromBadge": "متبقٍ {count} مهمة للحصول على الشارة"
+  ,"gamificationTasksProgress": "{done} مهمة/ {total} منجزة..."
+  ,"gamificationBadgesEarnedMonth": "حصلت على {count} شارات هذا الشهر"
+  ,"gamificationAiToolsSection": "أدوات الذكاء الاصطناعي :"
+  ,"gamificationStudySection": "الدراسة مع ميشكا :"
+  ,"gamificationStudyGoalWeekly": "حساب دقائق الدراسة (3 ساعات/يوم == 21 ساعة/أسبوع)"
+  ,"gamificationStudyHoursPerWeek": "{hours} ساعة / أسبوع"
+  ,"gamificationStudyHoursAway": "متبقٍ {hours} ساعة للحصول على الشارة"
+  ,"gamificationStudyProgress": "{done} ساعة/ {total} منجزة..."
+  ,"gamificationCommunitySection": "مجتمع ميشكا :"
+  ,"gamificationCommunityGoalWeekly": "النشاط في المجتمع 700%/أسبوع (شارة واحدة == >500%/أسبوع)"
+  ,"gamificationCommunityPercentWeek": "{percent}% / أسبوع"
+  ,"gamificationCommunityPercentAway": "متبقٍ {percent}% للحصول على الشارة"
+  ,"gamificationCommunityProgress": "{done}%/ {total} منجزة..."
+  ,"gamificationBadgeQuizPerfect": "10 / 10 في الاختبارات"
+  ,"gamificationBadgeQuizScore80": "8 / 10 في الاختبارات"
+  ,"gamificationBadgeQuizKeepLearning": "<5 / 10 في الاختبارات"
+  ,"gamificationBadgeFlashcards": "إنهاء جميع البطاقات"
+  ,"gamificationBadgeSummary": "إنهاء الملخص"
+  ,"gamificationBadgeMindMap": "إنهاء خريطة الذهن"
+  ,"gamificationBadgeChat": "الدردشة مع ميشكا (كل رسالة = نقطة)"
+  ,"gamificationChatBadgeFootnote": "(10 نقاط = شارة واحدة)"
+  ,"gamificationBadgeEarnedCount": "حصلت على هذه الشارة {count} مرات"
+  ,"gamificationMonthlyTitle": "{section} — شهري"
+  ,"gamificationMonthlyPlaceholder": "سيظهر التفصيل الشهري هنا بعد توفير البيانات من الخادم. شارك تصميم Figma للشاشة الشهرية عندما يكون جاهزاً."
+  ,"gamificationStreakCalendarTitle": "تقويم سلسلتك الشهرية"
+  ,"gamificationStreakDaysPerMonth": "{count} أيام متتالية/ شهر"
+  ,"gamificationStreakOpenedApp": "فتح التطبيق"
+  ,"gamificationStreakMissedApp": "لم يفتح التطبيق"
+  ,"gamificationWeekLabel": "الأسبوع {week}"
+  ,"gamificationDetailsLabel": "التفاصيل:"
+  ,"gamificationMonthlyBadgesHighlight": "الشارات الشهرية"
+  ,"gamificationTodoMonthlyAppBar": "شارات قائمة المهام الشهرية"
+  ,"gamificationTodoMonthlyTitle": "قائمة المهام"
+  ,"gamificationStudyGoalWeeklyShort": "21 ساعة/ أسبوع == شارة واحدة"
+  ,"gamificationStudyMonthlyAppBar": "شارات الدراسة مع ميشكا الشهرية"
+  ,"gamificationStudyMonthlyTitle": "الدراسة مع ميشكا"
+  ,"gamificationCommunityMonthlyAppBar": "شارات مجتمع ميشكا الشهرية"
+  ,"gamificationCommunityMonthlyTitle": "مجتمع ميشكا"
+  ,"gamificationAiToolsMonthlyAppBar": "شارات أدوات ميشكا الشهرية"
+  ,"gamificationAiToolsMonthlyTitle": "أدوات ميشكا الذكية"
 }

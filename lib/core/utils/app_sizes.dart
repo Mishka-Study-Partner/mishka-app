@@ -1,36 +1,39 @@
-import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:mishka_app/core/layout/app_scale.dart';
 
 class AppSizes {
   // Padding & Margins
-  static double get paddingSmall => 8.w;
-  static double get paddingMedium => 16.w;
-  static double get paddingLarge => 24.w;
-  static double get paddingXLarge => 32.w;
+  static double get paddingSmall => AppScale.w(8);
+  static double get paddingMedium => AppScale.w(16);
+  static double get paddingLarge => AppScale.w(24);
+  static double get paddingXLarge => AppScale.w(32);
 
   // Border Radius
-  static double get radiusSmall => 8.r;
-  static double get radiusMedium => 12.r;
-  static double get radiusLarge => 20.r;
-  static double get radiusXLarge => 24.r;
+  static double get radiusSmall => AppScale.r(8);
+  static double get radiusMedium => AppScale.r(12);
+  static double get radiusLarge => AppScale.r(20);
+  static double get radiusXLarge => AppScale.r(24);
 
   // Font Sizes
-  static double get fontSizeSmall => 12.sp;
-  static double get fontSizeMedium => 14.sp;
-  static double get fontSizeLarge => 16.sp;
-  static double get fontSizeXLarge => 18.sp;
-  static double get fontSizeXXLarge => 20.sp;
-  static double get fontSizeTitle => 26.sp;
+  static double get fontSizeSmall => AppScale.sp(12);
+  static double get fontSizeMedium => AppScale.sp(14);
+  static double get fontSizeLarge => AppScale.sp(16);
+  static double get fontSizeXLarge => AppScale.sp(18);
+  static double get fontSizeXXLarge => AppScale.sp(20);
+  static double get fontSizeTitle => AppScale.sp(26);
 
   // Icon Sizes
-  static double get iconSmall => 20.w;
-  static double get iconMedium => 24.w;
-  static double get iconLarge => 32.w;
+  static double get iconSmall => AppScale.w(20);
+  static double get iconMedium => AppScale.w(24);
+  static double get iconLarge => AppScale.w(32);
 
-  // Button Heights
-  static double get buttonHeight => 48.h;
-  static double get buttonHeightSmall => 40.h;
+  // Button Heights — tall enough for Pridi descenders (g, y, p).
+  static double get buttonHeight => AppScale.h(52);
+  static double get buttonHeightSmall => AppScale.h(44);
 
   // App Bar
-  static double get appBarHeight => 80.h;
-  static double get appBarBottomHeight => 32.h;
+  static double get appBarHeight => AppScale.h(80);
+  static double get appBarBottomHeight => AppScale.h(32);
+
+  /// Small gap after the last item in scrollable screens (not system safe area).
+  static double get screenEndPadding => AppScale.h(16);
 }

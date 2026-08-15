@@ -75,12 +75,25 @@ class TodoIconCatalog {
     };
   }
 
+  static TodoIconOption byLabel(String? label) {
+    if (label == null || label.isEmpty) return TodoIconOption.defaultOption;
+    final normalized = label.toLowerCase();
+    for (final option in [..._fallback, TodoIconOption.defaultOption]) {
+      if (option.label.toLowerCase() == normalized) return option;
+    }
+    return TodoIconOption.defaultOption;
+  }
+
   static TodoIconOption resolve({
     required int? iconId,
     required Map<int, TodoIconOption> byId,
+    String? localLabel,
   }) {
     if (iconId != null && byId.containsKey(iconId)) {
       return byId[iconId]!;
+    }
+    if (localLabel != null && localLabel.isNotEmpty) {
+      return byLabel(localLabel);
     }
     return TodoIconOption.defaultOption;
   }

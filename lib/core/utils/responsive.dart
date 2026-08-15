@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 
-class R {
-  static double w(BuildContext c, double v) =>
-      MediaQuery.of(c).size.width * (v / 375);
+import 'package:mishka_app/core/layout/app_scale.dart';
 
-  static double h(BuildContext c, double v) =>
-      MediaQuery.of(c).size.height * (v / 812);
+/// Legacy helpers — prefer [AppScale] or `.rw` / `.rh` extensions.
+class R {
+  static double w(BuildContext c, double v) => AppScale.w(v);
+
+  static double h(BuildContext c, double v) => AppScale.h(v);
 }

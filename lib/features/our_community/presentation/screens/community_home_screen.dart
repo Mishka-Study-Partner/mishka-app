@@ -1,14 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
+import 'package:mishka_app/core/network/api_exception.dart';
+import 'package:mishka_app/core/widgets/screen_end_spacer.dart';
 import 'package:mishka_app/core/utils/app_colors.dart';
+import 'package:mishka_app/core/utils/app_sizes.dart';
 import 'package:mishka_app/core/widgets/custom_app_bar.dart';
 import 'package:mishka_app/l10n/app_localizations.dart';
 
 import '../../community_display_helper.dart';
 import '../../community_styles.dart';
+import '../../data/community_error_helpers.dart';
 import '../../data/community_models.dart';
 import '../../data/community_repository.dart';
+import '../../utils/community_navigation.dart';
 import '../widgets/community_action_menu.dart';
 import '../widgets/community_avatar.dart';
 import '../widgets/group_list_item_card.dart';
@@ -54,25 +59,58 @@ class _CommunityHomeScreenState extends State<CommunityHomeScreen> {
         seed: _community,
         forceRefresh: forceRefresh,
       );
+      if (refreshed != null) {
+        _community = applyResolvedCommunityCounts(
+          model: refreshed,
+          seed: _community,
+        );
+      }
+      if (!_community.isMember) {
+        if (!mounted) return;
+        setState(() {
+          _groups = const [];
+          _loading = false;
+        });
+        return;
+      }
       final groups = await widget.repository.loadChannels(_community.id);
       if (!mounted) return;
       setState(() {
-        if (refreshed != null) {
-          _community = refreshed.copyWith(
-            isMember: true,
-            myRole: refreshed.myRole ?? _community.myRole,
-            ownerUserId: refreshed.ownerUserId ?? _community.ownerUserId,
-          );
-        }
         _groups = groups;
         _loading = false;
       });
     } catch (e) {
       if (!mounted) return;
+      final l10n = AppLocalizations.of(context)!;
+      if (e is ApiException && (e.statusCode == 403 || e.error == 'FORBIDDEN')) {
+        setState(() {
+          _community = _community.copyWith(isMember: false);
+          _groups = const [];
+          _loading = false;
+        });
+        return;
+      }
       setState(() {
-        _error = e.toString();
+        _error = communityErrorMessage(e, l10n: l10n);
         _loading = false;
       });
+    }
+  }
+
+  Future<void> _joinCommunity() async {
+    final l10n = AppLocalizations.of(context)!;
+    try {
+      final joined =
+          await widget.repository.joinPublicCommunity(_community.id);
+      if (!mounted) return;
+      setState(() => _community = joined.copyWith(isMember: true));
+      await _loadChannels(forceRefresh: true);
+    } catch (e) {
+      if (!mounted) return;
+      CommunityStyles.showSnackBar(
+        context,
+        communityErrorMessage(e, l10n: l10n),
+      );
     }
   }
 
@@ -97,21 +135,27 @@ class _CommunityHomeScreenState extends State<CommunityHomeScreen> {
                 children: [
                   ListTile(
                     contentPadding: EdgeInsets.zero,
-                    onTap: () => Navigator.push(
+                    onTap: () => Navigator.push<Object?>(
                       context,
-                      MaterialPageRoute<void>(
+                      MaterialPageRoute<Object?>(
                         builder: (_) => CommunityDetailScreen(
                           community: _community,
                           repository: widget.repository,
                         ),
                       ),
-                    ).then((_) => _loadChannels()),
+                    ).then((result) {
+                      if (!mounted) return;
+                      if (communityRouteLeft(result)) {
+                        Navigator.pop(context, communityLeftRouteResult);
+                        return;
+                      }
+                      _loadChannels();
+                    }),
                     leading: CommunityAvatar(community: _community, radius: 28),
                     title: Text(
                       communityTitle,
                       style: CommunityStyles.headline,
                     ),
-                    subtitle: Text(l10n.communityHomeTypeLabel, style: CommunityStyles.caption),
                     trailing: IconButton(
                       icon: Icon(
                         Icons.list,
@@ -123,6 +167,11 @@ class _CommunityHomeScreenState extends State<CommunityHomeScreen> {
                         community: _community,
                         repository: widget.repository,
                         onChanged: () => _loadChannels(forceRefresh: true),
+                        onLeftCommunity: () {
+                          if (mounted) {
+                            Navigator.pop(context, communityLeftRouteResult);
+                          }
+                        },
                       ),
                     ),
                   ),
@@ -154,12 +203,41 @@ class _CommunityHomeScreenState extends State<CommunityHomeScreen> {
                 child: Text(_error!, style: CommunityStyles.error),
               ),
             Expanded(
-              child: _loading
+              child: !_community.isMember
+                  ? Center(
+                      child: Padding(
+                        padding: EdgeInsets.all(24.w),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(
+                              l10n.communityAccessDenied,
+                              textAlign: TextAlign.center,
+                              style: CommunityStyles.caption,
+                            ),
+                            if (_community.isPublic) ...[
+                              SizedBox(height: 16.h),
+                              SizedBox(
+                                width: double.infinity,
+                                height: 48.h,
+                                child: ElevatedButton(
+                                  style: CommunityStyles.goldButtonStyle(),
+                                  onPressed: _joinCommunity,
+                                  child: Text(l10n.communityDiscoverJoin),
+                                ),
+                              ),
+                            ],
+                          ],
+                        ),
+                      ),
+                    )
+                  : _loading
                   ? const Center(child: CircularProgressIndicator())
                   : RefreshIndicator(
                       onRefresh: _loadChannels,
                       child: _groups.isEmpty
                           ? ListView(
+                              padding: AppScrollInsets.list(horizontal: 16.w, top: 10.h),
                               children: [
                                 SizedBox(height: 40.h),
                                 Center(
@@ -168,57 +246,69 @@ class _CommunityHomeScreenState extends State<CommunityHomeScreen> {
                                     style: CommunityStyles.caption,
                                   ),
                                 ),
+                                const ScreenEndSpacer(),
                               ],
                             )
                           : ListView.builder(
-                              padding: EdgeInsets.symmetric(
-                                horizontal: 16.w,
-                                vertical: 10.h,
-                              ),
+                              padding: AppScrollInsets.list(horizontal: 16.w, top: 10.h),
                               itemCount: _groups.length,
                               itemBuilder: (context, index) {
                                 final group = _groups[index];
                                 return GroupListItemCard(
                                   group: group,
-                                  onTap: () => Navigator.push(
+                                  onTap: () => Navigator.push<Object?>(
                                     context,
-                                    MaterialPageRoute<void>(
+                                    MaterialPageRoute<Object?>(
                                       builder: (_) => CommunityGroupChatScreen(
                                         community: _community,
                                         group: group,
                                         repository: widget.repository,
                                       ),
                                     ),
-                                  ),
+                                  ).then((result) {
+                                    if (!mounted) return;
+                                    if (communityRouteLeft(result)) {
+                                      Navigator.pop(
+                                        context,
+                                        communityLeftRouteResult,
+                                      );
+                                    }
+                                  }),
                                 );
                               },
                             ),
                     ),
             ),
-            Padding(
-              padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
-              child: SizedBox(
-                width: double.infinity,
-                height: 52.h,
-                child: ElevatedButton.icon(
-                  style: CommunityStyles.goldButtonStyle(),
-                  onPressed: () async {
-                    await Navigator.push<bool>(
-                      context,
-                      MaterialPageRoute<bool>(
-                        builder: (_) => AddGroupScreen(
-                          community: _community,
-                          repository: widget.repository,
+            if (_community.isMember)
+              Padding(
+                padding: EdgeInsets.fromLTRB(
+                  16.w,
+                  12.h,
+                  16.w,
+                  12.h + AppSizes.screenEndPadding,
+                ),
+                child: SizedBox(
+                  width: double.infinity,
+                  height: 52.h,
+                  child: ElevatedButton.icon(
+                    style: CommunityStyles.goldButtonStyle(),
+                    onPressed: () async {
+                      await Navigator.push<bool>(
+                        context,
+                        MaterialPageRoute<bool>(
+                          builder: (_) => AddGroupScreen(
+                            community: _community,
+                            repository: widget.repository,
+                          ),
                         ),
-                      ),
-                    );
-                    if (mounted) await _loadChannels();
-                  },
-                  icon: const Icon(Icons.add, size: 24),
-                  label: Text(l10n.communityHomeAddGroup),
+                      );
+                      if (mounted) await _loadChannels();
+                    },
+                    icon: const Icon(Icons.add, size: 24),
+                    label: Text(l10n.communityHomeAddGroup),
+                  ),
                 ),
               ),
-            ),
           ],
         ),
     );

@@ -5,6 +5,7 @@ import 'package:mishka_app/core/utils/app_colors.dart';
 import 'package:mishka_app/core/widgets/custom_app_bar.dart';
 import 'package:mishka_app/l10n/app_localizations.dart';
 
+import 'package:mishka_app/core/widgets/screen_end_spacer.dart';
 import '../../community_styles.dart';
 import '../../data/community_discover_models.dart';
 import '../../data/community_locale.dart';
@@ -412,7 +413,7 @@ class _CommunityDiscoverScreenState extends State<CommunityDiscoverScreen> {
                       : _recommended!.items.length,
                 ),
               ),
-            SliverToBoxAdapter(child: SizedBox(height: 24.h)),
+            const SliverToBoxAdapter(child: ScreenEndSpacer()),
           ],
         ),
       ),

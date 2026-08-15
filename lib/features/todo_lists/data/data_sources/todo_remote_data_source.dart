@@ -2,6 +2,7 @@ import 'package:mishka_app/core/network/api_endpoints.dart';
 import 'package:mishka_app/core/network/api_service.dart';
 import 'package:mishka_app/features/todo_lists/data/models/task_api_model.dart';
 import 'package:mishka_app/features/todo_lists/data/models/todo_list_api_model.dart';
+import 'package:mishka_app/features/todo_lists/data/task_due_fields.dart';
 
 class TodoRemoteDataSource {
   TodoRemoteDataSource(this._api);
@@ -104,7 +105,7 @@ class TodoRemoteDataSource {
       ApiEndpoints.taskById(id),
       data: {
         if (title != null) 'title': title,
-        if (dueDate != null) 'dueDate': dueDate.toUtc().toIso8601String(),
+        if (dueDate != null) ...TaskDueFields.encode(dueDate),
         if (status != null) 'status': status,
         if (priority != null) 'priority': priority,
       },
@@ -135,7 +136,7 @@ class TodoRemoteDataSource {
       data: {
         'title': title,
         if (todoListId != null && todoListId.isNotEmpty) 'listId': todoListId,
-        if (deadline != null) 'dueDate': deadline.toUtc().toIso8601String(),
+        if (deadline != null) ...TaskDueFields.encode(deadline),
       },
       dataFromJson: (raw) {
         if (raw is List && raw.isNotEmpty && raw.first is Map) {

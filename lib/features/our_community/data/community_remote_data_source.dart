@@ -55,6 +55,8 @@ class CommunityRemoteDataSource {
     int? universityYear,
     String? purpose,
     String? locale,
+    String? category,
+    String? newCategoryTitle,
   }) async {
     final body = <String, dynamic>{
       'name': name,
@@ -63,6 +65,11 @@ class CommunityRemoteDataSource {
         'description': description,
       if (imageUrl != null && imageUrl.isNotEmpty) 'imageUrl': imageUrl,
     };
+    if (category != null && category.trim().isNotEmpty) {
+      body['category'] = category.trim();
+    } else if (newCategoryTitle != null && newCategoryTitle.trim().isNotEmpty) {
+      body['newCategoryTitle'] = newCategoryTitle.trim();
+    }
     if (isPublic) {
       if (subjectKeys != null && subjectKeys.isNotEmpty) {
         body['subjectKeys'] = subjectKeys;
@@ -148,14 +155,22 @@ class CommunityRemoteDataSource {
     String? name,
     String? description,
     String? imageUrl,
+    String? category,
+    String? newCategoryTitle,
   }) async {
+    final body = <String, dynamic>{
+      if (name != null) 'name': name,
+      if (description != null) 'description': description,
+      if (imageUrl != null) 'imageUrl': imageUrl,
+    };
+    if (category != null && category.trim().isNotEmpty) {
+      body['category'] = category.trim();
+    } else if (newCategoryTitle != null && newCategoryTitle.trim().isNotEmpty) {
+      body['newCategoryTitle'] = newCategoryTitle.trim();
+    }
     final env = await _api.put<Map<String, dynamic>>(
       ApiEndpoints.communityById(id),
-      data: {
-        if (name != null) 'name': name,
-        if (description != null) 'description': description,
-        if (imageUrl != null) 'imageUrl': imageUrl,
-      },
+      data: body,
       dataFromJson: mapFromRawOrEmpty,
     );
     final row = env.data;
@@ -371,6 +386,29 @@ class CommunityRemoteDataSource {
     );
     if (data == null) return const DiscoverCategories();
     return DiscoverCategories.fromJson(data);
+  }
+
+  Future<List<CommunityCategoryTitle>> fetchCategoryTitles({
+    String? q,
+    int limit = 50,
+  }) async {
+    final data = await _fetchMap(
+      ApiEndpoints.communitiesCategoryTitles,
+      queryParameters: {
+        if (q != null && q.trim().isNotEmpty) 'q': q.trim(),
+        'limit': limit.clamp(1, 100),
+      },
+    );
+    if (data == null) return const [];
+    final items = data['items'];
+    if (items is! List) return const [];
+    return items
+        .whereType<Map>()
+        .map((row) => CommunityCategoryTitle.fromJson(
+              Map<String, dynamic>.from(row),
+            ))
+        .where((item) => item.title.isNotEmpty)
+        .toList();
   }
 
   Future<DiscoverBrowsePage> browseDiscover({

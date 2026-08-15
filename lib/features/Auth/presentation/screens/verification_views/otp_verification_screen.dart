@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:mishka_app/core/network/api_exception.dart';
+import 'package:mishka_app/core/layout/form_screen_body.dart';
 import 'package:mishka_app/core/utils/app_colors.dart';
 import 'package:mishka_app/core/utils/app_sizes.dart';
 import 'package:mishka_app/core/widgets/custom_app_bar.dart';
 import 'package:mishka_app/features/Auth/presentation/widgets/auth_success_dialog.dart';
 import 'package:mishka_app/features/Auth/presentation/widgets/custom_elevated_button.dart';
 import 'package:mishka_app/features/Auth/presentation/widgets/otp_input.dart';
+import 'package:mishka_app/features/Auth/utils/auth_error_messages.dart';
 import 'package:mishka_app/l10n/app_localizations.dart';
 
 class OtpVerificationScreen extends StatefulWidget {
@@ -70,23 +71,13 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(_errorMessage(e, l10n))),
+        SnackBar(content: Text(AuthErrorMessages.from(e, l10n))),
       );
     } finally {
       if (mounted) {
         setState(() => _isLoading = false);
       }
     }
-  }
-
-  String _errorMessage(Object error, AppLocalizations l10n) {
-    if (error is ApiException) {
-      if (error.error == 'UNIQUE_VIOLATION') {
-        return l10n.accountAlreadyExists;
-      }
-      return error.message;
-    }
-    return error.toString();
   }
 
   @override
@@ -99,11 +90,11 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
         showBottomBar: false,
         showBack: true,
       ),
-      body: Padding(
+      body: FormScreenBody(
         padding: EdgeInsetsDirectional.only(
           start: AppSizes.paddingMedium,
           end: AppSizes.paddingMedium,
-          bottom: AppSizes.paddingMedium,
+          bottom: AppSizes.paddingMedium + AppSizes.screenEndPadding,
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -149,7 +140,7 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
               onChanged: (code) => _otpCode = code,
               onCompleted: (code) => _otpCode = code,
             ),
-            const Spacer(),
+            SizedBox(height: 48.h),
             AuthButton(
               text: l10n.verify,
               isLoading: _isLoading,

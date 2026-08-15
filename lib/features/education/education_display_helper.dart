@@ -12,6 +12,17 @@ String formatEducationSummary(UserModel user, AppLocalizations l10n) {
     case 'school':
       final track = user.schoolTrack;
       final grade = user.schoolGrade;
+      if (track == 'primary_school' && grade != null) {
+        return switch (grade) {
+          1 => l10n.firstPrimary,
+          2 => l10n.secondPrimary,
+          3 => l10n.thirdPrimary,
+          4 => l10n.fourthPrimary,
+          5 => l10n.fifthPrimary,
+          6 => l10n.sixthPrimary,
+          _ => l10n.school,
+        };
+      }
       if (track == 'middle_school' && grade != null) {
         return switch (grade) {
           1 => l10n.firstPreparatory,

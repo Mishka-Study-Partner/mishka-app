@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:mishka_app/core/network/api_service.dart';
+import 'package:mishka_app/core/widgets/screen_end_spacer.dart';
 import 'package:mishka_app/core/utils/app_sizes.dart';
 import 'package:mishka_app/core/utils/link_launcher.dart';
 import 'package:mishka_app/core/widgets/custom_app_bar.dart';
@@ -88,10 +89,7 @@ class _HelpSupportScreenState extends State<HelpSupportScreen> {
                 physics: const AlwaysScrollableScrollPhysics(
                   parent: BouncingScrollPhysics(),
                 ),
-                padding: EdgeInsets.symmetric(
-                  horizontal: AppSizes.paddingLarge,
-                  vertical: 20.h,
-                ),
+                padding: AppScrollInsets.page(horizontal: AppSizes.paddingLarge, top: 20.h),
                 children: [
                   if (!hasContacts) ...[
                     Text(
@@ -113,6 +111,7 @@ class _HelpSupportScreenState extends State<HelpSupportScreen> {
                               icon: Icons.mail_outline,
                               title: l10n.email,
                               value: settings.supportEmail!.trim(),
+                              stackValueBelow: true,
                               onTap: () => _launch(
                                 () => LinkLauncher.openEmail(
                                   settings.supportEmail!.trim(),

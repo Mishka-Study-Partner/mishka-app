@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:mishka_app/features/ctegory/utils/ai_tool_ui_helper.dart';
 import '../../../../core/utils/app_colors.dart';
 import '../../../../core/utils/app_sizes.dart';
 
@@ -24,7 +25,7 @@ class FeatureAiSectionCard extends StatelessWidget {
       child: Container(
         height: 101.h,
         width: double.infinity,
-        margin: EdgeInsets.only(bottom: 12.h),
+        margin: EdgeInsets.only(bottom: 6.h),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(AppSizes.radiusMedium),
           border: Border.all(
@@ -51,23 +52,26 @@ class FeatureAiSectionCard extends StatelessWidget {
                 topLeft: Radius.circular(AppSizes.radiusMedium),
                 bottomLeft: Radius.circular(AppSizes.radiusMedium),
               ),
-              child: Container(
-                decoration: BoxDecoration(
-                  color: AppColors.white,
-                  border: Border.all(color: AppColors.stroke),
-                ),
-                child: Image.asset(
-                  imagePath,
-                  width: 104.w,
-                  height: double.infinity,
-                  fit: BoxFit.fitHeight,
-                  errorBuilder: (context, error, stackTrace) {
-                    return Container(
-                      width: 104.w,
-                      height: double.infinity,
-                      color: AppColors.lightFrameBackground,
-                    );
-                  },
+              child: SizedBox(
+                width: 104.w,
+                height: double.infinity,
+                child: Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 8.h),
+                  child: Image.asset(
+                    imagePath,
+                    key: ValueKey(
+                      '$imagePath-${AiToolUiHelper.homeCardAssetRevision}',
+                    ),
+                    fit: BoxFit.contain,
+                    alignment: Alignment.center,
+                    filterQuality: FilterQuality.high,
+                    gaplessPlayback: false,
+                    errorBuilder: (context, error, stackTrace) {
+                      return ColoredBox(
+                        color: AppColors.lightFrameBackground,
+                      );
+                    },
+                  ),
                 ),
               ),
             ),

@@ -1,8 +1,10 @@
+import 'package:mishka_app/core/widgets/screen_end_spacer.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../../core/utils/app_colors.dart';
 import '../../../../core/widgets/custom_app_bar.dart';
 import '../../../../l10n/app_localizations.dart';
+import '../../data/tool_data_normalizer.dart';
 import '../widgets/tool_preview_renderer.dart';
 
 class FlashcardsScreen extends StatelessWidget {
@@ -17,7 +19,7 @@ class FlashcardsScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
 
-    final data = Map<String, dynamic>.from(toolData);
+    final data = normalizeToolData(Map<String, dynamic>.from(toolData));
     data.putIfAbsent('tool_type', () => 'flashcards');
 
     return Scaffold(
@@ -25,11 +27,18 @@ class FlashcardsScreen extends StatelessWidget {
       appBar: MishkaAppBar(
         title: l10n.flashCards,
         showBack: true,
-        showBottomBar: false,
+        showBottomBar: true,
       ),
-      body: SingleChildScrollView(
-        padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 16.h),
-        child: ToolPreviewRenderer(toolData: data),
+      body: SafeArea(
+        child: Padding(
+          padding: AppScrollInsets.page(horizontal: 16.w, top: 16.h, bottom: 16.h),
+          child: SizedBox.expand(
+            child: ToolPreviewRenderer(
+              toolData: data,
+              layout: ToolPreviewLayout.expanded,
+            ),
+          ),
+        ),
       ),
     );
   }

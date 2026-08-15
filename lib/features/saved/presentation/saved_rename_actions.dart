@@ -66,6 +66,13 @@ Future<bool> showRenameSavedItemDialog({
                   Expanded(
                     child: OutlinedButton(
                       onPressed: () => Navigator.pop(dialogContext),
+                      style: OutlinedButton.styleFrom(
+                        textStyle: TextStyle(
+                          fontFamily: 'Pridi',
+                          fontSize: AppSizes.fontSizeMedium,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
                       child: Text(l10n.cancel),
                     ),
                   ),
@@ -79,6 +86,11 @@ Future<bool> showRenameSavedItemDialog({
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppColors.mainGold,
+                        textStyle: TextStyle(
+                          fontFamily: 'Pridi',
+                          fontSize: AppSizes.fontSizeMedium,
+                          fontWeight: FontWeight.w600,
+                        ),
                       ),
                       child: Text(l10n.save),
                     ),

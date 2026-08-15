@@ -3,12 +3,14 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:mishka_app/core/network/api_service.dart';
 import 'package:mishka_app/core/utils/app_colors.dart';
 import 'package:mishka_app/core/utils/app_sizes.dart';
+import 'package:mishka_app/core/widgets/screen_end_spacer.dart';
 import 'package:mishka_app/core/widgets/custom_app_bar.dart';
 import 'package:mishka_app/l10n/app_localizations.dart';
 
 import '../../data/study_remote_data_source.dart';
 import '../../data/timer_model.dart';
 import 'timer_session_screen.dart';
+import 'package:mishka_app/features/student_subjects/study_subject_launch.dart';
 
 class PomodoroScreen extends StatefulWidget {
   const PomodoroScreen({super.key});
@@ -79,6 +81,7 @@ class _PomodoroScreenState extends State<PomodoroScreen> {
               child: _isLoading
                   ? const Center(child: CircularProgressIndicator())
                   : ListView.builder(
+                      padding: AppScrollInsets.list(),
                       itemCount: _timers.length,
                       itemBuilder: (context, index) {
                         return _TimerTile(
@@ -97,12 +100,22 @@ class _PomodoroScreenState extends State<PomodoroScreen> {
                 onPressed: _timers.isEmpty
                     ? null
                     : () {
-                        Navigator.of(context).push(
-                          MaterialPageRoute(
-                            builder: (_) => TimerSessionScreen(
-                              model: _timers[_selectedIndex],
-                            ),
-                          ),
+                        final model = _timers[_selectedIndex];
+                        StudySubjectLaunch.pickSubjectAndStart(
+                          context,
+                          onStart: (subjectId, subjectName) async {
+                            if (!context.mounted) return;
+                            Navigator.of(context).push(
+                              MaterialPageRoute(
+                                builder: (_) => TimerSessionScreen(
+                                  model: model.withStudentSubject(
+                                    subjectId,
+                                    name: subjectName,
+                                  ),
+                                ),
+                              ),
+                            );
+                          },
                         );
                       },
                 style: ElevatedButton.styleFrom(

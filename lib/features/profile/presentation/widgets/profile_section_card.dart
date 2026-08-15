@@ -1,4 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+
+import 'package:mishka_app/core/layout/app_breakpoints.dart';
+import 'package:mishka_app/core/layout/app_scale.dart';
+import 'package:mishka_app/core/utils/app_sizes.dart';
 
 import '../../../../core/utils/app_colors.dart';
 
@@ -18,46 +23,47 @@ class ProfileSectionCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isTablet = AppBreakpoints.isTablet(context);
     final scheme = Theme.of(context).colorScheme;
     final borderColor = Theme.of(context).dividerColor;
+    final padding = isTablet ? AppScale.w(18) : 16.0;
+    final titleSize = isTablet ? AppSizes.fontSizeLarge : 16.0;
+    final iconSize = isTablet ? AppScale.w(18) : 16.0;
 
     return Container(
-      padding: const EdgeInsets.all(16),
+      width: double.infinity,
+      padding: EdgeInsets.all(padding),
       decoration: BoxDecoration(
         color: scheme.surface,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(isTablet ? 18.r : 16),
         border: Border.all(color: borderColor),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-
-          // ✅ HEADER (only if needed)
           if (_hasHeader) ...[
             Row(
               children: [
                 if (icon != null)
-                  Icon(icon, size: 16, color: AppColors.mainGold),
-
+                  Icon(icon, size: iconSize, color: AppColors.mainGold),
                 if (icon != null && title != null)
-                  const SizedBox(width: 8),
-
+                  SizedBox(width: isTablet ? 10.w : 8),
                 if (title != null)
-                  Text(
-                    title!,
-                    style: TextStyle(
-                      fontFamily: "Pridi",
-                      fontSize: 16,
-                      fontWeight: FontWeight.w500,
-                      color: scheme.onSurface,
+                  Expanded(
+                    child: Text(
+                      title!,
+                      style: TextStyle(
+                        fontFamily: 'Pridi',
+                        fontSize: titleSize,
+                        fontWeight: FontWeight.w500,
+                        color: scheme.onSurface,
+                      ),
                     ),
                   ),
               ],
             ),
-            const SizedBox(height: 12),
+            SizedBox(height: isTablet ? 14.h : 12),
           ],
-
-          // ✅ CONTENT
           child,
         ],
       ),

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../../../core/utils/app_colors.dart';
+import 'package:mishka_app/features/profile/presentation/widgets/profile_field_metrics.dart';
 
 class ProfileTextField extends StatelessWidget {
   final String label;
@@ -14,48 +14,33 @@ class ProfileTextField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
-    final fieldBg = Theme.of(context).brightness == Brightness.dark
-        ? scheme.surfaceContainerHighest.withValues(alpha: 0.35)
-        : AppColors.white;
-    final borderColor = Theme.of(context).dividerColor;
-
-    return SizedBox(
-      width: MediaQuery.of(context).size.width,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            label,
-            style: TextStyle(
-              fontFamily: "Pridi",
-              fontSize: 12,
-              fontWeight: FontWeight.w500,
-              color: scheme.onSurface.withValues(alpha: 0.9),
-            ),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(label, style: ProfileFieldMetrics.labelStyle(context)),
+        SizedBox(height: ProfileFieldMetrics.labelGap(context)),
+        Container(
+          width: double.infinity,
+          height: ProfileFieldMetrics.fieldHeight(context),
+          alignment: Alignment.centerLeft,
+          padding: EdgeInsets.symmetric(
+            horizontal: ProfileFieldMetrics.horizontalPad(context),
           ),
-          const SizedBox(height: 4),
-          Container(
-            height: 24,
-            alignment: Alignment.centerLeft,
-            padding: const EdgeInsets.symmetric(horizontal: 12),
-            decoration: BoxDecoration(
-              color: fieldBg,
-              borderRadius: BorderRadius.circular(6),
-              border: Border.all(color: borderColor),
+          decoration: BoxDecoration(
+            color: ProfileFieldMetrics.fieldBackground(context),
+            borderRadius: BorderRadius.circular(
+              ProfileFieldMetrics.fieldRadius(context),
             ),
-            child: Text(
-              value,
-              style: TextStyle(
-                fontFamily: "Pridi",
-                fontSize: 12,
-                fontWeight: FontWeight.w400,
-                color: scheme.onSurface,
-              ),
-            ),
+            border: Border.all(color: ProfileFieldMetrics.fieldBorder(context)),
           ),
-        ],
-      ),
+          child: Text(
+            value,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: ProfileFieldMetrics.valueStyle(context),
+          ),
+        ),
+      ],
     );
   }
 }

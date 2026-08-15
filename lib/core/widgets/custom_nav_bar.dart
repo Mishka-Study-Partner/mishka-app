@@ -1,12 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:iconify_flutter/icons/mdi.dart';
-import 'package:iconify_flutter/icons/lucide.dart';
 import 'package:iconify_flutter/iconify_flutter.dart';
 import 'package:mishka_app/core/utils/app_colors.dart';
 import 'package:mishka_app/core/utils/app_sizes.dart';
+import 'package:mishka_app/core/widgets/main_nav_destinations.dart';
 import 'package:mishka_app/l10n/app_localizations.dart';
-
 
 class MishkaBottomNav extends StatelessWidget {
   final int currentIndex;
@@ -23,9 +21,10 @@ class MishkaBottomNav extends StatelessWidget {
     final l10n = AppLocalizations.of(context)!;
     final scheme = Theme.of(context).colorScheme;
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final destinations = mainNavDestinations(l10n);
 
     return Container(
-      height: 72.h,
+      height: 76.h,
       decoration: BoxDecoration(
         color: scheme.surface,
         boxShadow: [
@@ -38,39 +37,17 @@ class MishkaBottomNav extends StatelessWidget {
           ),
         ],
       ),
+      padding: EdgeInsets.only(bottom: 4.h),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: [
-          _navItem(
-            context: context,
-            index: 0,
-            label: l10n.home,
-            icon: Mdi.home_outline,
-          ),
-          _navItem(
-            context: context,
-            index: 1,
-            label: l10n.toDo,
-            icon: Lucide.layout_list,
-          ),
-          _navItem(
-            context: context,
-            index: 2,
-            label: l10n.category,
-            icon: Mdi.category_outline,
-          ),
-          _navItem(
-            context: context,
-            index: 3,
-            label: l10n.saved,
-            icon: Mdi.content_save_check,
-          ),
-          _navItem(
-            context: context,
-            index: 4,
-            label: l10n.profile,
-            icon: Mdi.account_circle_outline,
-          ),
+          for (var i = 0; i < destinations.length; i++)
+            _navItem(
+              context: context,
+              index: i,
+              label: destinations[i].label,
+              icon: destinations[i].icon,
+            ),
         ],
       ),
     );
@@ -82,7 +59,7 @@ class MishkaBottomNav extends StatelessWidget {
     required String label,
     required String icon,
   }) {
-    bool selected = index == currentIndex;
+    final selected = index == currentIndex;
     final scheme = Theme.of(context).colorScheme;
     final inactive = scheme.onSurface.withValues(alpha: 0.75);
 
@@ -102,7 +79,7 @@ class MishkaBottomNav extends StatelessWidget {
               Text(
                 label,
                 style: TextStyle(
-                  fontFamily: "Pridi",
+                  fontFamily: 'Pridi',
                   fontSize: AppSizes.fontSizeSmall,
                   fontWeight: FontWeight.w600,
                   color: selected ? AppColors.mainGold : inactive,

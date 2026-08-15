@@ -3,10 +3,10 @@ class ApiEndpoints {
   ApiEndpoints._();
 
   /// Override with `--dart-define=API_BASE_URL=https://...` when needed.
-  /// Production: `https://mishka-backend-production.up.railway.app`
+  /// Production: `https://mishka-backend-production-3f6f.up.railway.app`
   static const String baseUrl = String.fromEnvironment(
     'API_BASE_URL',
-    defaultValue: 'https://fleshy-lemon-persevere.ngrok-free.dev',
+    defaultValue: 'https://mishka-backend-production-3f6f.up.railway.app',
   );
 
   // --- Public (no JWT) ---
@@ -47,6 +47,8 @@ class ApiEndpoints {
   static const String communitiesDiscover = '/communities/discover';
   static const String communitiesDiscoverCategories =
       '/communities/discover/categories';
+  static const String communitiesCategoryTitles =
+      '/communities/category-titles';
   static const String communitiesJoin = '/communities/join';
   static const String userCommunities = '/user-communities';
   static String communityById(String id) => '/communities/$id';
@@ -78,6 +80,7 @@ class ApiEndpoints {
   static String chatSessionMessages(String id) => '/chat-sessions/$id/messages';
   static String chatSessionTimeline(String id) => '/chat-sessions/$id/timeline';
   static const String chatMessages = '/chat-messages';
+  static String chatMessageById(String id) => '/chat-messages/$id';
   static const String aiRequests = '/ai-requests';
   static const String flashcardSets = '/flashcard-sets';
   static const String flashcards = '/flashcards';
@@ -110,6 +113,12 @@ class ApiEndpoints {
 
   /// Direct tutor entity URLs (outside saved-library wrappers).
   static String quizById(String id) => '/quizzes/$id';
+  static String quizQuestionsForQuiz(String quizId) =>
+      '/quizzes/$quizId/questions';
+  static String quizAttemptsForQuiz(String quizId) => '/quizzes/$quizId/attempts';
+  static String quizSubmit(String quizId) => '/quizzes/$quizId/submit';
+  static String flashcardSetFlashcards(String setId) =>
+      '/flashcard-sets/$setId/flashcards';
   static String flashcardSetById(String id) => '/flashcard-sets/$id';
   static String summaryById(String id) => '/summaries/$id';
   static String mindMapById(String id) => '/mind-maps/$id';
@@ -132,6 +141,8 @@ class ApiEndpoints {
   static String studyWithMishkaSessionEnd(String id) => '/study-with-mishka/sessions/$id/end';
   static String studyWithMishkaSessionAdvancePhase(String id) => '/study-with-mishka/sessions/$id/advance-phase';
   static String studyWithMishkaSessionCheckIns(String id) => '/study-with-mishka/sessions/$id/check-ins';
+  static String studyWithMishkaSessionMlReports(String id) =>
+      '/study-with-mishka/sessions/$id/ml-reports';
   static String studyWithMishkaCallBreakStart(String id) => '/study-with-mishka/sessions/$id/call-break/start';
   static String studyWithMishkaCallBreakEnd(String id) => '/study-with-mishka/sessions/$id/call-break/end';
   static const String studyWithMishkaStatsSummary = '/study-with-mishka/stats/summary';
@@ -139,6 +150,10 @@ class ApiEndpoints {
   static const String studyWithMishkaReportsWeek = '/study-with-mishka/reports/week';
   static const String studyWithMishkaReportsMonth = '/study-with-mishka/reports/month';
   static const String studyWithMishkaReportsYear = '/study-with-mishka/reports/year';
+
+  // --- Student subjects (personal course list) ---
+  static const String studentSubjects = '/student-subjects';
+  static String studentSubjectById(String id) => '/student-subjects/$id';
 
   // --- Your Report (unified bundle + PDF export) ---
   static const String yourReport = '/reports/your-report';
@@ -152,6 +167,13 @@ class ApiEndpoints {
   static const String tasksReportCompletions = '/tasks/report/completions';
   static const String dailyStreaksHistory = '/daily-streaks/history';
   static const String communitiesActivityReport = '/communities/activity/report';
+
+  // --- Gamification (JWT required) ---
+  static const String gamificationDashboard = '/gamification/dashboard';
+  static const String gamificationBadgesCollect = '/gamification/badges/collect';
+
+  static String gamificationSectionMonthly(String section) =>
+      '/gamification/sections/$section/monthly';
 
   // --- AI (JWT required; multipart / JSON) ---
   static const String upload = '/upload';

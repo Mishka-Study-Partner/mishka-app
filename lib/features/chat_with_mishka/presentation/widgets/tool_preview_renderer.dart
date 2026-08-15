@@ -1,13 +1,47 @@
+import 'dart:async';
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:mishka_app/generated/assets.dart';
+import 'package:mishka_app/l10n/app_localizations.dart';
+
 import '../../../../core/utils/app_colors.dart';
+import 'package:mishka_app/features/chat_with_mishka/data/quiz_progress_cache.dart';
+import 'package:mishka_app/features/chat_with_mishka/data/quiz_progress_metadata.dart';
+import 'package:mishka_app/features/chat_with_mishka/presentation/screens/quiz_result_screen.dart';
+import 'package:mishka_app/features/chat_with_mishka/presentation/screens/flashcards_result_screen.dart';
+import 'package:mishka_app/features/saved/data/models/quiz_submit_outcome.dart';
+import 'package:mishka_app/features/chat_with_mishka/presentation/widgets/tool_focus_metrics.dart';
+import '../../data/tool_data_normalizer.dart';
+import 'formatted_study_text.dart';
+import 'study_text_utils.dart';
+
+enum ToolPreviewLayout { embedded, expanded, saved, communityChat }
 
 class ToolPreviewRenderer extends StatefulWidget {
   final Map<String, dynamic> toolData;
+  final bool embedded;
+  final ToolPreviewLayout layout;
+  final ValueChanged<Map<String, dynamic>>? onToolDataUpdated;
+  final String? storageMessageId;
+  final int? previousScorePercent;
+  final ValueChanged<int?>? onPreviousScoreChanged;
+  final Future<QuizSubmitOutcome?> Function({
+    required List<Map<String, dynamic>> questions,
+    required Map<int, int> selectedAnswers,
+  })? onSubmitSavedQuiz;
 
   const ToolPreviewRenderer({
     super.key,
     required this.toolData,
+    this.embedded = false,
+    this.layout = ToolPreviewLayout.embedded,
+    this.onToolDataUpdated,
+    this.storageMessageId,
+    this.previousScorePercent,
+    this.onPreviousScoreChanged,
+    this.onSubmitSavedQuiz,
   });
 
   @override
@@ -16,120 +50,339 @@ class ToolPreviewRenderer extends StatefulWidget {
 
 class _ToolPreviewRendererState extends State<ToolPreviewRenderer> {
   int currentQuestionIndex = 0;
+  int currentFlashcardIndex = 0;
   int? selectedAnswerIndex;
   bool answered = false;
-  Map<int, bool> flashcardFlipped = {}; // Track which flashcards are flipped
+  bool showQuizResults = false;
+  final Map<int, int> selectedAnswers = {};
+  final Map<int, bool> questionCorrect = {};
+  Map<int, bool> flashcardFlipped = {};
+  bool _savedQuizRetaking = false;
+  int? _savedQuizPreviousScore;
+
+  bool get _isCommunityChat => widget.layout == ToolPreviewLayout.communityChat;
+
+  bool get _isExpandedQuiz => widget.layout == ToolPreviewLayout.expanded;
+  bool get _isSavedQuiz => widget.layout == ToolPreviewLayout.saved;
+  bool get _isExpandedFlashcards =>
+      widget.layout == ToolPreviewLayout.expanded;
+  bool get _isSavedFlashcards => widget.layout == ToolPreviewLayout.saved;
+  bool get _isExpandedMindMap => widget.layout == ToolPreviewLayout.expanded;
+  bool get _isSavedMindMap =>
+      widget.layout == ToolPreviewLayout.saved &&
+      widget.toolData['tool_type']?.toString() == 'mind_maps';
+
+  _QuizTheme get _quizTheme {
+    if (_isSavedQuiz) return _QuizTheme.saved;
+    return _isExpandedQuiz ? _QuizTheme.expanded : _QuizTheme.embedded;
+  }
 
   @override
-  Widget build(BuildContext context) {
-    final toolType = widget.toolData['tool_type'] ?? 'unknown';
+  void initState() {
+    super.initState();
+    _savedQuizPreviousScore = widget.previousScorePercent;
+    _hydrateQuizProgressFromToolData();
+  }
 
-    return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
-      child: switch (toolType) {
-        'flashcards' => _buildFlashcardsPreview(),
-        'quiz' => _buildQuizPreview(), // Fixed: was 'quizzes'
-        'quizzes' => _buildQuizPreview(), // Also support plural for compatibility
-        'mind_maps' => _buildMindmapPreview(),
-        'mindmap' => _buildMindmapPreview(), // Also support singular
-        'summary' => _buildSummaryPreview(),
-        'summarize' => _buildSummaryPreview(),
-        _ => _buildSummaryFallbackPreview(),
-      },
+  @override
+  void dispose() {
+    super.dispose();
+  }
+
+  @override
+  void didUpdateWidget(covariant ToolPreviewRenderer oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.toolData != widget.toolData ||
+        oldWidget.previousScorePercent != widget.previousScorePercent) {
+      _savedQuizPreviousScore =
+          widget.previousScorePercent ?? _savedQuizPreviousScore;
+      _hydrateQuizProgressFromToolData();
+    }
+  }
+
+  void _hydrateQuizProgressFromToolData() {
+    final data = QuizProgressCache.mergeStoredProgress(
+      normalizeToolData(widget.toolData),
+      widget.storageMessageId,
+    );
+    final progress = readQuizProgress(data);
+    _savedQuizPreviousScore =
+        widget.previousScorePercent ?? progress?.percent ?? _savedQuizPreviousScore;
+
+    if (progress == null) {
+      _resetLocalQuizState();
+      _savedQuizRetaking = false;
+      return;
+    }
+
+    if (_isSavedQuiz && progress.completed && !_savedQuizRetaking) {
+      _savedQuizPreviousScore = progress.percent ?? _savedQuizPreviousScore;
+      _resetLocalQuizState();
+      return;
+    }
+
+    currentQuestionIndex = progress.currentQuestionIndex;
+    selectedAnswers
+      ..clear()
+      ..addAll(progress.selectedAnswers);
+    questionCorrect
+      ..clear()
+      ..addAll(progress.questionCorrect);
+    showQuizResults = progress.showResults || progress.completed;
+    _restoreQuestionState(currentQuestionIndex);
+  }
+
+  void _startSavedQuizRetake() {
+    _savedQuizRetaking = true;
+    _resetLocalQuizState();
+    final cleared = clearQuizProgress(widget.toolData);
+    widget.onToolDataUpdated?.call(cleared);
+    final messageId = widget.storageMessageId;
+    if (messageId != null && messageId.isNotEmpty) {
+      unawaited(QuizProgressCache.clear(messageId));
+    }
+    setState(() {});
+  }
+
+  void _resetLocalQuizState() {
+    currentQuestionIndex = 0;
+    selectedAnswerIndex = null;
+    answered = false;
+    showQuizResults = false;
+    selectedAnswers.clear();
+    questionCorrect.clear();
+  }
+
+  QuizProgressSnapshot _currentQuizProgress({
+    bool? showResults,
+    bool? completed,
+    int? percent,
+  }) {
+    return QuizProgressSnapshot(
+      currentQuestionIndex: currentQuestionIndex,
+      selectedAnswers: Map<int, int>.from(selectedAnswers),
+      questionCorrect: Map<int, bool>.from(questionCorrect),
+      showResults: showResults ?? showQuizResults,
+      completed: completed ?? showQuizResults,
+      percent: percent,
     );
   }
 
-  Widget _buildSummaryFallbackPreview() {
-    final text = (widget.toolData['summary'] ??
-            widget.toolData['text'] ??
-            widget.toolData['content'] ??
+  void _persistQuizProgress({
+    bool? showResults,
+    bool? completed,
+    int? percent,
+  }) {
+    if (widget.onToolDataUpdated == null || !isQuizToolData(widget.toolData)) {
+      return;
+    }
+    final updated = applyQuizProgress(
+      toolData: widget.toolData,
+      progress: _currentQuizProgress(
+        showResults: showResults,
+        completed: completed,
+        percent: percent,
+      ),
+    );
+    final messageId = widget.storageMessageId;
+    if (messageId != null && messageId.isNotEmpty) {
+      unawaited(
+        QuizProgressCache.write(
+          messageId,
+          readQuizProgress(updated) ?? _currentQuizProgress(
+            showResults: showResults,
+            completed: completed,
+            percent: percent,
+          ),
+        ),
+      );
+    }
+    widget.onToolDataUpdated!(updated);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final data = normalizeToolData(widget.toolData);
+    final toolType = data['tool_type'] ?? 'unknown';
+
+    final content = switch (toolType) {
+        'flashcards' => _buildFlashcardsPreview(data),
+        'quiz' => _buildQuizPreview(data),
+        'quizzes' => _buildQuizPreview(data),
+        'mind_maps' => _buildMindmapPreview(data),
+        'mindmap' => _buildMindmapPreview(data),
+        'summary' => _buildSummaryPreview(data),
+        'summarize' => _buildSummaryPreview(data),
+        'summaries' => _buildSummaryPreview(data),
+        _ => _buildUnknownToolPreview(data),
+      };
+
+    if (widget.embedded) return content;
+    return Padding(
+      padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
+      child: content,
+    );
+  }
+
+  Widget _buildUnknownToolPreview(Map<String, dynamic> data) {
+    final inferred = (data['tool_type'] ?? '').toString();
+    if (inferred.contains('summ') ||
+        data['summaryText'] != null ||
+        data['explanation'] != null) {
+      return _buildSummaryFallbackPreview(data);
+    }
+    return const SizedBox.shrink();
+  }
+
+  Widget _buildSummaryFallbackPreview(Map<String, dynamic> data) {
+    final text = (data['summaryText'] ??
+            data['explanation'] ??
+            data['summary'] ??
+            data['text'] ??
+            (data['content'] is String ? data['content'] : null) ??
             '')
         .toString()
         .trim();
     if (text.isEmpty) return const SizedBox.shrink();
-    return _buildSummaryPreviewBody(text);
+    return _buildSummaryPreviewBody(data, text);
   }
 
-  Widget _buildSummaryPreview() {
-    final text = (widget.toolData['summary'] ??
-            widget.toolData['text'] ??
-            widget.toolData['content'] ??
+  Widget _buildSummaryPreview(Map<String, dynamic> data) {
+    final text = (data['summaryText'] ??
+            data['explanation'] ??
+            data['summary'] ??
+            data['text'] ??
+            (data['content'] is String ? data['content'] : null) ??
             '')
         .toString()
         .trim();
     if (text.isEmpty) return const SizedBox.shrink();
-    return _buildSummaryPreviewBody(text);
+    return _buildSummaryPreviewBody(data, text);
   }
 
-  Widget _buildSummaryPreviewBody(String text) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          widget.toolData['title']?.toString().trim().isNotEmpty == true
-              ? widget.toolData['title'].toString()
-              : 'Summary',
-          style: TextStyle(
-            fontSize: 14.sp,
-            fontWeight: FontWeight.w600,
-            color: AppColors.mainDark,
-            fontFamily: 'Pridi',
-          ),
-        ),
-        SizedBox(height: 12.h),
-        Text(
-          text,
-          style: TextStyle(
-            fontSize: 13.sp,
-            height: 1.45,
-            color: AppColors.mainDark,
-            fontFamily: 'Pridi',
-          ),
-        ),
-      ],
+  Widget _buildSummaryPreviewBody(Map<String, dynamic> data, String text) {
+    final body = FormattedStudyText(
+      text: text,
+      textAlign: TextAlign.justify,
+      baseStyle: TextStyle(
+        fontSize: ToolFocusMetrics.chromeBodySize(context),
+        height: 1.45,
+        color: AppColors.mainDark,
+        fontFamily: 'Pridi',
+      ),
+    );
+
+    if (widget.layout != ToolPreviewLayout.embedded &&
+        widget.layout != ToolPreviewLayout.communityChat) {
+      return body;
+    }
+
+    final maxHeight = _isCommunityChat
+        ? ToolFocusMetrics.communityEmbeddedSummaryMaxHeight(context)
+        : ToolFocusMetrics.embeddedSummaryMaxHeight(context);
+
+    return ConstrainedBox(
+      constraints: BoxConstraints(maxHeight: maxHeight),
+      child: SingleChildScrollView(child: body),
     );
   }
 
   // ===========================
   // FLASHCARDS PREVIEW
   // ===========================
-  Widget _buildFlashcardsPreview() {
-    final cards = widget.toolData['cards'] as List<dynamic>? ?? [];
+  Widget _buildFlashcardsPreview(Map<String, dynamic> data) {
+    final l10n = AppLocalizations.of(context)!;
+    final cards = data['cards'] as List<dynamic>? ?? [];
 
     if (cards.isEmpty) {
       return _buildEmptyState();
     }
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+    if (currentFlashcardIndex >= cards.length) {
+      currentFlashcardIndex = cards.length - 1;
+    }
+    if (currentFlashcardIndex < 0) currentFlashcardIndex = 0;
+
+    final card = cards[currentFlashcardIndex] as Map<String, dynamic>;
+    final isLastCard = currentFlashcardIndex >= cards.length - 1;
+    final footer = Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
+        SizedBox(height: ToolFocusMetrics.chromeGap(context)),
         Text(
-          "📇 ${widget.toolData['title'] ?? 'Flashcards'}",
+          l10n.flashcardProgress(currentFlashcardIndex + 1, cards.length),
+          textAlign: TextAlign.center,
           style: TextStyle(
-            fontSize: 14.sp,
+            fontFamily: 'Pridi',
+            fontSize: ToolFocusMetrics.progressLabelSize(context),
             fontWeight: FontWeight.w600,
             color: AppColors.mainDark,
-            fontFamily: 'Pridi',
           ),
         ),
-        SizedBox(height: 12.h),
+        SizedBox(height: ToolFocusMetrics.chromeGap(context)),
+        Row(
+          children: [
+            _FlashcardNavButton(
+              label: l10n.back,
+              filled: false,
+              enabled: currentFlashcardIndex > 0,
+              onTap: currentFlashcardIndex > 0
+                  ? () => setState(() => currentFlashcardIndex--)
+                  : null,
+            ),
+            const Spacer(),
+            _FlashcardNavButton(
+              label: isLastCard ? l10n.done : l10n.next,
+              filled: true,
+              enabled: true,
+              onTap: isLastCard
+                  ? () => _finishFlashcards(cards.length)
+                  : () => setState(() => currentFlashcardIndex++),
+            ),
+          ],
+        ),
+      ],
+    );
+
+    if (_isExpandedFlashcards || _isSavedFlashcards) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Expanded(
+            child: _buildFlashcardItem(card, currentFlashcardIndex),
+          ),
+          footer,
+        ],
+      );
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
         SizedBox(
-          height: 220.h, // Increased for bigger cards
-          child: ListView.builder(
-            scrollDirection: Axis.horizontal,
-            itemCount: cards.length,
-            itemBuilder: (context, index) {
-              final card = cards[index] as Map<String, dynamic>;
-              return _buildFlashcardItem(card, index);
-            },
-          ),
+          height: _isCommunityChat
+              ? ToolFocusMetrics.communityEmbeddedFlashcardHeight(context)
+              : ToolFocusMetrics.embeddedFlashcardHeight(context),
+          child: _buildFlashcardItem(card, currentFlashcardIndex),
         ),
+        footer,
       ],
     );
   }
 
   Widget _buildFlashcardItem(Map<String, dynamic> card, int index) {
     final isFlipped = flashcardFlipped[index] ?? false;
+    final isLargeLayout = _isExpandedFlashcards || _isSavedFlashcards;
+    final cardPadding = isLargeLayout ? 12.r : 8.r;
+    final iconContainerSize = ToolFocusMetrics.flashcardIconContainerSize(
+      context,
+      large: isLargeLayout,
+    );
+    final placeholderIconSize = ToolFocusMetrics.flashcardPlaceholderIconSize(
+      context,
+      large: isLargeLayout,
+    );
 
     return GestureDetector(
       onTap: () {
@@ -150,95 +403,56 @@ class _ToolPreviewRendererState extends State<ToolPreviewRenderer> {
         },
         child: Container(
           key: ValueKey<bool>(isFlipped),
-          width: 180.w, // Made bigger
-          margin: EdgeInsets.only(right: 12.w),
+          width: double.infinity,
+          margin: EdgeInsets.zero,
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(14.r),
-            border: Border.all(color: AppColors.mainDark, width: 1.5),
+            borderRadius: BorderRadius.circular(12.r),
+            border: Border.all(color: AppColors.mainGold, width: 1.5),
             color: Colors.white,
           ),
-          child: Column(
-            children: [
-              // Small icon on top center
-              if (card['image'] != null)
+          child: Padding(
+            padding: EdgeInsets.all(cardPadding),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
                 Padding(
-                  padding: EdgeInsets.only(top: 10.h),
-                  child: Container(
-                    height: 40.h,
-                    width: 40.w,
-                    decoration: BoxDecoration(
-                      color: AppColors.screenBackground,
-                      shape: BoxShape.circle,
-                    ),
-                    child: ClipOval(
-                      child: Image.asset(
-                        card['image'] as String,
-                        fit: BoxFit.contain,
-                        width: 40.w,
-                        height: 40.h,
-                        errorBuilder: (context, error, stackTrace) {
-                          return Icon(
-                            Icons.image_not_supported,
-                            size: 20.sp,
-                            color: AppColors.greyText,
-                          );
-                        },
-                      ),
+                  padding: EdgeInsets.only(top: isLargeLayout ? 14.h : 10.h),
+                  child: Align(
+                    alignment: Alignment.center,
+                    child: _FlashcardIconBadge(
+                      imagePath: card['image'] as String?,
+                      containerSize: iconContainerSize,
+                      iconSize: placeholderIconSize,
                     ),
                   ),
                 ),
-              // Content
-              Expanded(
-                child: Padding(
-                  padding: EdgeInsets.all(12.r),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      // Front or back text
-                      Expanded(
-                        child: Center(
-                          child: Text(
-                            isFlipped
-                                ? (card['back'] as String? ?? 'Answer')
-                                : (card['front'] as String? ?? card['title'] as String? ?? 'Card'),
-                            style: TextStyle(
-                              fontSize: 12.sp,
-                              fontWeight: FontWeight.w600,
-                              color: AppColors.mainDark,
-                              fontFamily: 'Pridi',
-                            ),
-                            textAlign: TextAlign.center,
-                            maxLines: 6,
-                            overflow: TextOverflow.ellipsis,
+                SizedBox(height: isLargeLayout ? 12.h : 8.h),
+                Expanded(
+                  child: Center(
+                    child: SingleChildScrollView(
+                      child: StudyText(
+                        isFlipped
+                            ? (card['back'] as String? ?? 'Answer')
+                            : (card['front'] as String? ??
+                                card['title'] as String? ??
+                                'Card'),
+                        style: TextStyle(
+                          fontSize: ToolFocusMetrics.flashcardCardTextSize(
+                            context,
+                            large: isLargeLayout,
                           ),
+                          fontWeight: FontWeight.w600,
+                          color: AppColors.mainDark,
+                          fontFamily: 'Pridi',
+                          height: 1.35,
                         ),
+                        textAlign: TextAlign.center,
                       ),
-                      SizedBox(height: 8.h),
-                      // Flip indicator
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(
-                            Icons.flip,
-                            size: 14.sp,
-                            color: AppColors.mainDark,
-                          ),
-                          SizedBox(width: 4.w),
-                          Text(
-                            isFlipped ? 'Tap to flip back' : 'Tap to flip',
-                            style: TextStyle(
-                              fontSize: 10.sp,
-                              color: AppColors.greyText,
-                              fontFamily: 'Pridi',
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
+                    ),
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
@@ -248,396 +462,960 @@ class _ToolPreviewRendererState extends State<ToolPreviewRenderer> {
   // ===========================
   // QUIZ PREVIEW
   // ===========================
-  Widget _buildQuizPreview() {
-    final questions = widget.toolData['questions'] as List<dynamic>? ?? [];
-    final total = widget.toolData['totalQuestions'] as int? ?? questions.length;
+  Widget _buildQuizPreview(Map<String, dynamic> data) {
+    final l10n = AppLocalizations.of(context)!;
+    final questions = data['questions'] as List<dynamic>? ?? [];
+    final total = data['totalQuestions'] as int? ?? questions.length;
 
     if (questions.isEmpty) {
       return _buildEmptyState();
     }
 
+    if (showQuizResults && !_isExpandedQuiz && !_isSavedQuiz) {
+      return _buildQuizScoreSummary(questions);
+    }
+
     final question = questions[currentQuestionIndex] as Map<String, dynamic>;
     final options = List<String>.from(question['options'] as List<dynamic>? ?? []);
     final correctIndex = question['correctOptionIndex'] as int? ?? -1;
+    final questionText = question['questionText'] as String? ?? 'Question?';
+    final theme = _quizTheme;
 
-    return Container(
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(12.r),
-        border: Border.all(color: AppColors.mainDark, width: 1.5),
-        color: Colors.white,
-      ),
-      padding: EdgeInsets.all(14.r),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Progress
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                "❓ Question ${currentQuestionIndex + 1}/$total",
+    final correctCount = questionCorrect.values.where((ok) => ok).length;
+    final wrongCount = questionCorrect.values.where((ok) => !ok).length;
+    final progressValue =
+        total == 0 ? 0.0 : (currentQuestionIndex + 1) / total;
+
+    final quizBody = _buildQuizQuestionBody(
+      options: options,
+      correctIndex: correctIndex,
+      questionText: questionText,
+      theme: theme,
+      total: total,
+    );
+
+    if (!_isSavedQuiz) {
+      return quizBody;
+    }
+
+    final previousScore = _savedQuizPreviousScore;
+    final showPreviousScore = previousScore != null && !_savedQuizRetaking;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        if (showPreviousScore) ...[
+          _buildSavedQuizPreviousScoreCard(l10n, previousScore),
+          SizedBox(height: ToolFocusMetrics.chromeGap(context)),
+        ],
+        ClipRRect(
+          borderRadius: BorderRadius.circular(4.r),
+          child: LinearProgressIndicator(
+            value: progressValue,
+            minHeight: 3.h,
+            backgroundColor: AppColors.mainGold.withValues(alpha: 0.2),
+            valueColor: const AlwaysStoppedAnimation<Color>(AppColors.mainGold),
+          ),
+        ),
+        SizedBox(height: ToolFocusMetrics.chromeGap(context)),
+        Row(
+          children: [
+            Text(
+              l10n.savedQuizQuestionLabel(currentQuestionIndex + 1, total),
+              style: TextStyle(
+                fontFamily: 'Pridi',
+                fontSize: ToolFocusMetrics.progressLabelSize(context),
+                fontWeight: FontWeight.w600,
+                color: AppColors.mainDark,
+              ),
+            ),
+            const Spacer(),
+            Text(
+              l10n.savedQuizCorrectWrong(correctCount, wrongCount),
+              style: TextStyle(
+                fontFamily: 'Pridi',
+                fontSize: ToolFocusMetrics.progressLabelSize(context),
+                fontWeight: FontWeight.w600,
+                color: AppColors.mainDark,
+              ),
+            ),
+          ],
+        ),
+        SizedBox(height: ToolFocusMetrics.sectionGap(context)),
+        Expanded(child: quizBody),
+        SizedBox(height: ToolFocusMetrics.chromeGap(context)),
+        _buildSavedQuizFooter(l10n, correctIndex, theme),
+        SizedBox(height: ToolFocusMetrics.chromeGap(context)),
+        Row(
+          children: [
+            _SavedQuizNavButton(
+              label: l10n.back,
+              filled: false,
+              enabled: currentQuestionIndex > 0,
+              onTap: currentQuestionIndex > 0 ? _previousQuestion : null,
+              theme: theme,
+            ),
+            const Spacer(),
+            if (currentQuestionIndex < questions.length - 1)
+              _SavedQuizNavButton(
+                label: l10n.next,
+                filled: true,
+                enabled: answered,
+                onTap: answered ? _nextQuestion : null,
+                theme: theme,
+              )
+            else
+              _SavedQuizNavButton(
+                label: l10n.done,
+                filled: true,
+                enabled: answered,
+                onTap: answered ? () => _finishQuiz(questions) : null,
+                theme: theme,
+              ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget _buildQuizQuestionBody({
+    required List<String> options,
+    required int correctIndex,
+    required String questionText,
+    required _QuizTheme theme,
+    required int total,
+  }) {
+    final l10n = AppLocalizations.of(context)!;
+
+    if (_isSavedQuiz) {
+      return Container(
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(10.r),
+          border: Border.all(color: AppColors.stroke),
+        ),
+        clipBehavior: Clip.antiAlias,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Container(
+              width: double.infinity,
+              padding: EdgeInsets.fromLTRB(
+                10.w,
+                ToolFocusMetrics.chromeGap(context) + 2.h,
+                10.w,
+                ToolFocusMetrics.chromeGap(context) + 2.h,
+              ),
+              color: AppColors.mainGold,
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(
+                    child: StudyText(
+                      questionText,
+                      style: TextStyle(
+                        fontFamily: 'Pridi',
+                        fontSize: ToolFocusMetrics.chromeBodySize(context),
+                        fontWeight: FontWeight.w700,
+                        color: Colors.white,
+                        height: 1.3,
+                      ),
+                    ),
+                  ),
+                  SizedBox(width: 6.w),
+                  Text(
+                    l10n.quizProgress(currentQuestionIndex + 1, total),
+                    style: TextStyle(
+                      fontFamily: 'Pridi',
+                      fontSize: ToolFocusMetrics.progressLabelSize(context),
+                      fontWeight: FontWeight.w700,
+                      color: Colors.white,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Expanded(
+              child: SingleChildScrollView(
+                padding: EdgeInsets.fromLTRB(10.w, 8.h, 10.w, 8.h),
+                child: _buildQuizOptionsList(
+                  options: options,
+                  correctIndex: correctIndex,
+                  theme: theme,
+                  numbered: true,
+                ),
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Expanded(
+              child: StudyText(
+                questionText,
                 style: TextStyle(
-                  fontSize: 12.sp,
+                  fontSize: theme.questionSize,
                   fontWeight: FontWeight.w600,
                   color: AppColors.mainDark,
                   fontFamily: 'Pridi',
+                  height: 1.4,
                 ),
               ),
-              Container(
-                padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
-                decoration: BoxDecoration(
-                  color: AppColors.screenBackground,
-                  borderRadius: BorderRadius.circular(8.r),
+            ),
+            SizedBox(width: theme.gapMedium),
+            Text(
+              l10n.quizProgress(currentQuestionIndex + 1, total),
+              style: TextStyle(
+                fontSize: theme.progressSize,
+                fontWeight: FontWeight.w600,
+                color: AppColors.mainDark,
+                fontFamily: 'Pridi',
+              ),
+            ),
+          ],
+        ),
+        SizedBox(height: theme.gapLarge),
+        _buildQuizOptionsList(
+          options: options,
+          correctIndex: correctIndex,
+          theme: theme,
+          numbered: false,
+        ),
+        if (answered && !_isSavedQuiz) ...[
+          SizedBox(height: theme.gapLarge),
+          Row(
+            children: [
+              if (currentQuestionIndex > 0)
+                _QuizNavButton(
+                  label: l10n.back,
+                  onTap: _previousQuestion,
+                  theme: theme,
                 ),
-                child: Text(
-                  "${currentQuestionIndex + 1}/$total",
-                  style: TextStyle(
-                    fontSize: 11.sp,
-                    fontWeight: FontWeight.w600,
-                    color: AppColors.mainDark,
-                    fontFamily: 'Pridi',
+              const Spacer(),
+              if (currentQuestionIndex < total - 1)
+                _QuizNavButton(
+                  label: l10n.next,
+                  onTap: _nextQuestion,
+                  theme: theme,
+                )
+              else
+                _QuizNavButton(
+                  label: l10n.done,
+                  onTap: () => _finishQuiz(
+                    normalizeToolData(widget.toolData)['questions']
+                            as List<dynamic>? ??
+                        const [],
                   ),
+                  theme: theme,
                 ),
-              ),
             ],
           ),
-          SizedBox(height: 12.h),
-          // Question
-          Text(
-            question['questionText'] as String? ?? 'Question?',
-            style: TextStyle(
-              fontSize: 13.sp,
-              fontWeight: FontWeight.w600,
-              color: AppColors.mainDark,
-              fontFamily: 'Pridi',
-              height: 1.4,
-            ),
-          ),
-          SizedBox(height: 12.h),
-          // Options with cat image stacked over them
-          Stack(
-            children: [
-              // Options (behind cat)
-              Column(
-                children: List.generate(options.length, (optIndex) {
-                  final isSelected = selectedAnswerIndex == optIndex;
-                  final isCorrect = optIndex == correctIndex;
-                  final showResult = answered && isSelected;
+        ],
+      ],
+    );
+  }
 
-                  Color bgColor = Colors.white;
-                  Color borderColor = AppColors.mainDark;
-                  IconData? iconData;
+  Widget _buildQuizOptionsList({
+    required List<String> options,
+    required int correctIndex,
+    required _QuizTheme theme,
+    required bool numbered,
+  }) {
+    final l10n = AppLocalizations.of(context)!;
 
-                  if (showResult) {
-                    if (isCorrect) {
-                      bgColor = const Color(0xFFE8F5E9); // light green
-                      borderColor = const Color(0xFF4CAF50); // green
-                      iconData = Icons.check_circle;
-                    } else {
-                      bgColor = const Color(0xFFFFEBEE); // light red
-                      borderColor = const Color(0xFFF44336); // red
-                      iconData = Icons.cancel;
+    return Stack(
+      clipBehavior: Clip.none,
+      children: [
+        Column(
+          children: List.generate(options.length, (optIndex) {
+            final isSelected = selectedAnswerIndex == optIndex;
+            final isCorrect = optIndex == correctIndex;
+            final showResult = answered && isSelected;
+
+            Color bgColor = Colors.white;
+            Color borderColor = AppColors.stroke;
+            Color? labelColor;
+            String? resultLabel;
+
+            if (showResult) {
+              if (isCorrect) {
+                bgColor = const Color(0xFFE8F5E9);
+                borderColor = AppColors.green;
+                labelColor = AppColors.green;
+                resultLabel = l10n.correctAnswer;
+              } else {
+                bgColor = const Color(0xFFFFEBEE);
+                borderColor = AppColors.red;
+                labelColor = AppColors.red;
+                resultLabel = l10n.wrongAnswer;
+              }
+            } else if (answered && _isSavedQuiz && optIndex == correctIndex) {
+              bgColor = const Color(0xFFE8F5E9);
+              borderColor = AppColors.green;
+            }
+
+            return GestureDetector(
+              onTap: !answered
+                  ? () {
+                      setState(() {
+                        selectedAnswerIndex = optIndex;
+                        answered = true;
+                        selectedAnswers[currentQuestionIndex] = optIndex;
+                        questionCorrect[currentQuestionIndex] =
+                            optIndex == correctIndex;
+                      });
+                      _persistQuizProgress();
                     }
-                  } else if (answered && isCorrect && !isSelected) {
-                    // Show correct answer even if user selected wrong
-                    bgColor = const Color(0xFFE8F5E9).withValues(alpha: 0.3);
-                    borderColor = const Color(0xFF4CAF50).withValues(alpha: 0.5);
-                  }
-
-                  return GestureDetector(
-                    onTap: !answered
-                        ? () {
-                            setState(() {
-                              selectedAnswerIndex = optIndex;
-                            });
-                          }
-                        : null,
-                    child: Container(
-                      width: double.infinity,
-                      padding: EdgeInsets.all(10.r),
-                      margin: EdgeInsets.only(bottom: 8.h),
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(8.r),
-                        border: Border.all(
-                          color: isSelected && !answered
-                              ? AppColors.mainDark.withValues(alpha: 0.5)
-                              : borderColor,
-                          width: isSelected && !answered ? 2.0 : 1.5,
+                  : null,
+              child: Container(
+                width: double.infinity,
+                padding: EdgeInsets.symmetric(
+                  horizontal: theme.optionHorizontalPadding,
+                  vertical: theme.optionVerticalPadding,
+                ),
+                margin: EdgeInsets.only(bottom: theme.optionSpacing),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(theme.optionRadius),
+                  border: Border.all(color: borderColor),
+                  color: bgColor,
+                ),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    if (!answered)
+                      Container(
+                        width: theme.radioSize,
+                        height: theme.radioSize,
+                        margin: EdgeInsets.only(
+                          right: theme.gapMedium,
+                          top: theme.radioTopInset,
                         ),
-                        color: isSelected && !answered
-                            ? AppColors.screenBackground
-                            : bgColor,
-                      ),
-                      child: Row(
-                        children: [
-                          if (!answered)
-                            Container(
-                              width: 20.w,
-                              height: 20.h,
-                              margin: EdgeInsets.only(right: 8.w),
-                              decoration: BoxDecoration(
-                                shape: BoxShape.circle,
-                                border: Border.all(
-                                  color: isSelected
-                                      ? AppColors.mainDark
-                                      : AppColors.greyText,
-                                  width: 2,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          border: Border.all(
+                            color: isSelected
+                                ? AppColors.mainDark
+                                : AppColors.greyText,
+                            width: 1.5,
+                          ),
+                        ),
+                        child: isSelected
+                            ? Center(
+                                child: Container(
+                                  width: theme.radioDotSize,
+                                  height: theme.radioDotSize,
+                                  decoration: const BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    color: AppColors.mainDark,
+                                  ),
                                 ),
-                                color: isSelected
-                                    ? AppColors.mainDark
-                                    : Colors.transparent,
+                              )
+                            : null,
+                      ),
+                    if (numbered) ...[
+                      Text(
+                        '${optIndex + 1}.',
+                        style: TextStyle(
+                          fontFamily: 'Pridi',
+                          fontSize: theme.optionTextSize,
+                          fontWeight: FontWeight.w600,
+                          color: AppColors.mainDark,
+                        ),
+                      ),
+                      SizedBox(width: 8.w),
+                    ],
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          if (resultLabel != null && !_isSavedQuiz)
+                            Padding(
+                              padding: EdgeInsets.only(bottom: theme.gapSmall),
+                              child: Text(
+                                resultLabel,
+                                style: TextStyle(
+                                  fontSize: theme.resultLabelSize,
+                                  fontWeight: FontWeight.w600,
+                                  color: labelColor,
+                                  fontFamily: 'Pridi',
+                                ),
                               ),
-                              child: isSelected
-                                  ? Icon(
-                                      Icons.check,
-                                      size: 14.sp,
-                                      color: Colors.white,
-                                    )
-                                  : null,
                             ),
-                          Expanded(
-                            child: Text(
-                              options[optIndex],
-                              style: TextStyle(
-                                fontSize: 12.sp,
-                                color: AppColors.mainDark,
-                                fontFamily: 'Pridi',
-                                fontWeight: answered ? FontWeight.w500 : FontWeight.w400,
-                              ),
+                          StudyText(
+                            options[optIndex],
+                            style: TextStyle(
+                              fontSize: theme.optionTextSize,
+                              color: AppColors.mainDark,
+                              fontFamily: 'Pridi',
                             ),
                           ),
-                          if (showResult && iconData != null)
-                            Icon(
-                              iconData,
-                              color: borderColor,
-                              size: 20.sp,
-                            ),
                         ],
                       ),
                     ),
-                  );
-                }),
+                  ],
+                ),
               ),
-              // Cat image stacked over answers on the right
-              if (answered)
-                Positioned(
-                  right: 0,
-                  bottom: 0,
-                  child: IgnorePointer(
-                    child: selectedAnswerIndex == correctIndex
-                        ? _buildHappyCat()
-                        : _buildSadCat(),
-                  ),
-                ),
-            ],
+            );
+          }),
+        ),
+        if (answered && !_isSavedQuiz)
+          Positioned(
+            right: 0,
+            bottom: 0,
+            child: IgnorePointer(
+              child: selectedAnswerIndex == correctIndex
+                  ? _buildHappyCat(theme)
+                  : _buildSadCat(theme),
+            ),
           ),
-          SizedBox(height: 12.h),
-          // Navigation buttons
-          if (answered)
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                if (currentQuestionIndex > 0)
-                  ElevatedButton.icon(
-                    onPressed: _previousQuestion,
-                    icon: const Icon(Icons.arrow_back),
-                    label: const Text('Prev'),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.mainDark,
-                      foregroundColor: Colors.white,
-                    ),
-                  ),
-                const Spacer(),
-                if (currentQuestionIndex < questions.length - 1)
-                  ElevatedButton.icon(
-                    onPressed: _nextQuestion,
-                    icon: const Icon(Icons.arrow_forward),
-                    label: const Text('Next'),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.mainDark,
-                      foregroundColor: Colors.white,
-                    ),
-                  ),
-              ],
-            )
-          else if (!answered)
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: selectedAnswerIndex != null
-                    ? () {
-                        setState(() {
-                          answered = true;
-                        });
-                      }
-                    : null,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: selectedAnswerIndex != null
-                      ? AppColors.mainDark
-                      : AppColors.greyText,
-                  foregroundColor: Colors.white,
+      ],
+    );
+  }
+
+  Widget _buildSavedQuizPreviousScoreCard(AppLocalizations l10n, int percent) {
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 10.h),
+      decoration: BoxDecoration(
+        color: AppColors.white,
+        borderRadius: BorderRadius.circular(8.r),
+        border: Border.all(color: AppColors.mainGold),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Text(
+            l10n.savedQuizPreviousScore(percent),
+            style: TextStyle(
+              fontFamily: 'Pridi',
+              fontSize: ToolFocusMetrics.chromeBodySize(context),
+              fontWeight: FontWeight.w700,
+              color: AppColors.mainDark,
+            ),
+          ),
+          SizedBox(height: 8.h),
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton(
+              onPressed: _startSavedQuizRetake,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.mainGold,
+                foregroundColor: Colors.white,
+                elevation: 0,
+                padding: EdgeInsets.symmetric(vertical: 8.h),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8.r),
                 ),
-                child: Text(selectedAnswerIndex != null
-                    ? 'Submit Answer'
-                    : 'Select an answer'),
+              ),
+              child: Text(
+                l10n.savedQuizSolveAgain,
+                style: TextStyle(
+                  fontFamily: 'Pridi',
+                  fontSize: ToolFocusMetrics.navButtonFontSize(context),
+                  fontWeight: FontWeight.w600,
+                ),
               ),
             ),
+          ),
         ],
       ),
     );
+  }
+
+  Widget _buildSavedQuizFooter(AppLocalizations l10n, int correctIndex, _QuizTheme theme) {
+    String feedback;
+    Color feedbackColor = AppColors.mainDark;
+
+    if (!answered) {
+      feedback = l10n.focusBeforeAnswering;
+    } else if (selectedAnswerIndex == correctIndex) {
+      feedback = l10n.correctAnswer;
+      feedbackColor = AppColors.green;
+    } else {
+      feedback = l10n.wrongAnswer;
+      feedbackColor = AppColors.red;
+    }
+
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.end,
+      children: [
+        Expanded(
+          child: Text(
+            feedback,
+            style: TextStyle(
+              fontFamily: 'Pridi',
+              fontSize: ToolFocusMetrics.chromeBodySize(context),
+              fontWeight: FontWeight.w600,
+              color: feedbackColor,
+            ),
+          ),
+        ),
+        if (!answered)
+          Image.asset(
+            'assets/images/mishka_school.png',
+            height: theme.catImageSize,
+            fit: BoxFit.contain,
+            errorBuilder: (_, __, ___) => Icon(
+              Icons.pets_outlined,
+              size: theme.catSize * 0.7,
+              color: AppColors.mainDark,
+            ),
+          )
+        else if (selectedAnswerIndex == correctIndex)
+          _buildHappyCat(theme)
+        else
+          _buildSadCat(theme),
+      ],
+    );
+  }
+
+  Widget _buildQuizScoreSummary(List<dynamic> questions) {
+    final l10n = AppLocalizations.of(context)!;
+    final total = questions.length;
+    final correct = questionCorrect.values.where((ok) => ok).length;
+    final percent = total == 0 ? 0 : ((correct / total) * 100).round();
+    final showCongrats = percent >= 80;
+    final badgeAsset = _quizBadgeAsset(percent);
+
+    TextStyle goldTitle() => TextStyle(
+          fontFamily: 'Pridi',
+          fontSize: 18.sp,
+          fontWeight: FontWeight.w700,
+          color: AppColors.mainGold,
+        );
+
+    TextStyle darkTitle() => TextStyle(
+          fontFamily: 'Pridi',
+          fontSize: 16.sp,
+          fontWeight: FontWeight.w700,
+          color: AppColors.mainDark,
+        );
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        Image.asset(
+          badgeAsset,
+          height: 190.h,
+          fit: BoxFit.contain,
+          errorBuilder: (_, __, ___) => Icon(
+            Icons.emoji_events_outlined,
+            size: 80.sp,
+            color: AppColors.mainGold,
+          ),
+        ),
+        SizedBox(height: 16.h),
+        if (showCongrats) ...[
+          Text(l10n.congratulation, style: goldTitle(), textAlign: TextAlign.center),
+          SizedBox(height: 8.h),
+        ],
+        Text(
+          l10n.quizYouHaveAnsweredPercent(percent),
+          style: darkTitle(),
+          textAlign: TextAlign.center,
+        ),
+        SizedBox(height: 4.h),
+        Text(
+          l10n.correctAnswers,
+          style: darkTitle(),
+          textAlign: TextAlign.center,
+        ),
+        SizedBox(height: 8.h),
+        Text(
+          showCongrats ? l10n.keepItUp : l10n.keepGoing,
+          style: goldTitle(),
+          textAlign: TextAlign.center,
+        ),
+      ],
+    );
+  }
+
+  String _quizBadgeAsset(int percent) {
+    if (percent >= 100) return Assets.imagesPerfectScore;
+    if (percent >= 80) return Assets.imagesScore80;
+    return Assets.imagesKeepLearning;
+  }
+
+  void _finishQuiz(List<dynamic> questions) {
+    final total = questions.length;
+    final correct = questionCorrect.values.where((ok) => ok).length;
+    final percent = total == 0 ? 0 : ((correct / total) * 100).round();
+
+    Future<void> persistAndNavigate(int finalPercent, {String? attemptId}) async {
+      _savedQuizPreviousScore = finalPercent;
+      widget.onPreviousScoreChanged?.call(finalPercent);
+      _persistQuizProgress(
+        showResults: true,
+        completed: true,
+        percent: finalPercent,
+      );
+      _savedQuizRetaking = false;
+
+      if (_isExpandedQuiz || _isSavedQuiz) {
+        if (!mounted) return;
+        final sourceId = widget.storageMessageId ??
+            (widget.toolData['quizId'] ?? widget.toolData['id'] ?? '')
+                .toString();
+        await Navigator.of(context).push(
+          MaterialPageRoute<void>(
+            builder: (_) => QuizResultScreen(
+              percent: finalPercent,
+              correctCount: correct,
+              totalCount: total,
+              sourceId: sourceId,
+              attemptId: attemptId,
+            ),
+          ),
+        );
+        return;
+      }
+
+      if (mounted) setState(() => showQuizResults = true);
+    }
+
+    if (_isSavedQuiz && widget.onSubmitSavedQuiz != null) {
+      final normalized = questions
+          .whereType<Map>()
+          .map((e) => Map<String, dynamic>.from(e))
+          .toList();
+      unawaited(() async {
+        var finalPercent = percent;
+        String? attemptId;
+        try {
+          final submitted = await widget.onSubmitSavedQuiz!(
+            questions: normalized,
+            selectedAnswers: Map<int, int>.from(selectedAnswers),
+          );
+          if (submitted != null) {
+            finalPercent = submitted.percent;
+            attemptId = submitted.attemptId;
+          }
+        } catch (_) {}
+        if (!mounted) return;
+        await persistAndNavigate(finalPercent, attemptId: attemptId);
+      }());
+      return;
+    }
+
+    unawaited(persistAndNavigate(percent));
+  }
+
+  void _finishFlashcards(int totalCards) {
+    if (!mounted) return;
+    final setId = (widget.toolData['flashcardSetId'] ??
+            widget.toolData['flashcard_set_id'] ??
+            widget.toolData['id'] ??
+            widget.storageMessageId ??
+            '')
+        .toString();
+    unawaited(
+      Navigator.of(context).push<void>(
+        MaterialPageRoute<void>(
+          builder: (_) => FlashcardsResultScreen(
+            totalCards: totalCards,
+            sourceId: setId,
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _restoreQuestionState(int index) {
+    selectedAnswerIndex = selectedAnswers[index];
+    answered = selectedAnswers.containsKey(index);
   }
 
   // ===========================
   // MINDMAP PREVIEW
   // ===========================
-  Widget _buildMindmapPreview() {
-    final root = widget.toolData['root'] as String? ?? 'Root';
-    final nodes = widget.toolData['nodes'] as List<dynamic>? ?? [];
+  Widget _buildMindmapPreview(Map<String, dynamic> data) {
+    final root = (data['root'] ?? data['title'] ?? 'Topic').toString();
+    final nodes = data['nodes'] as List<dynamic>? ?? [];
+    final spacious = _isExpandedMindMap || _isSavedMindMap;
+    final layout = _computeMindMapLayout(root, nodes, spacious: spacious);
 
-    return Container(
-      padding: EdgeInsets.all(16.r),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(14.r),
-        border: Border.all(color: AppColors.mainDark, width: 1.5),
-        color: Colors.white,
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            "🗺️ ${widget.toolData['title'] ?? 'Mind Map'}",
-            style: TextStyle(
-              fontSize: 14.sp,
-              fontWeight: FontWeight.w600,
-              color: AppColors.mainDark,
-              fontFamily: 'Pridi',
+    Widget viewport(double height) {
+      return SizedBox(
+        height: height,
+        width: double.infinity,
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(10.r),
+          child: DecoratedBox(
+            decoration: BoxDecoration(
+              color: AppColors.white,
+              border: Border.all(color: AppColors.stroke),
+              borderRadius: BorderRadius.circular(10.r),
             ),
-          ),
-          SizedBox(height: 16.h),
-          // Real mind map visualization - scrollable in all directions
-          SizedBox(
-            height: 400.h,
-            child: SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              child: SingleChildScrollView(
-                scrollDirection: Axis.vertical,
-                child: _buildMindMapTree(root, nodes),
+            child: _MindMapInteractiveCanvas(
+              layout: layout,
+              spacious: spacious,
+              nodeBuilder: (spec, size) => _buildMindMapNode(
+                spec,
+                width: size?.width,
+                height: size?.height,
+                spacious: spacious,
               ),
             ),
           ),
-        ],
-      ),
-    );
+        ),
+      );
+    }
+
+    if (_isExpandedMindMap || _isSavedMindMap) {
+      return LayoutBuilder(
+        builder: (context, constraints) {
+          final height = constraints.maxHeight.isFinite && constraints.maxHeight > 120
+              ? constraints.maxHeight
+              : 520.h;
+          return viewport(height);
+        },
+      );
+    }
+
+    final height = _isCommunityChat
+        ? ToolFocusMetrics.communityEmbeddedMindmapHeight(context)
+        : ToolFocusMetrics.embeddedMindmapHeight(context);
+    return viewport(height);
   }
 
-  Widget _buildMindMapTree(String root, List<dynamic> nodes) {
-    // Calculate dimensions - simpler horizontal tree layout
-    final nodeCount = nodes.length;
-    final maxChildren = nodes.fold<int>(0, (max, node) {
-      final children = (node as Map<String, dynamic>)['children'] as List<dynamic>? ?? [];
-      return children.length > max ? children.length : max;
-    });
-    
-    // Calculate width: space for nodes spread horizontally
-    final width = (200 + (nodeCount * 200)).w;
-    // Calculate height: root + main nodes + children
-    final height = (150 + (maxChildren * 60)).h;
-    final centerX = width / 2;
+  _MindMapLayoutSpec _computeMindMapLayout(
+    String root,
+    List<dynamic> nodes, {
+    bool spacious = false,
+  }) {
+    final hGap = spacious ? 56.0 : 36.0;
+    final vGap = spacious ? 96.0 : 72.0;
+    final topPad = spacious ? 32.0 : 24.0;
+    final childGap = spacious ? 24.0 : 18.0;
+    final branchDropFactor = spacious ? 0.55 : 0.4;
+    final bottomPad = spacious ? 96.0 : 72.0;
+    final minBranchWidth = spacious ? 168.0 : 120.0;
+    final minChildWidth = spacious ? 140.0 : 104.0;
+    final columnExtraPad = spacious ? 32.0 : 12.0;
 
-    return SizedBox(
-      width: width,
-      height: height,
-      child: CustomPaint(
-        painter: _MindMapPainter(root, nodes, width, height, centerX),
-        child: Stack(
-          children: [
-            // Root node at top center
-            Positioned(
-              left: centerX - 90.w,
-              top: 20.h,
-              child: _buildMindMapNode(root, isRoot: true),
-            ),
-            // Main nodes spread horizontally below root
-            ...List.generate(nodes.length, (index) {
-              final node = nodes[index] as Map<String, dynamic>;
-              final title = node['title'] as String? ?? 'Node';
-              final children = node['children'] as List<dynamic>? ?? [];
-              
-              // Position main nodes horizontally, evenly spaced
-              final nodeSpacing = width / (nodeCount + 1);
-              final nodeX = (nodeSpacing * (index + 1)) - 90.w;
-              final nodeY = 120.h; // Below root
-              
-              return Positioned(
-                left: nodeX,
-                top: nodeY,
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    _buildMindMapNode(title, isRoot: false),
-                    if (children.isNotEmpty)
-                      Padding(
-                        padding: EdgeInsets.only(top: 12.h),
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: List.generate(children.length, (childIndex) {
-                            return Padding(
-                              padding: EdgeInsets.only(top: 8.h),
-                              child: _buildMindMapNode(
-                                children[childIndex] as String? ?? 'Child',
-                                isRoot: false,
-                                isChild: true,
-                              ),
-                            );
-                          }),
-                        ),
-                      ),
-                  ],
-                ),
-              );
-            }),
-          ],
-        ),
-      ),
-    );
-  }
+    final nodeSizesById = <String, _MindMapNodeSize>{};
+    final branches = nodes
+        .whereType<Map>()
+        .map((node) => Map<String, dynamic>.from(node))
+        .toList();
 
-  Widget _buildMindMapNode(String text, {required bool isRoot, bool isChild = false}) {
-    return Container(
-      constraints: BoxConstraints(
-        maxWidth: isRoot ? 180.w : (isChild ? 140.w : 160.w),
-        minWidth: 80.w,
-      ),
-      padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 10.h),
-      decoration: BoxDecoration(
-        color: isRoot ? AppColors.mainDark : (isChild ? Colors.white : AppColors.screenBackground),
-        borderRadius: BorderRadius.circular(16.r),
-        border: Border.all(
-          color: AppColors.mainDark,
-          width: isRoot ? 2.5 : (isChild ? 1 : 1.5),
-        ),
-        boxShadow: isRoot
-            ? [
-                BoxShadow(
-                  color: AppColors.mainDark.withValues(alpha: 0.2),
-                  blurRadius: 4,
-                  offset: const Offset(0, 2),
-                ),
-              ]
-            : null,
-      ),
-      child: Text(
-        text,
-        style: TextStyle(
-          fontSize: isRoot ? 14.sp : (isChild ? 11.sp : 12.sp),
-          fontWeight: isRoot ? FontWeight.w700 : (isChild ? FontWeight.w400 : FontWeight.w600),
-          color: isRoot ? Colors.white : AppColors.mainDark,
-          fontFamily: 'Pridi',
+    _MindMapNodeSize measure(
+      String label, {
+      required bool isRoot,
+      bool isChild = false,
+    }) {
+      final fontSize = isRoot ? 14.0 : (isChild ? 11.0 : 12.0);
+      final fontWeight =
+          isRoot ? FontWeight.w700 : (isChild ? FontWeight.w400 : FontWeight.w600);
+      final maxTextWidth = isRoot
+          ? (spacious ? 360.0 : 280.0)
+          : (isChild ? (spacious ? 300.0 : 240.0) : (spacious ? 320.0 : 260.0));
+      final horizontalPad = spacious ? 36.0 : 28.0;
+      final verticalPad = spacious ? 28.0 : 20.0;
+
+      final direction = studyTextDirection(label);
+
+      final painter = TextPainter(
+        text: TextSpan(
+          text: label,
+          style: TextStyle(
+            fontSize: fontSize,
+            fontWeight: fontWeight,
+            fontFamily: 'Pridi',
+            height: 1.25,
+          ),
         ),
         textAlign: TextAlign.center,
-        maxLines: 2,
-        overflow: TextOverflow.ellipsis,
+        textDirection: direction,
+        maxLines: isRoot ? 3 : 5,
+      )..layout(maxWidth: maxTextWidth - horizontalPad);
+
+      return _MindMapNodeSize(
+        width: (painter.size.width + horizontalPad)
+            .clamp(isChild ? minChildWidth : minBranchWidth, maxTextWidth),
+        height: painter.size.height + verticalPad,
+      );
+    }
+
+    final positions = <String, Offset>{};
+    final edges = <(_MindMapNodeSpec, _MindMapNodeSpec)>[];
+    final columnWidths = <double>[];
+
+    for (final map in branches) {
+      final title = (map['title'] ?? map['label'] ?? 'Node').toString();
+      final branchSize = measure(title, isRoot: false);
+      var colWidth = branchSize.width;
+
+      final children = _mindMapChildren(map);
+      for (final child in children) {
+        colWidth = math.max(
+          colWidth,
+          measure(child, isRoot: false, isChild: true).width,
+        );
+      }
+      columnWidths.add(colWidth + columnExtraPad);
+    }
+
+    final totalBranchSpan = columnWidths.isEmpty
+        ? 200.0
+        : columnWidths.fold<double>(0, (sum, w) => sum + w) +
+            hGap * (columnWidths.length + 1);
+
+    final rootSize = measure(root, isRoot: true);
+    final canvasWidth = math.max(totalBranchSpan, rootSize.width + hGap * 2);
+    final centerX = canvasWidth / 2;
+
+    var maxDepthHeight = 0.0;
+    for (final map in branches) {
+      final title = (map['title'] ?? map['label'] ?? 'Node').toString();
+      final branchSize = measure(title, isRoot: false);
+      var colHeight = branchSize.height;
+      for (final child in _mindMapChildren(map)) {
+        colHeight +=
+            measure(child, isRoot: false, isChild: true).height + childGap;
+      }
+      if (colHeight > maxDepthHeight) maxDepthHeight = colHeight;
+    }
+
+    final canvasHeight =
+        topPad + rootSize.height + vGap + maxDepthHeight + bottomPad;
+
+    const rootId = 'root';
+    nodeSizesById[rootId] = rootSize;
+    positions[rootId] = Offset(centerX - rootSize.width / 2, topPad);
+
+    var xCursor = hGap;
+    for (var i = 0; i < branches.length; i++) {
+      final map = branches[i];
+      final title = (map['title'] ?? map['label'] ?? 'Node').toString();
+      final branchId = 'branch_$i';
+      final colWidth = columnWidths[i];
+      final branchSize = measure(title, isRoot: false);
+      nodeSizesById[branchId] = branchSize;
+
+      final x = xCursor + (colWidth - branchSize.width) / 2;
+      final y = topPad + rootSize.height + vGap * branchDropFactor;
+      final colLeft = xCursor;
+      positions[branchId] = Offset(x, y);
+      edges.add((_MindMapNodeSpec(id: rootId), _MindMapNodeSpec(id: branchId)));
+      xCursor += colWidth + hGap;
+
+      final children = _mindMapChildren(map);
+      var childY = y + branchSize.height + (spacious ? 24.0 : 18.0);
+      for (var j = 0; j < children.length; j++) {
+        final childId = 'child_${i}_$j';
+        final childLabel = children[j];
+        final childSize = measure(childLabel, isRoot: false, isChild: true);
+        nodeSizesById[childId] = childSize;
+        positions[childId] = Offset(
+          colLeft + (colWidth - childSize.width) / 2,
+          childY,
+        );
+        childY += childSize.height + childGap;
+        edges.add((
+          _MindMapNodeSpec(id: branchId),
+          _MindMapNodeSpec(id: childId),
+        ));
+      }
+    }
+
+    final nodeWidgets = <_MindMapNodeSpec, Offset>{};
+    nodeWidgets[_MindMapNodeSpec(id: rootId, label: root, isRoot: true)] =
+        positions[rootId]!;
+    for (var i = 0; i < branches.length; i++) {
+      final map = branches[i];
+      final title = (map['title'] ?? map['label'] ?? 'Node').toString();
+      final branchId = 'branch_$i';
+      nodeWidgets[_MindMapNodeSpec(id: branchId, label: title)] =
+          positions[branchId]!;
+      final children = _mindMapChildren(map);
+      for (var j = 0; j < children.length; j++) {
+        final childId = 'child_${i}_$j';
+        nodeWidgets[_MindMapNodeSpec(
+          id: childId,
+          label: children[j],
+          isChild: true,
+        )] = positions[childId]!;
+      }
+    }
+
+    return _MindMapLayoutSpec(
+      width: canvasWidth,
+      height: canvasHeight,
+      centerX: centerX,
+      nodePositions: nodeWidgets,
+      edges: edges,
+      positionsById: positions,
+      nodeSizesById: nodeSizesById,
+    );
+  }
+
+  List<String> _mindMapChildren(Map<String, dynamic> node) {
+    final raw = node['children'] ?? node['subtopics'] ?? node['branches'];
+    if (raw is! List) return const [];
+    return raw.map((child) {
+      if (child is Map) {
+        final row = Map<String, dynamic>.from(child);
+        return (row['title'] ?? row['label'] ?? row['name'] ?? row['text'] ?? 'Child')
+            .toString();
+      }
+      return child.toString();
+    }).toList();
+  }
+
+  Widget _buildMindMapNode(
+    _MindMapNodeSpec spec, {
+    double? width,
+    double? height,
+    bool spacious = false,
+  }) {
+    final nodeWidth = width ?? (spacious ? 220.0 : 180.0);
+    final hPad = spacious ? 18.0 : 14.0;
+    final vPad = spacious ? 14.0 : 10.0;
+
+    return SizedBox(
+      width: nodeWidth,
+      child: Container(
+        padding: EdgeInsets.symmetric(horizontal: hPad, vertical: vPad),
+        decoration: BoxDecoration(
+          color: spec.isRoot
+              ? AppColors.mainDark
+              : (spec.isChild ? Colors.white : AppColors.screenBackground),
+          borderRadius: BorderRadius.circular(16.r),
+          border: Border.all(
+            color: AppColors.mainDark,
+            width: spec.isRoot ? 2.5 : (spec.isChild ? 1 : 1.5),
+          ),
+          boxShadow: spec.isRoot
+              ? [
+                  BoxShadow(
+                    color: AppColors.mainDark.withValues(alpha: 0.2),
+                    blurRadius: 4,
+                    offset: const Offset(0, 2),
+                  ),
+                ]
+              : null,
+        ),
+        child: StudyText(
+          spec.label,
+          style: TextStyle(
+            fontSize: spec.isRoot ? 14 : (spec.isChild ? 11 : 12),
+            fontWeight: spec.isRoot
+                ? FontWeight.w700
+                : (spec.isChild ? FontWeight.w400 : FontWeight.w600),
+            color: spec.isRoot ? Colors.white : AppColors.mainDark,
+            fontFamily: 'Pridi',
+            height: 1.25,
+          ),
+          textAlign: TextAlign.center,
+          softWrap: true,
+        ),
       ),
     );
   }
@@ -645,20 +1423,20 @@ class _ToolPreviewRendererState extends State<ToolPreviewRenderer> {
   // ===========================
   // CAT IMAGES
   // ===========================
-  Widget _buildHappyCat() {
+  Widget _buildHappyCat(_QuizTheme theme) {
     return Container(
-      height: 100.h,
-      width: 100.w,
+      height: theme.catSize,
+      width: theme.catSize,
       alignment: Alignment.center,
       child: Image.asset(
         'assets/images/mishka_happy.png',
-        height: 90.h,
-        width: 90.w,
+        height: theme.catImageSize,
+        width: theme.catImageSize,
         fit: BoxFit.contain,
         errorBuilder: (context, error, stackTrace) {
           return Icon(
             Icons.sentiment_very_satisfied,
-            size: 60.sp,
+            size: theme.catSize * 0.6,
             color: const Color(0xFF4CAF50),
           );
         },
@@ -666,20 +1444,20 @@ class _ToolPreviewRendererState extends State<ToolPreviewRenderer> {
     );
   }
 
-  Widget _buildSadCat() {
+  Widget _buildSadCat(_QuizTheme theme) {
     return Container(
-      height: 100.h,
-      width: 100.w,
+      height: theme.catSize,
+      width: theme.catSize,
       alignment: Alignment.center,
       child: Image.asset(
         'assets/images/mishka_sad.png',
-        height: 90.h,
-        width: 90.w,
+        height: theme.catImageSize,
+        width: theme.catImageSize,
         fit: BoxFit.contain,
         errorBuilder: (context, error, stackTrace) {
           return Icon(
             Icons.sentiment_very_dissatisfied,
-            size: 60.sp,
+            size: theme.catSize * 0.6,
             color: const Color(0xFFF44336),
           );
         },
@@ -707,13 +1485,14 @@ class _ToolPreviewRendererState extends State<ToolPreviewRenderer> {
   }
 
   void _nextQuestion() {
-    final questions = widget.toolData['questions'] as List<dynamic>? ?? [];
+    final questions =
+        normalizeToolData(widget.toolData)['questions'] as List<dynamic>? ?? [];
     if (currentQuestionIndex < questions.length - 1) {
       setState(() {
         currentQuestionIndex++;
-        selectedAnswerIndex = null;
-        answered = false;
+        _restoreQuestionState(currentQuestionIndex);
       });
+      _persistQuizProgress();
     }
   }
 
@@ -721,25 +1500,162 @@ class _ToolPreviewRendererState extends State<ToolPreviewRenderer> {
     if (currentQuestionIndex > 0) {
       setState(() {
         currentQuestionIndex--;
-        selectedAnswerIndex = null;
-        answered = false;
+        _restoreQuestionState(currentQuestionIndex);
       });
+      _persistQuizProgress();
     }
   }
 
+}
+
+class _MindMapNodeSize {
+  const _MindMapNodeSize({required this.width, required this.height});
+
+  final double width;
+  final double height;
+}
+
+class _MindMapInteractiveCanvas extends StatefulWidget {
+  const _MindMapInteractiveCanvas({
+    required this.layout,
+    required this.spacious,
+    required this.nodeBuilder,
+  });
+
+  final _MindMapLayoutSpec layout;
+  final bool spacious;
+  final Widget Function(_MindMapNodeSpec spec, _MindMapNodeSize? size) nodeBuilder;
+
+  @override
+  State<_MindMapInteractiveCanvas> createState() =>
+      _MindMapInteractiveCanvasState();
+}
+
+class _MindMapInteractiveCanvasState extends State<_MindMapInteractiveCanvas> {
+  final TransformationController _controller = TransformationController();
+  bool _initialFitApplied = false;
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  void _applyInitialFitIfNeeded(Size viewportSize) {
+    if (_initialFitApplied || !widget.spacious) return;
+    if (viewportSize.width <= 0 || viewportSize.height <= 0) return;
+
+    final content = Size(widget.layout.width, widget.layout.height);
+    final margin = 24.0;
+    final scaleX = (viewportSize.width - margin * 2) / content.width;
+    final scaleY = (viewportSize.height - margin * 2) / content.height;
+    final scale = math.min(scaleX, scaleY).clamp(0.25, 1.0);
+
+    final dx = (viewportSize.width - content.width * scale) / 2;
+    final dy = (viewportSize.height - content.height * scale) / 2;
+
+    _controller.value = Matrix4.identity()
+      ..translateByDouble(dx, dy, 0, 1)
+      ..scaleByDouble(scale, scale, 1, 1);
+    _initialFitApplied = true;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final viewportSize = Size(
+          constraints.maxWidth,
+          constraints.maxHeight,
+        );
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (!mounted) return;
+          _applyInitialFitIfNeeded(viewportSize);
+        });
+
+        return InteractiveViewer(
+          transformationController: _controller,
+          boundaryMargin: EdgeInsets.all(widget.spacious ? 120 : 80),
+          minScale: 0.25,
+          maxScale: 3.0,
+          panEnabled: true,
+          scaleEnabled: true,
+          constrained: false,
+          alignment: Alignment.center,
+          child: SizedBox(
+            width: widget.layout.width,
+            height: widget.layout.height,
+            child: CustomPaint(
+              painter: _MindMapPainter(layout: widget.layout),
+              child: Stack(
+                clipBehavior: Clip.none,
+                children: widget.layout.nodePositions.entries.map((entry) {
+                  final pos = entry.value;
+                  final spec = entry.key;
+                  final size = widget.layout.nodeSizesById[spec.id];
+                  return Positioned(
+                    left: pos.dx,
+                    top: pos.dy,
+                    child: widget.nodeBuilder(spec, size),
+                  );
+                }).toList(),
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+}
+
+class _MindMapNodeSpec {
+  const _MindMapNodeSpec({
+    required this.id,
+    this.label = '',
+    this.isRoot = false,
+    this.isChild = false,
+  });
+
+  final String id;
+  final String label;
+  final bool isRoot;
+  final bool isChild;
+
+  @override
+  bool operator ==(Object other) =>
+      other is _MindMapNodeSpec && other.id == id;
+
+  @override
+  int get hashCode => id.hashCode;
+}
+
+class _MindMapLayoutSpec {
+  const _MindMapLayoutSpec({
+    required this.width,
+    required this.height,
+    required this.centerX,
+    required this.nodePositions,
+    required this.edges,
+    required this.positionsById,
+    required this.nodeSizesById,
+  });
+
+  final double width;
+  final double height;
+  final double centerX;
+  final Map<_MindMapNodeSpec, Offset> nodePositions;
+  final List<(_MindMapNodeSpec, _MindMapNodeSpec)> edges;
+  final Map<String, Offset> positionsById;
+  final Map<String, _MindMapNodeSize> nodeSizesById;
 }
 
 // ===========================
 // MIND MAP PAINTER
 // ===========================
 class _MindMapPainter extends CustomPainter {
-  final String root;
-  final List<dynamic> nodes;
-  final double width;
-  final double height;
-  final double centerX;
+  _MindMapPainter({required this.layout});
 
-  _MindMapPainter(this.root, this.nodes, this.width, this.height, this.centerX);
+  final _MindMapLayoutSpec layout;
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -748,43 +1664,309 @@ class _MindMapPainter extends CustomPainter {
       ..strokeWidth = 2.0
       ..style = PaintingStyle.stroke;
 
-    final nodeCount = nodes.length;
-    if (nodeCount == 0) return;
+    Offset centerOf(String id) {
+      final pos = layout.positionsById[id];
+      final size = layout.nodeSizesById[id];
+      if (pos == null || size == null) return Offset.zero;
+      return Offset(pos.dx + size.width / 2, pos.dy + size.height / 2);
+    }
 
-    // Root position (top center)
-    final rootX = centerX;
-    final rootY = 70.0; // Root node center Y
-    final nodeSpacing = width / (nodeCount + 1);
-
-    // Draw connections from root to main nodes
-    for (int i = 0; i < nodes.length; i++) {
-      final node = nodes[i] as Map<String, dynamic>;
-      final children = node['children'] as List<dynamic>? ?? [];
-      
-      // Calculate main node position (matching widget layout)
-      final nodeX = nodeSpacing * (i + 1);
-      final nodeY = 180.0; // Main node center Y (120 + 60 for node height)
-
-      // Draw line from root bottom to main node top
-      canvas.drawLine(
-        Offset(rootX, rootY + 30), // Root node bottom
-        Offset(nodeX, nodeY - 10), // Main node top
-        paint,
-      );
-
-      // Draw connections from main nodes to their children
-      for (int j = 0; j < children.length; j++) {
-        final childY = nodeY + 50 + (j * 60); // Child node center Y
-        canvas.drawLine(
-          Offset(nodeX, nodeY + 30), // Main node bottom
-          Offset(nodeX, childY - 10), // Child node top
-          paint,
-        );
-      }
+    for (final edge in layout.edges) {
+      final from = centerOf(edge.$1.id);
+      final to = centerOf(edge.$2.id);
+      canvas.drawLine(from, to, paint);
     }
   }
 
   @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+  bool shouldRepaint(covariant _MindMapPainter oldDelegate) =>
+      oldDelegate.layout != layout;
+}
+
+class _FlashcardIconBadge extends StatelessWidget {
+  const _FlashcardIconBadge({
+    required this.containerSize,
+    required this.iconSize,
+    this.imagePath,
+  });
+
+  final String? imagePath;
+  final double containerSize;
+  final double iconSize;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: containerSize,
+      height: containerSize,
+      decoration: BoxDecoration(
+        color: AppColors.lightFrameBackground,
+        borderRadius: BorderRadius.circular(8.r),
+      ),
+      alignment: Alignment.center,
+      child: imagePath != null
+          ? Image.asset(
+              imagePath!,
+              fit: BoxFit.contain,
+              width: containerSize * 0.82,
+              height: containerSize * 0.82,
+              errorBuilder: (_, __, ___) => Icon(
+                Icons.menu_book_outlined,
+                size: iconSize,
+                color: AppColors.mainGold,
+              ),
+            )
+          : Icon(
+              Icons.menu_book_outlined,
+              size: iconSize,
+              color: AppColors.mainGold,
+            ),
+    );
+  }
+}
+
+class _FlashcardNavButton extends StatelessWidget {
+  const _FlashcardNavButton({
+    required this.label,
+    required this.filled,
+    required this.enabled,
+    required this.onTap,
+  });
+
+  final String label;
+  final bool filled;
+  final bool enabled;
+  final VoidCallback? onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final bg = filled
+        ? (enabled ? AppColors.blue : AppColors.blue.withValues(alpha: 0.45))
+        : (enabled ? const Color(0xFFBDBDBD) : const Color(0xFFE0E0E0));
+    final fg = filled ? Colors.white : AppColors.mainDark;
+
+    return Material(
+      color: bg,
+      borderRadius: BorderRadius.circular(8.r),
+      child: InkWell(
+        onTap: enabled ? onTap : null,
+        borderRadius: BorderRadius.circular(8.r),
+        child: Padding(
+          padding: ToolFocusMetrics.navButtonPadding(context),
+          child: Text(
+            label,
+            style: TextStyle(
+              fontFamily: 'Pridi',
+              fontSize: ToolFocusMetrics.navButtonFontSize(context),
+              fontWeight: FontWeight.w600,
+              color: fg,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _SavedQuizNavButton extends StatelessWidget {
+  const _SavedQuizNavButton({
+    required this.label,
+    required this.filled,
+    required this.enabled,
+    required this.onTap,
+    required this.theme,
+  });
+
+  final String label;
+  final bool filled;
+  final bool enabled;
+  final VoidCallback? onTap;
+  final _QuizTheme theme;
+
+  @override
+  Widget build(BuildContext context) {
+    final bg = filled
+        ? (enabled ? AppColors.blue : AppColors.blue.withValues(alpha: 0.45))
+        : (enabled ? const Color(0xFFBDBDBD) : const Color(0xFFE0E0E0));
+    final fg = filled ? Colors.white : AppColors.mainDark;
+
+    return Material(
+      color: bg,
+      borderRadius: BorderRadius.circular(theme.navRadius),
+      child: InkWell(
+        onTap: enabled ? onTap : null,
+        borderRadius: BorderRadius.circular(theme.navRadius),
+        child: Padding(
+          padding: EdgeInsets.symmetric(
+            horizontal: theme.navHorizontalPadding,
+            vertical: theme.navVerticalPadding,
+          ),
+          child: Text(
+            label,
+            style: TextStyle(
+              fontFamily: 'Pridi',
+              fontSize: theme.navTextSize,
+              fontWeight: FontWeight.w600,
+              color: fg,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _QuizNavButton extends StatelessWidget {
+  const _QuizNavButton({
+    required this.label,
+    required this.onTap,
+    required this.theme,
+  });
+
+  final String label;
+  final VoidCallback onTap;
+  final _QuizTheme theme;
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: AppColors.blue,
+      borderRadius: BorderRadius.circular(theme.navRadius),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(theme.navRadius),
+        child: Padding(
+          padding: EdgeInsets.symmetric(
+            horizontal: theme.navHorizontalPadding,
+            vertical: theme.navVerticalPadding,
+          ),
+          child: Text(
+            label,
+            style: TextStyle(
+              fontFamily: 'Pridi',
+              fontSize: theme.navTextSize,
+              fontWeight: FontWeight.w600,
+              color: Colors.white,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _QuizTheme {
+  const _QuizTheme({
+    required this.questionSize,
+    required this.progressSize,
+    required this.optionTextSize,
+    required this.resultLabelSize,
+    required this.navTextSize,
+    required this.optionHorizontalPadding,
+    required this.optionVerticalPadding,
+    required this.optionSpacing,
+    required this.optionRadius,
+    required this.radioSize,
+    required this.radioDotSize,
+    required this.radioTopInset,
+    required this.gapSmall,
+    required this.gapMedium,
+    required this.gapLarge,
+    required this.navHorizontalPadding,
+    required this.navVerticalPadding,
+    required this.navRadius,
+    required this.catSize,
+    required this.catImageSize,
+  });
+
+  final double questionSize;
+  final double progressSize;
+  final double optionTextSize;
+  final double resultLabelSize;
+  final double navTextSize;
+  final double optionHorizontalPadding;
+  final double optionVerticalPadding;
+  final double optionSpacing;
+  final double optionRadius;
+  final double radioSize;
+  final double radioDotSize;
+  final double radioTopInset;
+  final double gapSmall;
+  final double gapMedium;
+  final double gapLarge;
+  final double navHorizontalPadding;
+  final double navVerticalPadding;
+  final double navRadius;
+  final double catSize;
+  final double catImageSize;
+
+  static final saved = _QuizTheme(
+    questionSize: 14.sp,
+    progressSize: 12.sp,
+    optionTextSize: 13.sp,
+    resultLabelSize: 11.sp,
+    navTextSize: 12.sp,
+    optionHorizontalPadding: 10.w,
+    optionVerticalPadding: 9.h,
+    optionSpacing: 7.h,
+    optionRadius: 8.r,
+    radioSize: 18.w,
+    radioDotSize: 8.w,
+    radioTopInset: 2.h,
+    gapSmall: 3.h,
+    gapMedium: 6.w,
+    gapLarge: 10.h,
+    navHorizontalPadding: 16.w,
+    navVerticalPadding: 7.h,
+    navRadius: 8.r,
+    catSize: 52.h,
+    catImageSize: 46.h,
+  );
+
+  static final embedded = _QuizTheme(
+    questionSize: 13.sp,
+    progressSize: 12.sp,
+    optionTextSize: 12.sp,
+    resultLabelSize: 11.sp,
+    navTextSize: 12.sp,
+    optionHorizontalPadding: 10.w,
+    optionVerticalPadding: 10.h,
+    optionSpacing: 8.h,
+    optionRadius: 8.r,
+    radioSize: 18.w,
+    radioDotSize: 8.w,
+    radioTopInset: 2.h,
+    gapSmall: 4.h,
+    gapMedium: 8.w,
+    gapLarge: 12.h,
+    navHorizontalPadding: 16.w,
+    navVerticalPadding: 8.h,
+    navRadius: 8.r,
+    catSize: 100.h,
+    catImageSize: 90.h,
+  );
+
+  static final expanded = _QuizTheme(
+    questionSize: 17.sp,
+    progressSize: 15.sp,
+    optionTextSize: 15.sp,
+    resultLabelSize: 13.sp,
+    navTextSize: 15.sp,
+    optionHorizontalPadding: 14.w,
+    optionVerticalPadding: 14.h,
+    optionSpacing: 12.h,
+    optionRadius: 10.r,
+    radioSize: 22.w,
+    radioDotSize: 10.w,
+    radioTopInset: 3.h,
+    gapSmall: 6.h,
+    gapMedium: 10.w,
+    gapLarge: 16.h,
+    navHorizontalPadding: 22.w,
+    navVerticalPadding: 12.h,
+    navRadius: 10.r,
+    catSize: 120.h,
+    catImageSize: 108.h,
+  );
 }
 

@@ -12,6 +12,10 @@ class StudyTimerModel {
   /// Saved custom timer id when using `concentrationPreset: custom`.
   final String? customPresetId;
 
+  /// Optional personal course/subject for reports.
+  final String? studentSubjectId;
+  final String? studentSubjectName;
+
   const StudyTimerModel(
     this.title,
     this.studyMinutes,
@@ -19,11 +23,32 @@ class StudyTimerModel {
     this.longBreakMinutes, {
     this.modeId,
     this.customPresetId,
+    this.studentSubjectId,
+    this.studentSubjectName,
   });
+
+  StudyTimerModel withStudentSubject(String? id, {String? name}) {
+    return StudyTimerModel(
+      title,
+      studyMinutes,
+      shortBreakMinutes,
+      longBreakMinutes,
+      modeId: modeId,
+      customPresetId: customPresetId,
+      studentSubjectId: id,
+      studentSubjectName: name,
+    );
+  }
 
   Duration get studyDuration => Duration(minutes: studyMinutes);
   Duration get shortBreakDuration => Duration(minutes: shortBreakMinutes);
   Duration get longBreakDuration => Duration(minutes: longBreakMinutes);
+
+  /// Open-ended focus (Flowtime, Camera call): counts up until the user ends study.
+  bool get isOpenEndedStudy =>
+      modeId == 'flowtime' ||
+      modeId == 'call_with_mishka' ||
+      studyMinutes == 0;
 
   Duration durationFor(TimerMode mode) {
     switch (mode) {

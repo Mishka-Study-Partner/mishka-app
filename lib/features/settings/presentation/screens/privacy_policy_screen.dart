@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:mishka_app/core/network/api_service.dart';
+import 'package:mishka_app/core/widgets/screen_end_spacer.dart';
 import 'package:mishka_app/core/utils/app_sizes.dart';
+import 'package:mishka_app/core/utils/policy_text_utils.dart';
 import 'package:mishka_app/core/widgets/custom_app_bar.dart';
+import 'package:mishka_app/features/chat_with_mishka/presentation/widgets/formatted_study_text.dart';
 import 'package:mishka_app/features/settings/data/app_public_settings_cache.dart';
 import 'package:mishka_app/features/settings/data/data_sources/app_public_settings_remote_data_source.dart';
 import 'package:mishka_app/l10n/app_localizations.dart';
@@ -68,13 +71,12 @@ class _PrivacyPolicyScreenState extends State<PrivacyPolicyScreen> {
                 physics: const AlwaysScrollableScrollPhysics(
                   parent: BouncingScrollPhysics(),
                 ),
-                padding: EdgeInsets.symmetric(
-                  horizontal: AppSizes.paddingLarge,
-                  vertical: 20.h,
-                ),
-                child: Text(
-                  _body ?? l10n.privacyPolicyBody,
-                  style: TextStyle(
+                padding: AppScrollInsets.page(horizontal: AppSizes.paddingLarge, top: 20.h),
+                child: FormattedStudyText(
+                  text: preparePolicyTextForDisplay(
+                    _body ?? l10n.privacyPolicyBody,
+                  ),
+                  baseStyle: TextStyle(
                     fontFamily: 'Pridi',
                     fontSize: AppSizes.fontSizeMedium,
                     height: 1.55,

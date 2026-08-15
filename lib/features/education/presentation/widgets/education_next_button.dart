@@ -3,6 +3,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import 'package:mishka_app/core/utils/app_colors.dart';
 import 'package:mishka_app/core/utils/app_sizes.dart';
+import 'package:mishka_app/core/widgets/button_label.dart';
 import 'package:mishka_app/l10n/app_localizations.dart';
 
 class EducationNextButton extends StatelessWidget {
@@ -30,7 +31,6 @@ class EducationNextButton extends StatelessWidget {
       ),
       child: SizedBox(
         width: double.infinity,
-        height: 50.h,
         child: ElevatedButton(
           onPressed: enabled && !isLoading ? onPressed : null,
           style: ElevatedButton.styleFrom(
@@ -38,6 +38,9 @@ class EducationNextButton extends StatelessWidget {
             disabledBackgroundColor: AppColors.mainGold.withValues(alpha: 0.45),
             foregroundColor: AppColors.white,
             elevation: 0,
+            padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
+            minimumSize: Size(double.infinity, AppSizes.buttonHeightSmall),
+            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(AppSizes.radiusLarge),
             ),
@@ -51,12 +54,14 @@ class EducationNextButton extends StatelessWidget {
                     color: AppColors.white,
                   ),
                 )
-              : Text(
+              : ButtonLabel(
                   l10n.next,
                   style: TextStyle(
                     fontFamily: 'Pridi',
                     fontSize: AppSizes.fontSizeLarge,
                     fontWeight: FontWeight.w600,
+                    color: AppColors.white,
+                    height: 1.2,
                   ),
                 ),
         ),
