@@ -66,8 +66,8 @@ class Assets {
   static const String screenshotsCommunity = 'assets/screenshots/Community.png';
   static const String screenshotsConcentrationCustomTimers = 'assets/screenshots/concentration_custom_timers.png';
   static const String screenshotsFlashcards = 'assets/screenshots/Flashcards.png';
-  static const String screenshotsFrame1707479595 = 'assets/screenshots/Frame_1707479595.png';
   static const String screenshotsGamifications2 = 'assets/screenshots/gamifications-2.png';
+  static const String screenshotsHomePage = 'assets/screenshots/Home_page.png';
   static const String screenshotsMishka = 'assets/screenshots/Mishka.zip';
   static const String screenshotsMishka2 = 'assets/screenshots/Mishka-2.zip';
   static const String screenshotsQuizes3 = 'assets/screenshots/Quizes3.png';
@@ -75,6 +75,7 @@ class Assets {
   static const String screenshotsStudyWithMeCameraModeOff = 'assets/screenshots/study_with_me_camera_mode_off.png';
   static const String screenshotsTakingBreak = 'assets/screenshots/taking_break.png';
   static const String screenshotsTheNewCommunity = 'assets/screenshots/The_New_Community.png';
+  static const String screenshotsToDoListTasks = 'assets/screenshots/To_Do_List_(tasks).png';
   static const String soundsPostureCritical = 'assets/sounds/posture_critical.wav';
   static const String soundsPostureWarning = 'assets/sounds/posture_warning.wav';
 

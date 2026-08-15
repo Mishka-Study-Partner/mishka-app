@@ -132,7 +132,7 @@ For iOS signing, open `ios/Runner.xcworkspace` in Xcode and set your team if nee
   <img src="assets/screenshots/Community.png" width="180" alt="Community" />
   <img src="assets/screenshots/The_New_Community.png" width="180" alt="Community detail" />
   <img src="assets/screenshots/gamifications-2.png" width="180" alt="Gamification" />
-  <img src="assets/screenshots/Frame_1707479595.png" width="180" alt="App screen" />
+  <img src="assets/screenshots/Home_page.png" width="180" alt="Home page" />
 </p>
 
 Full walkthrough: [demo video (Google Drive)](https://drive.google.com/file/d/1_895taR2NOqe8-lAwkkiopTUOPWm2cM8/view?usp=sharing)
