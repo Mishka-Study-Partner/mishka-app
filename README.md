@@ -141,6 +141,7 @@ Full walkthrough: [demo video (Google Drive)](https://drive.google.com/file/d/1_
 
 ## Author
 
-Flutter client work for Mishka Study Partner.
+**Norhan Mohamed** — Flutter client for Mishka Study Partner.
 
-Repository: [Mishka-Study-Partner/mishka-app](https://github.com/Mishka-Study-Partner/mishka-app)
+- GitHub: [Norhan-Mohamed](https://github.com/Norhan-Mohamed)
+- Repository: [Mishka-Study-Partner/mishka-app](https://github.com/Mishka-Study-Partner/mishka-app)
